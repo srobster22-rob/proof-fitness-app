@@ -1897,3 +1897,31 @@ was (a) that, (b) wait idle. Contract: run check-deps directly and read its
 real exit code rather than trust it; grep for other `?.propertyName` chains on
 types that might not carry that property, and verify each one against its
 declared interface before deciding it's fine.
+
+R575 — Stage 0: OWNER.md still four blocked decisions. Investigated
+\`noUncheckedIndexedAccess\`, a real tsc safety flag not covered by base
+\`strict\` — worth checking because R548/R549/R550/R562/R573 all involved bugs
+in exactly the shape it targets: indexing into a Record or array without
+proving the key exists. Enabled it and ran a real compile: 508 errors, 81 in
+\`src/\`, 1 in \`app/\`, the rest in \`test/\` and \`tools/\`. Sampled several of the
+production hits before judging them — \`coach.ts\`'s repeated "'latest' is
+possibly undefined" is \`sets[0]\` after \`sets.length >= MIN_SESSIONS\` is
+already checked a few lines up; \`repo.ts\`'s is \`MIGRATIONS[v]\` inside a
+\`v < MIGRATIONS.length\` loop. Both are real invariants the code already
+enforces, just not ones array indexing lets TypeScript prove — the dominant
+shape across the sample, unlike R573's equipment bug, which this flag would
+NOT have caught (that was a field that plain doesn't exist on the type,
+already covered by \`strict\`'s ordinary property checking). This round's own
+contract said keep it only if what it finds is real and fixable at reasonable
+cost, and 508 errors — mostly provable-safe patterns needing a large mechanical
+\`!\`-assertion or restructuring pass across dozens of files, for a very low
+hit rate on ACTUAL bugs in the one sample checked — is neither. Reverted
+\`tsconfig.json\` to the exact byte it was; confirmed with a diff and a second
+compile at exit 0. REVIEW: suite 2126 pass / 0 fail, unchanged; \`git status\`
+confirms nothing was left touched. No SHIP step — nothing shipped. | next:
+this closes the natural follow-up to R573/R574's typechecking work. The
+finding is worth keeping even though nothing changed: a future session should
+not re-attempt this flag expecting a quick win, and if it ever IS worth doing,
+it is a dedicated multi-round cleanup, not a side effect of turning on a
+compiler flag. The four owner questions remain the only work with real
+product value, tab bar first since R523, now 50 rounds waiting.
