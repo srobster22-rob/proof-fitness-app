@@ -63,17 +63,87 @@ function drawnText(data: Record<string, unknown>): string[] {
  * message is a sentence, and forcing them to share phrasing would be a worse
  * product for the sake of an easier test.
  */
+/*
+ * The card's vocabulary, READ OUT OF THE RENDERER rather than retyped here.
+ *
+ * Retyping it is how this test was blind three times: the English labels were
+ * copied and the Spanish ones were not, so `SESIÓN UNO` read as no claim at all
+ * and two correct workouts were reported broken. A hand-kept copy of another
+ * file's strings drifts the moment somebody edits the other file — HANDOFF #13,
+ * in the test that exists to catch exactly this kind of drift between copies.
+ *
+ * `LABELS` is module-private, so this parses the source. The assertion below is
+ * the safety catch: if the parse ever finds nothing, the vocabulary is empty
+ * and every card would read as claiming nothing, which is a pass.
+ */
+const RENDER_SRC = fs.readFileSync(path.join(ROOT, 'spike', 'recap.js'), 'utf8');
+
+function labelsFor(key: string): string[] {
+  const found: string[] = [];
+  const pattern = new RegExp(key + String.raw`:\s*'([^']+)'`, 'g');
+  for (const m of RENDER_SRC.matchAll(pattern)) found.push(m[1]);
+  return found;
+}
+
+function anyOf(labels: string[]): RegExp {
+  /*
+   * Throws on an empty list, and that is the important line. `new RegExp('')`
+   * matches EVERY string, so a vocabulary that failed to parse does not read as
+   * 'no claim' — it reads as the FIRST claim, on every card. That is how this
+   * round briefly reported all seven English cases claiming a personal record.
+   */
+  if (!labels.length) throw new Error('no labels: the parse found nothing to match');
+  // Escaped via a character LIST rather than a regex literal full of
+  // backslashes: this line has been eaten twice by escaping (HANDOFF trap 7),
+  // and a list has nothing to eat.
+  const META = '.*+?^${}()|[]\\'.split('');
+  const quote = (l: string) =>
+    l.split('').map(ch => (META.indexOf(ch) >= 0 ? '\\' + ch : ch)).join('');
+  return new RegExp(labels.map(quote).join('|'), 'i');
+}
+
 const CARD_WORDS: Array<[string, RegExp]> = [
-  ['pr', /NEW PERSONAL RECORD|NUEVO RÉCORD PERSONAL/],
-  ['firstSession', /SESSION ONE|ONE TO BEAT/],
-  ['bestYet', /BEST YET|LO MEJOR HASTA AHORA/]
+  ['pr', anyOf(labelsFor('pr'))],
+  ['firstSession', anyOf([...labelsFor('first'), ...labelsFor('toBeat')])],
+  ['bestYet', anyOf(labelsFor('bestYet'))]
 ];
 
+test('the card vocabulary was actually found in the renderer', () => {
+  // A gate on the instrument. An empty vocabulary makes every case report
+  // "none", and three of the seven cases expect "none" — so a silent parse
+  // failure would leave a suite that is mostly green and entirely blind.
+  for (const [claim, pattern] of CARD_WORDS) {
+    assert.notEqual(pattern.source, '(?:)', `no card labels found for "${claim}"`);
+  }
+  for (const [claim, labels] of [['pr', labelsFor('pr')], ['bestYet', labelsFor('bestYet')],
+                                 ['first', labelsFor('first')]] as Array<[string, string[]]>) {
+    assert.ok(labels.length >= 2,
+      `only ${labels.length} label(s) for "${claim}" — both languages should be there`);
+  }
+  assert.ok(labelsFor('first').some(l => /SESIÓN/i.test(l)),
+    'the Spanish first-session label is missing, which is the case that was blind');
+});
+
 const MESSAGE_WORDS: Array<[string, RegExp]> = [
-  ['pr', /HEAVIEST EVER/],
-  ['firstSession', /SESSION ONE/],
-  ['bestYet', /BEST SET YET/]
+  ['pr', /HEAVIEST EVER|LO MÁS PESADO HASTA AHORA/],
+  ['firstSession', /SESSION ONE|SESIÓN UNO/],
+  ['bestYet', /BEST SET YET|LA MEJOR SERIE HASTA AHORA/]
 ];
+
+/*
+ * Order matters in these lists and it is not alphabetical (R553).
+ *
+ * Spanish says "lo más pesado hasta ahora" for a record and "la mejor serie
+ * hasta ahora" for a best — the two share four words. A vocabulary checked in
+ * the wrong order would read every Spanish record as a `bestYet`, which is
+ * precisely the claim confusion this file exists to catch, introduced by the
+ * file itself. `claimIn` returns the FIRST match and `pr` is listed first, so
+ * the more specific claim wins; this asserts that rather than trusting it.
+ */
+test('the Spanish vocabulary cannot confuse a record with a best', () => {
+  assert.equal(claimIn(MESSAGE_WORDS, 'lo más pesado hasta ahora, antes 200'), 'pr');
+  assert.equal(claimIn(MESSAGE_WORDS, 'la mejor serie hasta ahora, antes 195'), 'bestYet');
+});
 
 function claimIn(vocabulary: Array<[string, RegExp]>, said: string): string {
   const all = said.toUpperCase();
@@ -85,9 +155,9 @@ function claimIn(vocabulary: Array<[string, RegExp]>, said: string): string {
 const cardClaim = (data: Record<string, unknown>) =>
   claimIn(CARD_WORDS, drawnText(data).join(''));
 
-const messageClaim = (data: Record<string, unknown>) =>
+const messageClaim = (data: Record<string, unknown>, lang: 'en' | 'es' = 'en') =>
   claimIn(MESSAGE_WORDS, shareText(
-    { payload: data, prs: [], thin: false, sessionId: 's1', multiple: null } as never, 'en'));
+    { payload: data, prs: [], thin: false, sessionId: 's1', multiple: null } as never, lang));
 
 /*
  * R552. §5: "the message is the half that actually travels."
@@ -129,13 +199,23 @@ describe('the card and the message make the same claim (R552)', () => {
     }, 'pr']
   ];
 
-  for (const [name, data, expected] of CASES) {
-    test(`${name}: card and message both say "${expected}"`, () => {
-      const card = cardClaim(data);
-      const message = messageClaim(data);
-      assert.equal(card, expected, `the CARD called it "${card}"`);
-      assert.equal(message, expected, `the MESSAGE called it "${message}"`);
-    });
+  /*
+   * Both languages, because §16 wants them saying the same thing and the card
+   * is the artefact that LEAVES the device — a Spanish sender's card is read by
+   * people who will never open the app. R552 shipped the es labels in
+   * `CARD_WORDS` with nothing exercising them, which is a vocabulary list one
+   * step from being a blind instrument.
+   */
+  for (const lang of ['en', 'es'] as const) {
+    for (const [name, data, expected] of CASES) {
+      test(`${lang} — ${name}: card and message both say "${expected}"`, () => {
+        const payload = lang === 'es' ? { ...data, lang: 'es' } : data;
+        const card = cardClaim(payload);
+        const message = messageClaim(payload, lang);
+        assert.equal(card, expected, `the ${lang} CARD called it "${card}"`);
+        assert.equal(message, expected, `the ${lang} MESSAGE called it "${message}"`);
+      });
+    }
   }
 
   test('and the claim survives the round trip through the link', () => {
@@ -144,10 +224,13 @@ describe('the card and the message make the same claim (R552)', () => {
      * in memory — which is exactly how R435 escaped: the two differed only
      * after packing. So the last check renders from what the link carries.
      */
-    for (const [name, data, expected] of CASES) {
-      const packed = ShareUrl.unpack(pack(data as never));
-      assert.equal(cardClaim(packed as never), expected,
-        `${name}: after packing, the card a stranger opens calls it something else`);
+    for (const lang of ['en', 'es'] as const) {
+      for (const [name, data, expected] of CASES) {
+        const payload = lang === 'es' ? { ...data, lang: 'es' } : data;
+        const packed = ShareUrl.unpack(pack(payload as never));
+        assert.equal(cardClaim(packed as never), expected,
+          `${lang} ${name}: after packing, the card a stranger opens calls it something else`);
+      }
     }
   });
 });

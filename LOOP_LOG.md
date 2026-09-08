@@ -1003,3 +1003,51 @@ and §16 wants both languages saying the same thing. That is a contained next
 round. Tab bar remains the top item and the owner's; R548's strength-vs-size
 question is filed beside it. Also owner-only: the R508 bundle scope (~48 kB) and
 the two R483 items.
+
+R553 — PICK (logged first): the Spanish half of the share surface. Shortlist was
+(a) the es claim cases R552 left unexercised, (b) the Goals screen, (c) the
+first-run/cold-start path. Picked (a): R552 built claim-level agreement between
+card and message and tested it in English only, and its own `CARD_WORDS` already
+carries the Spanish labels with nothing driving them — a vocabulary list nobody
+exercises is the blind instrument this session keeps finding, one step from
+being written. §16 requires both languages to say the same thing, and the share
+card is the artefact that leaves the device, so a Spanish sender's card is read
+by people who will never see the app.
+
+R553 — BUILD/REVIEW/SHIP on the pick logged above. Drove R552's whole claim
+matrix through BOTH languages: fourteen cases plus the round trip, and all three
+ladders agree in Spanish as well. Checked the Spanish message wording first
+rather than assuming — "lo más pesado hasta ahora" for a record, "la mejor serie
+hasta ahora" for a best, "SESIÓN UNO, la marca a batir" for a first workout —
+and chased one thing that looked wrong and was not: the shared volume reads
+"5960 lb" in Spanish against "5,960" in English, which is `toLocaleString('es')`
+doing correct Spanish typography (no separator below five digits), and
+`shareText` was already using the locale formatter. THE INSTRUMENT WAS BLIND A
+THIRD TIME, in the same file, and this one is the sharpest of the three. My card
+vocabulary was hand-copied and I had copied only the English labels, so `SESIÓN
+UNO` read as no claim and two CORRECT workouts were reported broken — a
+hand-kept copy of another file's strings, in the test whose entire job is
+catching drift between copies. Fixed by deriving the vocabulary from the
+renderer's own `LABELS` (HANDOFF #13), which cannot fall behind the thing it
+describes. That immediately produced a FOURTH blindness, and it is worth
+recording exactly: the parse regex lost its backslash (`\s` became `s`,
+trap 7 again), `labelsFor` returned nothing, and `anyOf([])` built `new
+RegExp('')` — WHICH MATCHES EVERY STRING — so every card in every language
+claimed a personal record. An empty vocabulary does not fail safe: it does not
+read as "no claim", it reads as the FIRST claim, everywhere. `anyOf` now throws
+on an empty list, and the escape is built with `String.raw`. REVIEW: suite 2049
+pass / 0 fail (real count, up 9). Two plants: blank the Spanish first-session
+labels and one case fails while English stays green, proving the es half is
+really being exercised; break the parse and the run stops with "no labels: the
+parse found nothing to match" instead of passing. Verified in the PRODUCT by
+switching the app to Spanish and finishing a real workout — "DÍA DE EMPUJE /
+VOLUMEN TOTAL / SERIES / RACHA 13 SEM / COMPARTIR" — then switching back and
+reseeding. SHIP: `--check` current, `link/build.cjs` dist/ ready, `spike/recap.js`
+restored and clean, app back in English on seed.b64. | next: four blind
+instruments in three rounds is itself the finding — three of them were a
+hand-copy of something another file owns, and one was an empty pattern that
+fails OPEN. Worth a round adding the second of those to HANDOFF as a trap in its
+own right, since "an empty matcher matches everything" is not obvious and cost
+this round twice. Tab bar remains the top item and the owner's; R548's
+strength-vs-size question is filed beside it. Also owner-only: the R508 bundle
+scope (~48 kB) and the two R483 items.
