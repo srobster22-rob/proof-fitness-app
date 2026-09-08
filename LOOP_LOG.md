@@ -1607,3 +1607,13 @@ the second time a list fell behind (R543's raw-history consumers was the
 first), and the fix pattern is the same both times: find what defines the
 population and match on that instead of enumerating it. Four owner questions
 remain, tab bar first since R523.
+
+R567 — PICK (logged first): sweep for OTHER hand-kept lists in the repo's own
+tooling that could fall behind the way .gitignore did (R566) and raw-history-
+consumers did (R543) — both real, both found by luck rather than by looking.
+Shortlist was (a) that sweep, (b) the skip-reasons filing, (c) stop and wait on
+the owner queue. Picked (a): two for two is a pattern worth checking on purpose
+rather than a third time by accident. Contract: find every ACKNOWLEDGED/hand-
+enumerated list a tool or gate relies on, check whether it is derivable from
+something structural instead, and where it cannot be, confirm it at least fails
+loudly when the population moves past it.

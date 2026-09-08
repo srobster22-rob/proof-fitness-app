@@ -40,7 +40,8 @@ const INTERFACES = [
   { file: 'src/ui/now-model.ts', name: 'RailLift' },
   { file: 'src/ui/measure-model.ts', name: 'KindRow' },
   { file: 'src/domain/measure-goal.ts', name: 'MeasureGoalProgress' },
-  { file: 'src/data/portable.ts', name: 'RestoreReport' }
+  { file: 'src/data/portable.ts', name: 'RestoreReport' },
+  { file: 'src/ui/progress-model.ts', name: 'SessionSummary' }
 ];
 
 /*

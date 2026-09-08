@@ -103,6 +103,30 @@ describe('every field on a tracked interface is read somewhere, or is acknowledg
       'RestoreReport left the scanned shapes; restore builds it and summarise reads it');
   });
 
+  test('and the ones structurally identical to what is already scanned', () => {
+    /*
+     * R567. Swept every exported interface in src/domain and src/ui for one
+     * with the same shape as what field-scan.cjs already targets — a
+     * multi-field row a MODEL computes and a SCREEN reads. SessionSummary was
+     * the clearest match, sibling to ProgressRow (same file, same job: one row
+     * per item in a list), and had NO dead-field protection of any kind before
+     * this. Adding it to the scan came back clean — every field is read — so
+     * this is coverage gained rather than a bug found, which is the more
+     * common outcome and still worth pinning so it cannot quietly drop back
+     * out.
+     *
+     * Not a claim that every interface belongs here — RecapPayload is the
+     * counter-example, correctly ABSENT, because it already has three
+     * dedicated per-consumer completeness tests (R290 on) built for its
+     * specific claim-priority branching, which is a stronger check than this
+     * generic scan could give it.
+     */
+    const src = readFileSync(TOOL, 'utf8');
+    assert.match(src, /name: 'SessionSummary'/,
+      'SessionSummary left the scanned shapes — it is a per-row model-to-screen ' +
+      'structure with the same shape as ProgressRow');
+  });
+
   test('the acknowledged list still explains itself', () => {
     const src = readFileSync(TOOL, 'utf8');
     const block = region(src, 'const ACKNOWLEDGED', 'function fields');
