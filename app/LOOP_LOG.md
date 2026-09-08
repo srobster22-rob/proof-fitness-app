@@ -185,3 +185,26 @@ candidates, all already safe). Settings and Progress hold no comparable
 snapshots to check. This line of investigation is exhausted. Four owner
 questions remain the only work with real product value, tab bar first since
 R523, now 55 rounds waiting.
+
+R582 — Stage 0: OWNER.md still four blocked decisions. Extended R581's
+tab-bar-specific lens (destructive action + resurrecting undo, safe only
+because the current stack pops and destroys state) to Settings, Measure and
+Progress — a tab bar would keep all of them mounted, not just Goals, so any
+of them relying on the same pop-based safety net would carry the same latent
+risk. Surveyed for the shape rather than for staleness generally (R580
+already covered that): an undo affordance whose restore path is an upsert
+with no memory of an intervening erase. FOUND NO SIBLING. Measure's only
+object-shaped local state (\`removing\`, checked for plain staleness in R580)
+and its two enum-shaped confirm states (\`targeting\`, \`clearing\`) are all
+confirm-THEN-ACT with no "put it back" path at all — nothing to resurrect,
+because nothing is retrievable after. Progress's ERASE EVERYTHING and RESTORE
+are themselves the terminal one-shot actions, not an undo of something else.
+Settings has no destructive action with undo anywhere. Goals' wipe -> undo ->
+restore triad was genuinely the only instance of this shape in the app, which
+means R581 was not one fix among several waiting to be found the same way —
+it was the whole answer to the question this round asked. REVIEW: suite 2133
+pass / 0 fail, unchanged; \`git status\` confirms nothing touched. No SHIP
+step — nothing shipped. | next: the tab-bar-specific hardening line, opened by
+R581, is now confirmed complete rather than left open. Four owner questions
+remain the only work with real product value, tab bar first since R523, now
+57 rounds waiting.

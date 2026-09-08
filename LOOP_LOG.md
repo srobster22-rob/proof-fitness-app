@@ -2052,3 +2052,11 @@ pending tab-bar decision (this, and R516/R523's own cost analysis). If the
 owner picks the tab bar, both are already accounted for. Four owner questions
 remain the only work with real product value, tab bar first since R523, now
 56 rounds waiting.
+
+R582 — PICK (logged first): extend R581's tab-bar-specific lens to Settings,
+Measure and Progress — a tab bar would keep ALL of them mounted, not just
+Goals, so any of them relying on "leaving pops and destroys state" has the
+same latent risk. Contract: find confirm/undo-style local state on each (the
+category R581 fixed), check whether the underlying write is an unconditional
+upsert or resurrect like restoreGoals was, and fix only what is real and
+specifically tied to the pop-reliance shape — not a general audit.
