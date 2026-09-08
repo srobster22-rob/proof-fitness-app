@@ -1570,3 +1570,40 @@ exist precisely because things were being recomputed), and unlike the last three
 rounds it is about the product rather than my instruments. Contract: measure the
 model's work at a realistic and an extreme history, in numbers, and gate
 whatever is worth keeping.
+
+R566 — Stage 0: OWNER.md still four blocked decisions. Picked auditing whether
+the dev-only seed fixtures in public/ actually belong there, after checking (and
+clearing) whether R565's own new seed had a gap in R559's tracking gate — it did
+not, that scan is directory-derived. FOUND SOMETHING WORSE THAN A GAP: seven
+fixture files written by seeds from THIS SESSION — big565.b64 through
+pr539.b64, 1.5MB total — were TRACKED AND COMMITTED, because `.gitignore` named
+four seeds one at a time (seed.b64, stress.b64, tabbar.b64, mixed.b64) and
+nobody connected "writing a new seed tool" to "add it to the ignore list" for
+the seven added since. Confirmed this is not theoretical: ran a REAL `expo
+export --platform web` and every fixture came out the other side inside
+`dist/`, the actual production artifact. `.gitignore` was not failing to
+prevent a future risk; it had already failed to prevent a real one, twenty-some
+git commits deep. Fixed with a wildcard, `public/*.b64`, rather than an eighth
+name — the failure mode WAS the list falling behind, and a pattern cannot.
+`sql-wasm.wasm` stays out of it on purpose: it is a real web dependency, not a
+fixture, and a broader pattern would have swallowed it too. REVIEW, done
+properly rather than assumed: planted a force-added fixture back and both
+tracking tests named it; widened the pattern to `public/*` and the wasm-safety
+test caught it. MADE A REAL MISTAKE MID-ROUND AND CAUGHT IT MYSELF: the first
+`git rm --cached` sweep + commit left `pr539.b64` still tracked, because an
+earlier `git add -f` / `git restore --staged` cycle (done to prove the plant
+above) had put it in a different index state than the other six, and I trusted
+the sweep instead of re-checking after commit. The suite caught it — still red
+post-commit — rather than me declaring victory on a green run I had not
+actually looked at. Second commit fixed the one file. Full suite: 2110 tests,
+one unrelated flake (R565's own timing test, warned-of noise under full-suite
+load, clean alone) resolved by rerunning in isolation — not silenced, checked.
+`--check` current; no share code moved so `link/build.cjs` was not needed;
+verified the dev server still serves the fixtures from disk. Committed as
+9423b14 then c4fb917 (git is on for this repo; both commits are inside
+fitness-app, never the parent). | next: worth a look at whether ANY other
+gitignore pattern in this repo is a hand-list rather than derived — this was
+the second time a list fell behind (R543's raw-history consumers was the
+first), and the fix pattern is the same both times: find what defines the
+population and match on that instead of enumerating it. Four owner questions
+remain, tab bar first since R523.
