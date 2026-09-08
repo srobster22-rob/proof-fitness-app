@@ -2343,3 +2343,40 @@ the next fresh find in this app's history has repeatedly come from an angle
 nobody had used yet, not from repeating the same angle a fourth time. Genuine
 technical queue is thin; the highest-value remaining lever is still the five
 owner decisions waiting in OWNER.md, tab bar first, now 62 rounds.
+
+R590 - Stage 0: OWNER.md unchanged since R586. IDEATE: moved to ground this
+segment had genuinely never looked at -- src/domain/predict.ts (PROMPT.md §7,
+the exercise predictor behind the swipe-to-next gesture and session opener).
+Read it in full rather than testing a hypothesis, since five straight clean
+audits (R585-R589) argued for changing METHOD again rather than repeating
+plant-a-bug on ground already gone over.
+FINDING: the module is unusually well-armored already -- its own comments
+document two real historical bugs (the position-decay mismatch and the
+12-wide overflow pool re-sorting across different training days) with
+measured day-counts for how bad each one got, and both fixes are exactly
+right against their own reasoning. `occurrences()`'s identity+length memo is
+sound because `Repo.allSets()` genuinely freezes its array (confirmed by
+reading repo.ts:390-395, not assumed) and the length check is documented as
+covering only the in-place-mutation case identity alone would miss.
+One theoretical gap, filed rather than fixed: `rankExercises`'s
+`positionSum / positionWeight` divides by a sum of `0.5 ^ (daysAgo/28)` terms,
+which underflows to exactly 0.0 in IEEE double only past roughly 30,000 days
+(~82 years) of daysAgo -- past that this produces NaN and would silently
+corrupt sort order rather than crash. Confirmed the arithmetic by hand rather
+than asserting it; not fixed, because no real training history can be 82
+years old and a defensive branch for an unreachable input is exactly the kind
+of complexity §12's spirit argues against paying for nothing. Documented here
+so a future round does not rediscover the same arithmetic from scratch and
+mistake it for live.
+REVIEW: no code changed, so nothing to plant; ran the full suite as a sanity
+floor anyway: 2139 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: six rounds now (R585-R590) without a fresh product defect, across
+five different methods (structural gate, demo-fixture staleness, plant-in-
+suite x2, self-testing build run, full-module read). Continuing to search the
+same class of ground is losing to a plateau; the honest position is that the
+technical queue is closer to exhausted than at any point since the segment's
+earlier ~18-strategy edge search concluded similarly. Five owner decisions
+remain the highest-value lever, tab bar first, 63 rounds waiting -- the
+Vision response filed in R586 asked for a screenshot with what looks off,
+which is now the most likely unlock for further product-shaped work.
