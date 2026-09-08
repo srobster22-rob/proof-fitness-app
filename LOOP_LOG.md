@@ -2108,3 +2108,11 @@ thinking about it" — this is the second time this session a fix (R538→R539,
 now R581→R583) had a real second half found only by coming back to it fresh.
 Four owner questions remain the only work with real product value, tab bar
 first since R523, now 58 rounds waiting.
+
+R584 — PICK (logged first): apply R583's own lesson to the one screen not yet
+checked for it — Measure. Same shape found cold, before assuming: `rows =
+useMemo(() => measureRows(repo, now), [repo, tick])`, zero `useFocusEffect`
+anywhere in the file, left via `useGuardedLeave` (a pop) exactly like Goals
+was before R583. Contract: add the same refresh-on-focus fix, verified the
+same way — currently safe by construction, real the moment a tab bar removes
+the pop.

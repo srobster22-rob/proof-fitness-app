@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useGuardedLeave } from '../src/ui/guarded-push.ts';
 import { getRepo } from '../src/data/db.ts';
 import { COLUMN } from '../src/ui/column.ts';
@@ -47,6 +47,38 @@ export default function Measure() {
   const [tick, setTick] = useState(0);
   const refresh = useCallback(() => setTick(t => t + 1), []);
   const still = useReducedMotion();
+
+  /*
+   * R584, the same fix R581/R583 gave Goals — both halves at once, since here
+   * they land in one round rather than two. `rows` below only recomputes when
+   * `tick` changes, and `tick` only ever changed through this screen's own
+   * actions — nothing refreshed it on ARRIVAL. `adding`/`open`/`removing`/
+   * `targeting`/`clearing` are the sheet-visibility and confirm state, each
+   * one closed by its own action but never by simply LEAVING and RETURNING.
+   *
+   * Safe today only because `leave` (`useGuardedLeave`, a pop) always
+   * destroys this component on the way out, so a fresh mount always starts
+   * from nothing and calls `measureRows` from scratch. Becomes real the
+   * moment anything keeps this screen mounted while blurred — the tab bar
+   * OWNER.md has open — the same way it would have for Goals: a restore or
+   * an erase done on Progress would leave this screen showing readings that
+   * no longer exist, or a confirm sheet open over one of them.
+   *
+   * The setters referenced here are declared further down this function
+   * (`adding` through `clearing`); safe despite the textual order because the
+   * closure below is not invoked until `useFocusEffect` fires, well after
+   * this render pass has finished and every const in the function is
+   * initialized — the same reasoning that let Goals' equivalent guard
+   * reference `setTick` correctly.
+   */
+  useFocusEffect(useCallback(() => {
+    refresh();
+    setAdding(null);
+    setOpen(null);
+    setRemoving(null);
+    setTargeting(null);
+    setClearing(null);
+  }, [refresh]));
 
   const now = Date.now();
   const rows = useMemo(() => measureRows(repo, now), [repo, tick]);
