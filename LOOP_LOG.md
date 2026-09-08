@@ -1971,3 +1971,36 @@ Asserting that without checking is exactly the kind of untested conclusion
 R577/R578 exist to catch. Contract: test addSetTo against an exercise id that
 has been removed out from under it while addingTo held it, the same way
 editingSet was tested against a removed set.
+
+R579 — BUILD/REVIEW/SHIP on the pick logged above: verifying my OWN R578 claim
+rather than trusting it. R578 asserted "\`addingTo\` holds only a string id, not
+a snapshot, so the same staleness question does not apply to it the same way"
+— asserted, not tested, which is precisely the standard R577/R578 exist to
+hold everything ELSE to. \`addSetTo\` has no explicit guard checking the
+exercise or session still exist; it derives safety only from
+\`mine.length === 0\` once a session's sets are gone. Verified that holds two
+ways. First, statically: \`removeExercise\` checks \`SELECT 1 FROM sets WHERE
+exercise_id = ?\` with no \`deleted\` filter at all, so even a soft-deleted set
+blocks removal — meaning \`addSetTo\` returning non-null (a real set to repeat
+exists) and the exercise having been removed are mutually exclusive by
+construction. Second, and more directly: ran the actual erase path. Logged a
+set, called \`eraseAll()\`, then called \`addSetTo('bench')\` with the model
+still holding a session id \`repo.session()\` now returns \`null\` for — the
+stale-tap-after-ERASE-EVERYTHING scenario \`addingTo\` is actually exposed to,
+since Now never unmounts. Returns \`null\`, zero sets, no exception. UNLIKE
+R578's \`editingSet\` finding, this exact case had NO existing test — a real,
+if narrow, gap rather than a second confirmed-clean result. Added one,
+placed beside \`addSetTo\`'s other tests. REVIEW: suite 2130 pass / 0 fail
+(real count, up 1). Planted a defect that makes \`addSetTo\` invent a
+placeholder set instead of refusing when there is nothing to repeat, and it
+is caught by name — the new test AND an existing one both fail, restored
+clean confirmed by the count returning to 204 in that file. Product verified
+— app renders normally post-change, nothing residual. \`--check\` current, no
+production source touched so link/build.cjs was not needed. \`git diff\` on
+now-model.ts is empty. Committed as 36f02ae inside fitness-app. | next: all
+three pieces of Now's component-local state that could plausibly go stale —
+\`typing\` (R577, verified safe), \`editingSet\` (R578, verified safe and
+already covered), \`addingTo\` (R579, verified safe and NOW covered) — have
+been checked by running the actual scenario rather than reading the code.
+Four owner questions remain the only work with real product value, tab bar
+first since R523, now 54 rounds waiting.
