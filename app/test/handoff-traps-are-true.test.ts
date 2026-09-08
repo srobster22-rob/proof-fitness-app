@@ -88,6 +88,37 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
     }
   });
 
+  test('a re-measurement note never lands mid-sentence', () => {
+    /*
+     * R534 found this in R533's own work. The note recording that trap 12 had
+     * been verified was inserted after an anchor line ending "before concluding
+     * a control" -- mid-clause -- so the trap then read "...before concluding a
+     * control / RE-MEASURED R533 ... / is unresponsive." The advice was cut in
+     * half by the evidence for it.
+     *
+     * Prose has no compiler. An anchored insert into a document is exactly as
+     * capable of landing in the wrong place as one into code, and nothing said
+     * so: the suite was green, the claim was true, and the sentence was broken.
+     * Two of the three notes were fine, which is why reading one and assuming
+     * the rest would not have caught it.
+     *
+     * The rule is checkable: a note begins a new thought, so the line before it
+     * must have finished one.
+     */
+    const handoff = DOCS.find(([n]) => n === 'HANDOFF.md')![1];
+    const lines = handoff.split(/\r?\n/);
+    const bad: string[] = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (!/^\s*(RE-)?MEASURED R\d+/.test(lines[i])) continue;
+      const prev = (lines[i - 1] ?? '').trim();
+      if (!/[.:!?]$/.test(prev)) {
+        bad.push(`"${prev.slice(-45)}" is followed by "${lines[i].trim().slice(0, 35)}..."`);
+      }
+    }
+    assert.deepEqual(bad, [],
+      'a measurement note interrupts an unfinished sentence: ' + bad.join(' | '));
+  });
+
   test('and the geometry tool is kept for the reason it is actually good for', () => {
     /*
      * `screen-render.cjs` was justified as the ONLY way to see a screen, which

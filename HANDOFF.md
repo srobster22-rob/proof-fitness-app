@@ -118,7 +118,7 @@ test suite and obvious in a picture.
    ACTUALLY FIRED AND ACTUALLY APPLIED. A plant that produces no failure means one of two
    things — the instrument is blind, or the edit never landed — and both are findings. An
    instrument reporting no problems must also say how much it examined.
-   The original three: The 320pt layout sweep
+   The original three. The 320pt layout sweep
    was scoped to `#root` and therefore examined **zero** elements on every sheet in the app,
    reporting clean (R217). The same sweep then counted the screen *behind* a stacked route as
    51 failures (R220). The screen-capture snippet took leaf text only and dropped the Now
@@ -152,10 +152,10 @@ test suite and obvious in a picture.
    `[...document.body.children]` and inspecting the LAST sibling div directly is more precise
    and does not depend on innerText's own quirks. **Always separate "dispatch the event" from
    "read the result" into two steps, or bridge them with a delay**, before concluding a control
+   is unresponsive.
    RE-MEASURED R533 and it holds exactly: dispatching `click` on LOG SET and reading
    `document.body.innerText` in the SAME execution reports 0 sets; reading it after a delay
    reports 1. The press landed both times — only the read was early.
-   is unresponsive.
 
 13. **A hand-maintained list of "things that must all do X" drifts, every time.** Twice: every
    `RecapPayload` field had to reach `recap.tsx`, `shareText` and `spike/recap.js`, and enumerating
