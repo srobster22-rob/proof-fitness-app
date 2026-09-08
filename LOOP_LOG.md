@@ -1925,3 +1925,42 @@ not re-attempt this flag expecting a quick win, and if it ever IS worth doing,
 it is a dedicated multi-round cleanup, not a side effect of turning on a
 compiler flag. The four owner questions remain the only work with real
 product value, tab bar first since R523, now 50 rounds waiting.
+
+R576 — Stage 0: OWNER.md still four blocked decisions. Checked the app's crash
+recovery — a genuine risk class nothing this session had ever touched, since
+every prior round assumed the JS runs and none tested what happens when it
+throws. Found TWO paths, both real and already correctly wired. \`app/_layout.tsx\`
+re-exports \`ErrorBoundary\` from \`expo-router\` — verified against the
+package's own \`.d.ts\` rather than trusted by name: a genuine React
+\`Component\` with \`getDerivedStateFromError\`, applied automatically to every
+route via the router's \`Try\` wrapper, and already carries a comment
+explaining the choice — a deliberate decision, not an oversight found and
+left alone. The one gap that boundary cannot cover — a database open or
+migration failing before any route renders, so there is no Stack yet for the
+router to guard — has its OWN dedicated handler, \`RepoGate\` -> \`StorageError\`,
+which turned out to already have a comprehensive test file (escalating
+guidance, both languages, no destructive button, device language over the
+possibly-broken repo's). Nothing was missing in the LOGIC; what was missing
+was a REGRESSION GATE — nothing pinned either path against being silently
+undone by an unrelated future edit. Added three tests doing exactly that:
+the re-export stays, \`RepoGate\` keeps rendering \`StorageError\` rather than
+its children on failure, and the comment explaining why the two paths are not
+redundant survives. STOPPED SHORT OF CLAIMING MORE THAN WAS PROVEN. Whether
+either path actually SHOWS on a real crash needs a production build — a dev
+server routes an uncaught render error to Metro's own overlay instead of
+letting expo-router's boundary catch it, the same device-blocked shape as
+HANDOFF trap 17's focus events. Recorded that as trap 18 with the reasoning,
+rather than either faking a pane-based "verification" or leaving a future
+session to rediscover the same limit from scratch. REVIEW: suite 2129 pass /
+0 fail (real count, up 3), exit code checked explicitly at 0. Two plants: the
+\`_layout.tsx\` re-export removed fails the boundary test by name; \`RepoGate\`
+made to render its children instead of \`StorageError\` fails the second test
+by name. Verified in the PRODUCT what IS observable from here — the app's
+success path renders normally, confirming \`RepoGate\`'s working case rather
+than only its failure case. \`--check\` current; no share code moved so
+link/build.cjs was not needed; \`git diff\` on both touched production files
+is empty, confirming both plants were fully reverted. Committed as f306b18
+inside fitness-app. | next: this closes the last major untested risk class —
+crash recovery — the way R573-575 closed typechecking. Four owner questions
+remain the only work with real product value, tab bar first since R523, now
+51 rounds waiting.
