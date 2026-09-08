@@ -953,3 +953,53 @@ mining the same seam a seventh time; the recap/share surface has had one real
 defect this session (R540) and no systematic pass. Tab bar remains the top item
 and the owner's; R548's strength-vs-size question is filed beside it. Also
 owner-only: the R508 bundle scope (~48 kB) and the two R483 items.
+
+R552 — PICK (logged first): the SHARE surface. Shortlist was (a) the share-URL
+payload, (b) the recap screen's message ladder, (c) the Goals screen. Picked
+(a)+(b) as one target because R540 found the session's only real defect there
+and there has been no systematic pass since. §5 says the message is the half
+that actually travels, and the share link is the one artefact that leaves the
+device and is read by people with no app — so anything wrong in it is wrong in
+public and cannot be corrected later. Contract to check: what the CARD claims
+and what the MESSAGE claims must agree, and both must survive the round trip
+through the URL.
+
+R552 — BUILD/REVIEW/SHIP on the pick logged above. Three surfaces decide what a
+workout gets CALLED — the recap screen, the share message, and the card image a
+stranger opens — and each carries its own copy of the same priority ladder, in
+TSX, TS and plain JS. The repo has THREE gates asserting every payload field is
+MENTIONED in each, and mentioned is not agreed: R435's defect was a field
+mentioned everywhere, where the sender's card read "+10 LB" and the card their
+friend opened read "BEST YET" for the same workout, and R540's was `bestYet`
+firing on a claim `findPRs` had already refused. R290 looked at testing the
+ladder and declined, because it "does not reduce to a flat list of names without
+restructuring RecapPayload" — TRUE OF THE SOURCE, and it does not have to be
+tested from the source. Render the card, generate the message, and ask each what
+it called the workout. Eight tests over seven payload shapes, including the
+three precedence cases where two claims are true at once and only one is right,
+and the last one renders from `unpack(pack(x))` through the DEPLOYED decoder,
+because the card a stranger opens is built from the link and R435 escaped
+exactly there. All three ladders agree today. MY INSTRUMENT WAS BLIND TWICE IN
+ONE ROUND and both times it reported product defects that do not exist. First it
+read the card's drawn text joined with a separator — the card draws tracked
+headings ONE CHARACTER PER `fillText`, so "NEW PERSONAL RECORD" arrived as
+"N | E | W | ..." and five workouts were reported as claiming nothing. Then,
+with that fixed, it judged the MESSAGE with the CARD's vocabulary: the two
+deliberately differ, the card printing the label NEW PERSONAL RECORD and the
+message writing "heaviest ever, up from 200", and forcing them to share phrasing
+would be a worse product for the sake of an easier test. What has to agree is
+the claim, not the wording, so each surface is now read in its own. REVIEW: suite
+2040 pass / 0 fail (real count, up 8). Three plants, each a disagreement that
+has actually happened or nearly did — disable the card's bestYet branch (R435's
+literal shape), reorder the message's ladder so bestYet outranks firstSession,
+and drop the field in the decoder so it survives packing but not unpacking. Each
+fails by name; the third fails ONLY the round-trip test, which is what earns
+that test its place. Verified in the PRODUCT by finishing a real workout and
+reading the recap. SHIP: `--check` current, `link/build.cjs` dist/ ready, all
+three planted files restored and `git status` clean on them, app reseeded. |
+next: the share surface now has claim-level coverage; what it still lacks is the
+Spanish half — `CARD_WORDS` carries the es labels but no case exercises them,
+and §16 wants both languages saying the same thing. That is a contained next
+round. Tab bar remains the top item and the owner's; R548's strength-vs-size
+question is filed beside it. Also owner-only: the R508 bundle scope (~48 kB) and
+the two R483 items.
