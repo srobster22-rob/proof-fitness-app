@@ -1300,12 +1300,25 @@ describe('Now screen — the line under the lift name is never blank (§4)', () 
     assert.equal(s.lastTime.head + s.lastTime.tail, 'First time');
   });
 
-  test('a second session goes back to last time, and does not say "just did"', () => {
+  test('a second session speaks about the previous one, never about this one', () => {
+    /*
+     * R518: this asserted the literal "Last time  215 × 5". The coach line
+     * (OWNER.md #2) now owns this slot when it has something to say, and this
+     * fixture is four weekly squats at 200/205/210/215 — a lifter on linear
+     * progression — so it says so and names the next rung.
+     *
+     * The invariant the test was written for is untouched and is what is
+     * asserted now: the line is about the PREVIOUS session's number, and
+     * logging a set today must not displace it with "just did". Both the old
+     * line and the coach line cite 215; only the coach line also says what to
+     * do with it.
+     */
     const m = new NowModel(trained(), () => T0);
-    assert.match(lineOf(m), /^Last time  215 × 5$/);
+    assert.match(lineOf(m), /215/, 'the line must name the weight that decides what to load');
+    assert.doesNotMatch(lineOf(m), /^Just did/);
     m.log();
-    assert.match(
-      lineOf(m), /^Last time  /,
+    assert.doesNotMatch(
+      lineOf(m), /^Just did/,
       'the previous session is the number that decides what to load — it must not be displaced'
     );
   });

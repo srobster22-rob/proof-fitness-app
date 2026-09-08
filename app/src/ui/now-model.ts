@@ -11,11 +11,12 @@ import {
   PLAN_DAYS, PLAN_DAY_COVERS,
   type SplitDay, type SplitGroup, type SplitPlan, type PlanDay
 } from '../domain/split.ts';
+import { coachSuggestion, type Suggestion } from '../domain/coach.ts';
 import { PHONE_MAX } from './column.ts';
 import { loadLabel, convertWeight } from '../domain/types.ts';
 import { goalProgress, isAchieved } from '../domain/goals.ts';
 import { recommendNext } from '../domain/muscles.ts';
-import { t, languageOf, type Language } from '../domain/i18n.ts';
+import { t, fill, languageOf, type Language } from '../domain/i18n.ts';
 
 /**
  * The Now screen, as a pure state machine. PROMPT.md §5 screen 1.
@@ -564,6 +565,11 @@ export interface LastTimeInput {
   thisSession: readonly LoggedSet[];
   /** The live goal on this lift, if there is one. See `goalTail`. */
   goal?: GoalHint | null;
+  /**
+   * The coach's advice, when it has any (OWNER.md #2). Outranks `previous`,
+   * never `thisSession` — see `lastTimeParts`.
+   */
+  coach?: Suggestion | null;
 }
 
 /**
@@ -577,8 +583,18 @@ export interface LastTimeInput {
 export function lastTimeParts(input: LastTimeInput, lang: Language = 'en'): {
   head: string; tail: string; hit: boolean;
 } {
-  const { previous, thisSession, goal } = input;
-  const head = previous ? `${t(lang, 'lastTime')}  ${loadLabel(previous.weight)} × ${previous.reps}`
+  const { previous, thisSession, goal, coach } = input;
+  /*
+   * The coach outranks "Last time", and ONLY that. It never displaces "Just
+   * did" — that line is the confirmation that the set you just logged landed,
+   * and swapping advice in on top of it would answer a question the lifter is
+   * not asking mid-set. In practice the two never collide anyway: `previous`
+   * already wins over `thisSession`, and the coach needs two sessions in the
+   * window, which is a strict superset of having a `previous` at all.
+   */
+  const head = coach
+    ? fill(t(lang, coach.key as never), coach.params)
+    : previous ? `${t(lang, 'lastTime')}  ${loadLabel(previous.weight)} × ${previous.reps}`
     : thisSession.length
       ? `${t(lang, 'justDid')}  ${loadLabel(thisSession[thisSession.length - 1].weight)} × ` +
         `${thisSession[thisSession.length - 1].reps}`
@@ -1180,10 +1196,34 @@ export class NowModel {
       plateJump: this.plateJump(),
       repJump: this.repJump(),
       lang: this.lang(),
+      /*
+       * The coach line (OWNER.md #2) takes over this slot rather than getting
+       * one of its own.
+       *
+       * Not a compromise — the right place. The slot's head says "Last time
+       * 185 x 5" for any lift with history, and the coach line is that same
+       * fact plus what to do about it: "185 for 2 sessions - try 190". It is a
+       * strict improvement on what was there, in the position a lifter already
+       * looks for it, directly under the exercise name.
+       *
+       * And it is the only place it could go. R512 measured the shortest
+       * shipping phone at 624px of unshrinkable content against 568px of
+       * screen, and R511 put LOG SET below the fold by adding EIGHT pixels of
+       * padding. A new row costs about twenty. Reusing a row that is already
+       * budgeted in `fixedHeight`'s HEADER_TEXT costs nothing at all.
+       *
+       * `historyInSessionUnit`, not `allSets`: a LoggedSet carries no unit
+       * (HANDOFF trap 9), so raw history would compare kilos against pounds
+       * and suggest a jump in the wrong currency.
+       */
       lastTime: lastTimeParts({
         previous: this.lastTime(),
         thisSession: sessionSets.filter(s => s.exerciseId === this.exerciseId),
-        goal: this.goalHint()
+        goal: this.goalHint(),
+        coach: coachSuggestion(
+          this.historyInSessionUnit(), this.exerciseId, this.now(),
+          { unit: this.session.unit }
+        )
       }, this.lang()),
       loggedThisExercise: sessionSets.filter(s => s.exerciseId === this.exerciseId),
       loggedThisSession: sessionSets,

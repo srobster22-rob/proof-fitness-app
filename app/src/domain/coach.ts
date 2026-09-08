@@ -229,6 +229,40 @@ export function coachSuggestion(
    * ACTION as `hold` for a completely different reason, and the reason is the
    * half the owner asked for.
    */
+  /*
+   * CLIMBING. The weight has gone up every session in the window, so the
+   * lifter is on linear progression and it is working.
+   *
+   * This is checked before `settle` because they look identical from
+   * `atSameWeight` alone — both are "one session at this weight" — and the
+   * right advice is opposite. R518 found it through an existing fixture: four
+   * weekly squat sessions at 200, 205, 210, 215, and the engine said "first
+   * time at 215, repeat it before adding" to somebody who had added five
+   * pounds a week for a month and made every one of them. Conservative advice
+   * given to a lifter with a working plan is still wrong advice, and it is the
+   * kind that makes a coach worth ignoring.
+   *
+   * The step is THEIR step, not the table's. A lifter climbing in 5s is told
+   * to try 5 more; one climbing in 10s is told 10. OWNER.md asks for the app
+   * to be personalised to the person, and their own recent increment is a
+   * better answer than a constant chosen here.
+   */
+  if (sets.length >= MIN_SESSIONS && atSameWeight === 1) {
+    let rising = true;
+    for (let i = 0; i + 1 < sets.length; i++) {
+      if (sets[i].weight <= sets[i + 1].weight) { rising = false; break; }
+    }
+    if (rising) {
+      const theirStep = sets[0].weight - sets[1].weight;
+      const up = latest.weight + theirStep;
+      return {
+        kind: 'increase', weight: up, recentWeight: latest.weight,
+        sessions: sets.length, key: 'coachClimbing',
+        params: { weight: latest.weight, suggest: up, n: sets.length }
+      };
+    }
+  }
+
   if (atSameWeight < MIN_SESSIONS) {
     return {
       kind: 'hold', weight: latest.weight, recentWeight: latest.weight,

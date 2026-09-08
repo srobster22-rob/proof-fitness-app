@@ -149,6 +149,14 @@ describe('it is tuned to what the lifter is training for', () => {
 });
 
 describe('the line can be said in both languages', () => {
+  /*
+   * Every line must name the weight the lifter is ON before it names the one
+   * to try. OWNER.md's own example has that shape — "185 lb the last two
+   * weeks — try 190" — because the evidence is what makes the advice worth
+   * reading, and it is checkable against the list further down the screen.
+   * The climbing line shipped for about ten minutes without it, saying "Up
+   * every session, 2 in a row — try 220" and never mentioning 215.
+   */
   const cases: Array<[string, LoggedSet[], TrainingGoal]> = [
     ['increase', [...session(2, [[185, 8]]), ...session(5, [[185, 8]])], 'size'],
     ['hold', [...session(2, [[185, 5]]), ...session(5, [[185, 4]])], 'size'],
@@ -173,6 +181,26 @@ describe('the line can be said in both languages', () => {
       }
     });
   }
+
+  test('every line names the weight the lifter is on', () => {
+    const histories: LoggedSet[][] = [
+      [...session(2, [[185, 8]]), ...session(5, [[185, 8]])],
+      [...session(2, [[185, 5]]), ...session(5, [[185, 4]])],
+      [...session(1, [[185, 5]]), ...session(4, [[185, 5]]), ...session(7, [[185, 5]])],
+      [...session(1, [[185, 4]]), ...session(4, [[185, 6]]), ...session(7, [[185, 8]])],
+      [...session(2, [[205, 5]]), ...session(5, [[200, 5]]), ...session(8, [[195, 5]])],
+      [...session(2, [[195, 5]]), ...session(5, [[210, 5]]), ...session(8, [[205, 5]])]
+    ];
+    for (const h of histories) {
+      const s = coachSuggestion(h, 'bench', NOW, lb);
+      if (!s) continue;
+      for (const lang of ['en', 'es'] as const) {
+        const line = fill(t(lang, s.key as never), s.params);
+        assert.ok(line.includes(String(s.recentWeight)),
+          `${s.key} in ${lang} does not name ${s.recentWeight}, the weight it is about: "${line}"`);
+      }
+    }
+  });
 
   test('the engine never returns a sentence of its own', () => {
     // The guard that keeps the above true. A `reason: string` field would be
@@ -201,11 +229,35 @@ describe('a lifter who moves up every session (the real common case)', () => {
     ...session(8, [[195, 5]])
   ];
 
-  test('is told to repeat the new weight, not to "stay" at it', () => {
+  test('is told to keep climbing, in their own step', () => {
+    /*
+     * R518 corrected R517 here. This fixture is a lifter adding 5 lb a session
+     * and making every one, and R517 asserted `coachSettle` — repeat it before
+     * adding — because the engine could not yet tell a climb from a one-off.
+     * Conservative advice to a lifter whose plan is working is still wrong
+     * advice. The step is theirs (5), not the goal table's.
+     */
     const s = coachSuggestion(climbing, 'bench', NOW, lb)!;
-    assert.equal(s.key, 'coachSettle',
-      'a weight hit once is being reported as though it were a streak');
-    assert.equal(s.weight, 205, 'the advice must be about the weight they just hit');
+    assert.equal(s.key, 'coachClimbing');
+    assert.equal(s.recentWeight, 205, 'the advice must cite the weight they just hit');
+    assert.equal(s.weight, 210, 'their own increment is 5, so the next rung is 210');
+  });
+
+  test('but a weight that is NOT part of a climb is one to repeat', () => {
+    /*
+     * The other half, and why the two cases have to be told apart: from
+     * `atSameWeight` alone they look identical — one session at this weight —
+     * and the right answer is opposite. Here they came back DOWN to 195, which
+     * is not a climb and not evidence they own it.
+     */
+    const dropped = [
+      ...session(2, [[195, 5]]),
+      ...session(5, [[210, 5]]),
+      ...session(8, [[205, 5]])
+    ];
+    const s = coachSuggestion(dropped, 'bench', NOW, lb)!;
+    assert.equal(s.key, 'coachSettle');
+    assert.equal(s.weight, 195, 'settling means the weight they are on, not a new one');
   });
 
   test('and no line ever counts a streak of one', () => {
