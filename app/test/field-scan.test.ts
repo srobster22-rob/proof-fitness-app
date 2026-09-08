@@ -77,6 +77,32 @@ describe('every field on a tracked interface is read somewhere, or is acknowledg
     assert.match(block, /isRead/, 'the write-vs-read split is gone — a write-only field will pass silently again');
   });
 
+  test('it searches every directory that consumes these shapes', () => {
+    /*
+     * R560. `src/data` was not searched, and `summarise()` lives there and
+     * reads `report.added` and `report.skipped` on every restore — so adding
+     * `RestoreReport` to the scan reported three live fields as dead. A gate
+     * that cries wolf gets switched off (R543), so the population and the
+     * search area have to grow together.
+     */
+    const src = readFileSync(TOOL, 'utf8');
+    const dirs = /const DIRS = \[([^\]]+)\]/.exec(src);
+    assert.ok(dirs, 'the scan no longer declares its search directories');
+    for (const dir of ['src/domain', 'src/ui', 'src/data', 'app']) {
+      assert.ok(dirs[1].includes(`'${dir}'`),
+        `${dir} is not searched, so any shape read only there reads as dead`);
+    }
+  });
+
+  test('the shapes it scans include the ones outside src/ui', () => {
+    // The population is hand-picked, which is defensible — these are the shapes
+    // that cross a model-to-screen boundary — but it drifts silently, and
+    // RestoreReport sat outside it until R560 despite being exactly that.
+    const src = readFileSync(TOOL, 'utf8');
+    assert.match(src, /name: 'RestoreReport'/,
+      'RestoreReport left the scanned shapes; restore builds it and summarise reads it');
+  });
+
   test('the acknowledged list still explains itself', () => {
     const src = readFileSync(TOOL, 'utf8');
     const block = region(src, 'const ACKNOWLEDGED', 'function fields');

@@ -1337,3 +1337,51 @@ the third round in a row whose value was a rule rather than a fix, and the
 fixtures were the last piece of instrument this session had proved unreliable.
 Everything now measured is measured with something that has been shown to fail
 when it should. The remaining work is genuinely the owner's four questions.
+
+R560 — PICK (logged first): the RESTORE path, which is the one place a user can
+destroy real data and the one surface I have deliberately never exercised.
+Shortlist was (a) restore, (b) ERASE EVERYTHING, (c) stop. Picked (a) over (b)
+because erase is a confirmed destructive action whose whole job is to delete,
+while restore is the path where a MISTAKE looks like success: it reads a file
+somebody else's app wrote, and a partial or silently-dropped import leaves a
+lifter with a history that looks plausible and is missing things. R559 just
+showed what a plausible-but-wrong dataset costs when nothing checks it. Method:
+export the seeded history, damage the file in the ways a real file gets damaged,
+and check the app reports rather than swallows. Nothing destructive runs against
+the live app — every case goes through an in-memory Repo.
+
+R560 — BUILD/REVIEW/SHIP on the pick logged above. Exercised RESTORE against
+eight ways a real backup gets damaged — truncated mid-download, not JSON at all,
+valid JSON of the wrong shape, an empty object, sets whose sessions are missing,
+the same file restored twice, and a restore onto a phone that already has
+DIFFERENT training on it. Every one is handled and reported honestly: damaged
+files are REJECTED with a reason rather than half-imported, orphan sets are
+skipped naming the missing session, a second restore adds nothing and says "3
+skipped", and restoring onto a busy phone MERGES (3 sets to 6) rather than
+replacing, with the sentence saying exactly what it added. Then I checked
+coverage before writing anything and found 27 tests already pinning all of it —
+so no test was written, because duplicating coverage to make a round look
+productive is the opposite of the job. WHAT THE PROBE DID FIND is a blind spot
+in the orphan-field scan. `report.skipped` carries a REASON for every skipped
+row and only the COUNT reaches the user, so I went to check whether that had
+been adjudicated like `prefillSource` was — and `RestoreReport` had never been
+scanned at all. Adding it flagged THREE fields as dead, and all three were false
+alarms: `summarise()` reads them and lives in `src/data`, which the scan did not
+search. A whole production directory outside the instrument's field of view, and
+the shape most likely to be affected by that was the one I was asking about. So
+the search area and the population grew together (R543's rule: a gate that cries
+wolf gets switched off), and with `src/data` searched the flags cleared honestly
+rather than by exclusion. REVIEW: suite 2079 pass / 0 fail (real count, up 2).
+Three plants: a new `RestoreReport` field nothing reads is caught by name;
+dropping `src/data` from the search fails TWO tests including the scan's own
+clean-run check; dropping `RestoreReport` from the shapes fails the population
+test. Product verified — Progress shows EXPORT MY DATA / RESTORE with its
+promise intact ("a plain JSON file, yours to keep, readable without this app").
+Nothing destructive was run against the live app; every damage case went through
+an in-memory Repo. SHIP: `--check` current, `link/build.cjs` dist/ ready, plants
+reverted, `git status` clean on `app/src`. | next: the skip REASONS still reach
+nobody — the count is honest but a lifter told "3 skipped" cannot learn their
+backup is damaged. That is a product judgement against the owner's "if it needs
+explaining, it's wrong", so it is a fifth filing rather than a fix, and I would
+rather not add one before the four outstanding are answered. Tab bar remains the
+top item.

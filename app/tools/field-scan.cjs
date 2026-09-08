@@ -39,7 +39,8 @@ const INTERFACES = [
   { file: 'src/ui/now-model.ts', name: 'NowState' },
   { file: 'src/ui/now-model.ts', name: 'RailLift' },
   { file: 'src/ui/measure-model.ts', name: 'KindRow' },
-  { file: 'src/domain/measure-goal.ts', name: 'MeasureGoalProgress' }
+  { file: 'src/domain/measure-goal.ts', name: 'MeasureGoalProgress' },
+  { file: 'src/data/portable.ts', name: 'RestoreReport' }
 ];
 
 /*
@@ -114,7 +115,15 @@ function fields(file, ifaceName) {
  * "unused" on `bestAt`/`trendSince`: their real readers (`bestSetA11y`,
  * `trendA11y`) live in the SAME file as the interface, right below it.
  */
-const DIRS = ['src/domain', 'src/ui', 'app'];
+/*
+ * `src/data` joined the search in R560, and it had to before `RestoreReport`
+ * could join the scan. `summarise()` reads `report.added` and
+ * `report.skipped` and lives there, so scanning the shape without scanning
+ * the file that consumes it reported three fields as dead that are read on
+ * every restore. A gate that cries wolf gets switched off (R543), so the
+ * population and the search area have to grow together.
+ */
+const DIRS = ['src/domain', 'src/ui', 'src/data', 'app'];
 function prodMinusInterface(file, ifaceName) {
   let out = '';
   for (const d of DIRS) {
@@ -180,7 +189,7 @@ const known = orphans.filter(o => o.field in ACKNOWLEDGED);
 const resolved = Object.keys(ACKNOWLEDGED).filter(n => !orphans.some(o => o.field === n));
 
 const totalFields = INTERFACES.reduce((n, i) => n + (fields(i.file, i.name)?.length ?? 0), 0);
-console.log(`scanned ${INTERFACES.length} interfaces, ${totalFields} fields, against src/domain + src/ui + app.\n`);
+console.log(`scanned ${INTERFACES.length} interfaces, ${totalFields} fields, against ${DIRS.join(' + ')}.\n`);
 
 if (fresh.length) {
   console.log('NEW — computed, never read. Read the source before acting:');
