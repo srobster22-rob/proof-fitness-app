@@ -21,9 +21,6 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
-- Attention-span pass: every core flow (open → log a set → done) measured in
-  taps and seconds; cut anything that isn't earning its place. Fun and
-  easy-to-look-at, not more features.
 - Bland → not bland: motion, colour and feedback where a set is logged or a
   best is hit, within §12 (Animated only, resting style is the visible one, no
   new dependencies).
@@ -35,6 +32,30 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Attention-span pass** — R521. Measured on the running app, by driving it.
+  Nothing needed cutting: the flow is already about as short as it can be.
+
+  | flow | taps | §4 target |
+  | --- | --- | --- |
+  | install → first set logged | 1 | ≤ 3 |
+  | log another set | 1 | 1 |
+  | change the weight, then log | 3 | ≤ 3, no keyboard |
+  | finish → recap | 1 | (not budgeted before) |
+  | recap → back to logging | 1 | (not budgeted before) |
+
+  So open → log a set → done is TWO taps. Changing the weight used no
+  keyboard: zero visible inputs, focus never left the page. Totals reconciled
+  against the recap (45×8, 45×8, 90×13 = 1,890 lb).
+  - §4 budgeted the logging half and never the FINISHING half, so that is now
+    tested too — mainly against the cheapest way to lose it, which is adding
+    an "are you sure". FINISH looks irreversible and is not (the recap has
+    EDIT THIS WORKOUT), so a confirmation would spend a tap on a question the
+    app can already answer.
+  - SECONDS are honestly unmeasured. Cold start in the dev server is ~7s, but
+    that is 1.5 MB of unminified development bundle evaluating — the DOM is
+    ready in 0.14s. A real number needs a production build on a device, which
+    is device-blocked, and I would rather say so than quote you 7 seconds.
+
 - **Personalization** — R520. I audited this rather than assuming, and the
   answer is that it is ALREADY TRUE: all seven stored preferences change
   something you can see. Units, language, split, plate jump, rep jump and

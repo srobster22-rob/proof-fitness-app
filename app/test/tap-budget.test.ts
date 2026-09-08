@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { PLATE, REP_JUMP, WEIGHT_STEP } from '../src/ui/now-model.ts';
+import { region } from './helpers/source.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const T0 = Date.UTC(2026, 7, 27, 12);
@@ -25,6 +26,17 @@ const fresh = () => new NowModel(new Repo(new DatabaseSync(':memory:') as never,
  * never leaving `<body>` — so no keyboard, which is the half of that target
  * that is easy to lose. Totals reconciled at every step: 45 × 8 = 360, then
  * 720, then 1,890.
+ *
+ * R521 took those counts again on the running app, with dispatched pointer
+ * sequences rather than a finger, and added the half §4 never budgeted — what
+ * it costs to FINISH:
+ *
+ *   finish -> recap                 1 tap
+ *   recap  -> back to logging       1 tap
+ *
+ * So the owner's whole flow, open -> log a set -> done, is TWO taps. Totals
+ * reconciled against the recap: 45x8, 45x8, 90x13 = 1,890 lb, which is the
+ * same arithmetic as the note above, taken independently.
  *
  * These pin what MAKES those numbers possible, since the counts themselves can
  * only be taken with a finger.
@@ -139,5 +151,78 @@ describe('nothing on the logging path spins (§4)', () => {
     const layout = readFileSync(path.join(HERE, '..', 'app', '_layout.tsx'), 'utf8');
     assert.match(layout, /RepoGate/,
       'the boot gate is no longer wrapping the app at the root');
+  });
+});
+
+/*
+ * R521, for OWNER.md #4: "every core flow (open, log a set, done) measured in
+ * taps and seconds; cut anything that isn't earning its place".
+ *
+ * Measuring it found nothing to cut — the flow is two taps — so what follows
+ * pins the things that would quietly make it three. §4 budgets the logging
+ * half and says nothing about FINISHING, which is half of the owner's flow and
+ * was the half nobody had counted.
+ */
+describe('finishing a workout is one tap, and stays one (R521)', () => {
+  test('FINISH ends the session outright, with nothing to confirm', () => {
+    /*
+     * The cheapest way to lose this budget is a confirmation step, and a
+     * confirmation is exactly what a cautious change would add: FINISH is
+     * irreversible-looking. It is not — the recap's own EDIT THIS WORKOUT goes
+     * back — so an 'are you sure' would be a tap spent on a question the app
+     * can already answer by undoing.
+     */
+    const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    // `region`, not slice(indexOf(...)): a moved anchor makes the raw form
+    // return the tail of the file rather than throw, and this test would then
+    // pass by reading something else entirely. The repo's own gate caught me
+    // doing it, which is the gate working.
+    const handler = region(src, "accessibilityLabel={T('finishA11y')}",
+                           '<Text style={s.finishText}>');
+    assert.match(handler, /model\.finish\(\); sync\(\); onFinish\?\.\(\);/,
+      'FINISH no longer finishes and navigates in one press');
+    assert.doesNotMatch(handler, /Alert|confirm|setConfirm|window\.confirm/,
+      'a confirmation step was added to FINISH, which costs the flow a tap');
+  });
+
+  test('and one press cannot land two recaps on the stack', () => {
+    /*
+     * The guard that makes the count honest rather than lucky. Two real
+     * pointer sequences at the same coordinates both hit the same pre-render
+     * node, so a check against render state cannot see the second coming —
+     * measured on the running app, and it put DONE at two taps with a third
+     * session rolled over underneath. The ref is the fix and it has to be a
+     * ref, checked and set synchronously outside any render.
+     */
+    const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    assert.match(src, /if \(finishedRef\.current\) return;\s*finishedRef\.current = true;/,
+      'the double-press guard is gone, so one press can push two recaps');
+    // THIS ref, not any ref: the file has three `useRef(false)` and matching
+    // the bare call passed happily with the guard replaced by a plain object
+    // — caught by planting exactly that.
+    assert.match(src, /const finishedRef = useRef\(false\)/,
+      'the guard is no longer a ref, so it cannot be set synchronously');
+  });
+
+  test('the model really does end the session when asked once', () => {
+    /*
+     * The behaviour under the source checks above: one call, session over.
+     *
+     * Asserted against the REPO, not against `state()`. I first wrote
+     * `totalSets === 0` and it failed — `state()` still describes the workout
+     * that just ended, which is correct and necessary, because the recap is
+     * what renders next and it has to have something to show. The checkable
+     * fact is that nothing is live any more.
+     */
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    const m = new NowModel(repo, () => T0);
+    m.log();
+    assert.ok(repo.liveSession(), 'nothing was live to finish');
+    assert.equal(m.state().canFinish, true, 'a logged set should be finishable');
+    m.finish();
+    // Falsy, not a specific empty value: this returns null, and my probe
+    // printed `liveSession()?.id` which reads as undefined either way.
+    assert.ok(!repo.liveSession(),
+      'FINISH left the session live, so the next set would join the old workout');
   });
 });
