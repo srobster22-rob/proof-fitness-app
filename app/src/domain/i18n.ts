@@ -410,6 +410,7 @@ const EN = {
   settingLower: 'setting',
   settingsLower: 'settings',
   skippedWord: 'skipped',
+  skippedWithReason: '{n} skipped ({reason})',
   restoredLine: 'Restored {parts}.',
   // A pattern rather than a standalone "across", because word order is not
   // guaranteed to survive translation — see `goalGap` above for the same
@@ -971,6 +972,7 @@ const ES: Partial<Record<Key, string>> = {
   settingLower: 'ajuste',
   settingsLower: 'ajustes',
   skippedWord: 'omitidos',
+  skippedWithReason: '{n} omitidos ({reason})',
   restoredLine: 'Restaurado: {parts}.',
   exportSummary: '{sets} en {sessions}',
   exportedLine: 'Exportado: {summary}.',

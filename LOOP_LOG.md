@@ -1648,3 +1648,16 @@ WeeklyComparison and a few others are worth a second look with the same
 cold-run-first method, but this is now a method rather than a one-off, and the
 marginal value per interface is dropping. Four owner questions remain, tab bar
 first since R523.
+
+R568 — PICK (logged first): surface restore's skip REASONS to the user, not just
+the count. Shortlist was (a) that, (b) another interface added to field-scan.cjs
+(GoalDraft/Suggestion/WeeklyComparison), (c) wait idle. Picked (a) — I flagged
+this gap in R560 and deliberately held off three times running rather than
+file a fifth owner decision behind four unanswered ones. It has sat long enough
+that it is now the right call: it is small, contained, does not touch anything
+an owner decision is pending on, and closes a real gap `report.skipped` already
+carries a REASON string per row and only the COUNT reaches the user today — "3
+skipped" with no way to learn a backup is damaged. Contract: the reason is
+visible somewhere reachable from the restore result, in both languages, without
+turning "3 skipped" into a wall of technical detail on a screen §15 keeps
+deliberately quiet.

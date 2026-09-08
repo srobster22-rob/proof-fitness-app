@@ -330,7 +330,33 @@ export function summarise(report: RestoreReport, lang: Language = 'en'): string 
   if (body) parts.push(count(body, t(lang, 'measurementLower'), t(lang, 'measurementsLower')));
   if (prefs) parts.push(count(prefs, t(lang, 'settingLower'), t(lang, 'settingsLower')));
   const head = fill(t(lang, 'restoredLine'), { parts: parts.join(', ') });
-  return report.skipped.length
-    ? `${head} ${report.skipped.length} ${t(lang, 'skippedWord')}.`
-    : head;
+  if (!report.skipped.length) return head;
+  /*
+   * A REASON, not just a count (R568).
+   *
+   * `report.skipped` has always carried a reason per row and only the count
+   * reached the user — "3 skipped" with no way to learn whether that was
+   * ordinary or a sign the backup is damaged.
+   *
+   * "already on this device" is the harmless, EXPECTED case: restoring the
+   * same file twice, or restoring after some of it was already merged in.
+   * Everything else is a real signal — a foreign id space, a corrupted row, an
+   * unknown unit — and a lifter who sees only a number cannot tell one from
+   * the other, or know there is a real problem versus nothing to worry about.
+   *
+   * So: if every skip is the harmless kind, the count alone still speaks for
+   * itself (no wall of near-identical detail, §15's quiet-by-default). The
+   * moment even one skip is NOT that, name it — the first one, not all of
+   * them, because a restore of a badly mismatched file could skip hundreds of
+   * rows for the same underlying reason and this is a status line, not a log.
+   */
+  // The literal string `skip()` writes for the harmless case — a diagnostic
+  // constant like `parsed.error`, not a translated key: skip reasons are meant
+  // to be pasted into a support message as-is, the same reasoning applyBackup
+  // already gives for parse errors.
+  const real = report.skipped.find(s => s.reason !== 'already on this device');
+  const tail = real
+    ? fill(t(lang, 'skippedWithReason'), { n: report.skipped.length, reason: real.reason })
+    : `${report.skipped.length} ${t(lang, 'skippedWord')}`;
+  return `${head} ${tail}.`;
 }
