@@ -299,6 +299,22 @@ test suite and obvious in a picture.
    pieces that ARE testable stay testable — the model behind the field is pure and covered by
    `recent-surface-edges.test.ts` (colon in the name, blank name, switching kit).
 
+18. **A crash inside the DEV preview shows Metro's overlay, not the app's own error screen —**
+   **so the two crash-recovery paths this app has can only be confirmed correct by READING,**
+   **not by triggering a crash here.** Checked R576: `app/_layout.tsx` re-exports `ErrorBoundary`
+   from `expo-router`, which is the framework's documented convention (confirmed against its own
+   `.d.ts` — a real `Component` with `getDerivedStateFromError`, wired automatically onto every
+   route by the router's `Try` wrapper) and is already commented in place, not an oversight. The
+   ONE gap that boundary does not cover — a database open or migration failing before any route
+   renders — has its own dedicated handler, `RepoGate` -> `StorageError`, comprehensively tested
+   in `storage-error.test.ts` (escalating guidance, both languages, no destructive button, the
+   device's own language rather than the possibly-broken repo's). Both paths are real and
+   correctly wired. What is NOT verified, and cannot be from here: that either one actually
+   fires and renders on a genuine crash in a PRODUCTION build, because a dev server routes an
+   uncaught render error to Metro's LogBox instead of letting `expo-router`'s boundary catch it
+   — the same shape as trap 17, a real behaviour this pane's dev mode structurally cannot show.
+   Do not "verify" a crash screen from here; the source-level confirmation above is the ceiling.
+
 
 ## Architecture in one paragraph
 
