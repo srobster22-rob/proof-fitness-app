@@ -2542,3 +2542,32 @@ half: finding a structural inconsistency is not the same as finding a bug,
 and the checking step (does this actually run with mismatched inputs, ever)
 is where the difference gets decided. Five owner decisions still wait, tab
 bar first, 67 rounds.
+
+R595 - Stage 0: OWNER.md unchanged since R586. IDEATE: one more pass of the
+R592-R594 tracing method, this time on `SessionStats.volumeKnown` -- another
+explicit §8 "never cry wolf" fix (R141, then a second round for the
+bodyweight-before-any-reading case) with a stated promise: "a surface that
+cannot express unknown should show nothing rather than the zero." Never
+independently checked against every screen that actually renders a volume
+number this segment.
+BUILD/REVIEW (a reading audit): grepped every consumer of `volumeKnown` across
+src/ui and app/. First pass searched only `app/*.tsx` and initially looked
+like a gap -- `now-model.ts` computes `totalVolumeKnown` but no file under
+app/ appeared to read it. Before reporting that, checked where NowScreen
+actually renders (`src/ui/NowScreen.tsx`, not under app/ at all, per this
+project's thin-route-shell convention) and found the gate right there,
+correctly guarding the printed number. All four real surfaces that show a
+volume total -- Now (NowScreen.tsx:904), Progress (progress.tsx:349), and
+Recap (recap-model.ts + recap.tsx:151) -- check `volumeKnown` before printing
+a number, and each falls back to something other than a bare zero. No gap.
+REVIEW: no code changed; suite unaffected, 2142 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: the false-gap in this round's own first pass (searching app/*.tsx
+only, missing src/ui/NowScreen.tsx) is worth remembering on its own --
+this project's thin-shell convention means "grep the screens" has to include
+src/ui, not just app/, or a real consumer goes invisible the same way R586's
+Vision-check nearly did before checking the right file. Five owner decisions
+still wait, tab bar first, 68 rounds. Four straight rounds (R592-R595) on the
+"trace a stated promise to every place it is made" method: one real fix, one
+filed gap, one verified-safe inconsistency, one fully clean. Diminishing but
+not yet zero -- worth one more subject before rotating method again.
