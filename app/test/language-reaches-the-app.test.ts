@@ -226,8 +226,31 @@ describe('nothing renders a bare English sentence', () => {
    * `PROOF` is the product's name and a watermark. The glyphs are symbols, not
    * words — a gear and two chevrons read the same in every language, which is
    * why they were chosen over labels in the first place.
+   *
+   * R527 removed `←` from this list. It exempted nothing: the arrow lives
+   * inside the TRANSLATED string `editWorkout` ('← EDIT THIS WORKOUT' /
+   * '← EDITAR ESTE ENTRENO'), so it was never a bare glyph needing permission
+   * — and an allow-list entry for something that does not exist is a claim
+   * about the code that has quietly stopped being true, which is what R526
+   * found one screen over.
+   *
+   * The test below keeps it honest: an entry that appears nowhere in the
+   * screens fails the build, so this list can only shrink by being wrong.
    */
-  const ALLOWED = new Set(['PROOF', '⚙', '▾', '▴', '›', '+', '−', '×', '·', '←']);
+  const ALLOWED = new Set(['PROOF', '⚙', '▾', '▴', '›', '+', '−', '×', '·']);
+
+  test('every allowed string is actually rendered somewhere', () => {
+    /*
+     * An allow-list is permission to skip a check, so a dead entry is
+     * permission nobody is using and nobody will re-examine — it just widens
+     * the net for whatever is added next that happens to match.
+     */
+    const everything = SCREENS.map(f => read(f)).join('');
+    const dead = [...ALLOWED].filter(a => !everything.includes(a));
+    assert.deepEqual(dead, [],
+      `these are allowed but appear in no screen: ${dead.join(' ')} — remove them, ` +
+      'or the list is granting permission for code that no longer exists');
+  });
 
   for (const file of SCREENS) {
     test(`${file} has no untranslated prose`, () => {
