@@ -1101,12 +1101,20 @@ export function NowScreen({
                         `${set.note ? fill(T('notedA11y'), { note: set.note }) : ''}` +
                         T('tapToEditA11y')
                       }
-                      style={pressStyle(s.chip, 'surface', still)}
+                      style={pressStyle(
+                        [s.chip, state.prSetIds.includes(set.id) && s.chipPR],
+                        'surface', still)}
                     >
                       <Text style={s.chipIndex}>{i + 1}</Text>
-                      <Text style={s.chipText}>
+                      <Text style={[s.chipText, state.prSetIds.includes(set.id) && s.chipTextPR]}>
                         {loadLabel(set.weight)} × {set.reps}
                       </Text>
+                      {/* OWNER.md #5: the moment a best is hit, marked where it
+                          happens. One glyph and the accent, not a banner — §8
+                          calls the PR the emotional payload and also forbids
+                          crying wolf, and the recap is where it gets a sentence. */}
+                      {state.prSetIds.includes(set.id)
+                        ? <Text style={s.chipPRMark}>★</Text> : null}
                       {/* A note is worth nothing if the list does not admit it
                           is there. One glyph, so a whole session of notes does
                           not turn the list into prose. */}
@@ -2398,6 +2406,19 @@ const s = StyleSheet.create({
   // set on a single stray tap would trade one mistake for another.
   chipArmed: { borderColor: '#FF6B6B', backgroundColor: '#2A1416' },
   chipArmedText: { color: '#FF6B6B' },
+  /*
+   * A set that broke a record. Volt on the border and the number, which is the
+   * accent §15 allows one use of — and this is what it is for: not the loudest
+   * thing on the screen, the truest.
+   *
+   * The chip already ARRIVES with motion (see `Arrive`), so a PR needs no
+   * separate animation; it inherits the one the app already had and differs in
+   * colour. That also keeps §12's rule intact — the resting style is the
+   * visible one, so a chip that never animates is still marked.
+   */
+  chipPR: { borderWidth: 1, borderColor: VOLT, backgroundColor: '#14170D' },
+  chipTextPR: { color: VOLT },
+  chipPRMark: { color: VOLT, fontSize: 11, fontWeight: '900' },
   chipIndex: { color: '#7C8792', fontSize: 12, fontWeight: '700' },
   chipText: { color: '#E8EAED', fontSize: 15, fontWeight: '700' },
   undo: { paddingHorizontal: 12, paddingVertical: 10 },

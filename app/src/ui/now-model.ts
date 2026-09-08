@@ -3,6 +3,7 @@ import { Repo } from '../data/repo.ts';
 import { prefillFor, pickerFor, unitForNewSession, type Prefill } from '../domain/coldstart.ts';
 import { nextCandidates, openingLift } from '../domain/predict.ts';
 import { autoEnd, isStale, lastSetAt, sessionStats } from '../domain/session.ts';
+import { findPRs } from '../domain/pr.ts';
 import { restSince, type RestState } from '../domain/rest.ts';
 import { PREF_UNIT } from './display-unit.ts';
 import { weekStreak } from '../domain/session.ts';
@@ -805,6 +806,8 @@ export interface NowState {
   /** What the +/- rep jump buttons add. User-settable. */
   repJump: number;
   /** Sets logged for this exercise in this session. */
+  /** Sets logged in this workout that are personal records — see state(). */
+  prSetIds: string[];
   loggedThisExercise: LoggedSet[];
   /** Every set in the session, in order. */
   loggedThisSession: LoggedSet[];
@@ -1016,6 +1019,36 @@ export class NowModel {
    * 195 lb in the database for ever (schema.ts), and rounding to the half unit
    * is what `convertWeight` is for.
    */
+  /**
+   * Which sets in this workout are personal records, cached on the history it
+   * was computed from.
+   *
+   * `state()` runs on every tap and `findPRs` walks the whole history for each
+   * set in the session. Measured at 14,000 sets it took `state()` from 3.98 ms
+   * — the number R495 worked to get — back up to 5.99, which is a regression
+   * on the one path §4 budgets in taps and milliseconds.
+   *
+   * Keyed on `allSets()`'s array IDENTITY, sound for the reason R495 and R509
+   * both rely on: `Repo.allSets` hands back a frozen array and drops its memo
+   * on every write, so a new object appears exactly when the answer could have
+   * changed. Logging, editing and deleting a set all write, so all three
+   * invalidate this; nothing else can.
+   */
+  private prCacheKey: LoggedSet[] | null = null;
+  private prCacheValue: string[] = [];
+
+  private prSetIds(sessionSets: LoggedSet[], exercises: Map<string, Exercise>): string[] {
+    if (!this.session.id || sessionSets.length === 0) return [];
+    const all = this.repo.allSets();
+    if (all === this.prCacheKey) return this.prCacheValue;
+    this.prCacheValue = findPRs(
+      sessionSets, this.repo.historyBefore(this.session.id), exercises,
+      this.session.unit, this.repo.measurements(), this.repo.sessionUnits()
+    ).map(r => r.setId);
+    this.prCacheKey = all;
+    return this.prCacheValue;
+  }
+
   private historyInSessionUnit(): LoggedSet[] {
     const all = this.repo.allSets();
     const units = this.repo.sessionUnits();
@@ -1226,6 +1259,25 @@ export class NowModel {
           { unit: this.session.unit, goal: trainingGoal(this.repo) }
         )
       }, this.lang()),
+      /*
+       * Which sets logged in THIS workout are personal records (OWNER.md #5).
+       *
+       * §8 calls the PR "the emotional payload of the whole product", and until
+       * now the logging screen did not know one had happened. `findPRs` was
+       * used by the recap and by the harness and never here, so a lifter could
+       * set a record and the screen it happened on said nothing — the moment
+       * the app exists for, passing in silence until the recap.
+       *
+       * Same call the recap makes, with the same arguments, so the two cannot
+       * disagree about what a record is: `historyBefore(sessionId)` excludes
+       * this workout, which is what makes "more than ever" mean before today,
+       * and the measurements and per-session units are what let a bodyweight
+       * movement and a kilogram session be compared honestly.
+       *
+       * IDs, not claims. The screen marks the chip; the sentence about it
+       * belongs to the recap, which has room for one.
+       */
+      prSetIds: this.prSetIds(sessionSets, exercises),
       loggedThisExercise: sessionSets.filter(s => s.exerciseId === this.exerciseId),
       loggedThisSession: sessionSets,
       dayRail: this.buildRail(planDay, candidates, sessionSets, exercises),

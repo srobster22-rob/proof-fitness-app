@@ -21,9 +21,12 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
-- Bland → not bland: motion, colour and feedback where a set is logged or a
-  best is hit, within §12 (Animated only, resting style is the visible one, no
-  new dependencies).
+- OWNER DECISION (2026-09-08): the bottom tab bar — BUILD BOTH and show me.
+  Make a real tab-bar version and keep the current one, screenshot each at a
+  true short-phone size (568px tall, the one you measured at 624px of content)
+  AND at 375x812, and put the two side by side with what came off the screen to
+  pay for the bar. I will pick from the pictures. Do not ship either as the
+  default until I have chosen.
 
 ## Never
 - Don't trade simplicity for features. If it needs explaining, it's wrong.
@@ -32,6 +35,28 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Bland → not bland** — R522. Half of this already existed and half was
+  missing, which took looking to find out.
+  - LOGGING a set already had feedback: the chip animates in (`Arrive`).
+  - A BEST had none. §8 calls the personal record "the emotional payload of
+    the whole product", and the record detector was used by the recap and the
+    harness and never by the screen the record happens ON. You could break a
+    plateau and the logging screen said exactly what it says for a warm-up,
+    until the recap told you later.
+  - Now the chip that broke the record is marked, in volt with a ★, beside the
+    ordinary sets. Small on purpose: §8's other half is never cry wolf, and a
+    banner for every heavy set teaches people to ignore it. The sentence still
+    belongs to the recap.
+  - No new dependency, no new animation — it reuses the entrance the chips
+    already had and differs in colour, so it is still true that a chip which
+    never animates is fully marked.
+
+  ONE THING I BROKE AND HAVE NOT FIXED, found while looking at this: the coach
+  line suggests YOUR increment, and it does not cap it. I jumped the test
+  weight by 135 lb in one session and it said "320 and climbing — try 455".
+  Real linear progression will not do that, but one odd session produces
+  nonsense advice. That is a defect in what I shipped in R518 and it is next.
+
 - **Attention-span pass** — R521. Measured on the running app, by driving it.
   Nothing needed cutting: the flow is already about as short as it can be.
 
