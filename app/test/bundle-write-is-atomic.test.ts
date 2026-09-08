@@ -92,9 +92,20 @@ describe('rewriting a file that other processes read (R501)', () => {
     child.kill();
 
     assert.equal(err, '', `the reader child errored: ${err}`);
-    // A rename costs more per write than a truncate, so this floor is set by
-    // the slower path: enough writes to guarantee overlap, not a throughput bar.
-    assert.ok(writes > 30, `only ${writes} writes — nothing to race against`);
+    /*
+     * A floor on OVERLAP, not on throughput — and R531 had to lower it twice
+     * over, which is the lesson rather than the number.
+     *
+     * R511 already made this correction on the reader side: 200 reads was a
+     * quota describing an idle machine, and under a full suite the child
+     * managed 100 and a healthy run was reported as broken. The writer floor
+     * had the identical flaw and fired the same way at 17 writes.
+     *
+     * Five is enough to prove the two processes ran together, which is all
+     * this guard is for. That the probe can still SEE tearing at this scale is
+     * not assumed here — the positive control above measures it every run.
+     */
+    assert.ok(writes > 5, `only ${writes} writes — nothing to race against`);
     const seen = JSON.parse(out.trim()) as { reads: number; short: number };
     /*
      * A floor, not a quota. R510's failure log caught this firing as a FALSE

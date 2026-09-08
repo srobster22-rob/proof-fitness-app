@@ -45,7 +45,7 @@ Also: `npm run bundle` (Metro → 1.7 MB iOS bundle, no device needed), `npm run
 |---|---|
 | `npm run cards` | `out/card-sheet.png` — every claim state × four rows: each language as it usually looks, then each language at the WORST realistic case (a typed 57-character movement name, a seven-figure volume, three-digit sets and streak). `npm run e2e` draws only the PR case, and §8 makes that the rarest one. The hard rows exist because for its whole life this sheet drew fourteen cards that physically could not overprint, which is why R476's 69px collision had to be found by eye (R477). |
 | `npm run seed` | 12 weeks of history into `public/seed.b64`; `node tools/stress-web.ts` does 700 sessions / 14,000 sets / 100 goals. Load either from the page (the tool prints how). |
-| `node tools/screen-render.cjs <capture.json> <name>` | Draws an app SCREEN from captured geometry. **Screenshots do not work here** — the Browser pane only composites while displayed — so this is the only way to see one. Capture snippet is in `BUILD_LOOP.md`. |
+| `node tools/screen-render.cjs <capture.json> <name>` | Draws an app SCREEN from captured geometry. Complements `computer{action:'screenshot'}`, which DOES work (R531): this one reports geometry as numbers, which a photo cannot. Capture snippet is in `BUILD_LOOP.md`. |
 | `node tools/predict-probe.ts <db>` | What the §7 predictor would suggest and why: score, typical position and day per lift. |
 | `node build-domain.cjs --check` | Reports whether `dist/proof-domain.js` is stale WITHOUT rebuilding it. Run this before the harness: `npm test` rebuilds the bundle first, so the parity tests can never catch a stale one, and `harness/index.html` loads that file directly. |
 | `node tools/orphan-scan.cjs` | Tested exports with no production caller, split into NEW versus the five knowingly kept. Runs inside `npm test` too. |
@@ -108,11 +108,18 @@ test suite and obvious in a picture.
    filter (R218). **Every one was found by running the instrument against a case whose answer
    was already known.** Anything that reports "no problems" must also report how much it
    examined — and you must look at that number.
-11. **Screenshots do not work in this environment.** The Browser pane only composites frames
-   while it is displayed, so `computer{action:'screenshot'}` times out. Use
-   `tools/screen-render.cjs` (see `BUILD_LOOP.md`), which draws real `getBoundingClientRect`
-   boxes with real colours and sizes — not a photo, but honest about geometry, which is what
-   the layout defects turned on.
+11. **Screenshots DO work — this entry used to say they do not, and that was wrong (R531).**
+   `computer{action:'screenshot'}` returns real images, including at an emulated phone size.
+   Dozens were taken across R511-R530: the main screen at 375x812, both tab-bar variants at
+   two sizes for an owner decision, and Progress, Goals and the Recap. Believing the old
+   wording would have made an owner request — *screenshot each and put them side by side* —
+   look impossible.
+   What is TRUE is the failure mode underneath it: a hidden or minimised pane can stop the
+   page drawing, and the call then times out after 5s. The fix is to call it again; the error
+   message says so itself, and a retry has worked every time it has happened here.
+   `tools/screen-render.cjs` is still worth having, for a different reason: it reports
+   `getBoundingClientRect` boxes as NUMBERS. A photo cannot tell you an element is 3px wide
+   or 8px past the fold, and the layout defects turned on exactly that.
 12. **Reading DOM state in the SAME script execution as the click sees pre-render state —**
    and this produced three false "this button doesn't respond to automation" conclusions in
    one session (R263, R272, R273) before R277 caught it. React batches the state update from

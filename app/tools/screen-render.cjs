@@ -3,7 +3,8 @@
  * environment cannot screenshot one.
  *
  * The Browser pane does not composite frames unless it is displayed, so
- * `computer{action:'screenshot'}` times out — every judgement about the four
+ * `computer{action:'screenshot'}` works (R531 corrected this); this exists because a
+ * photo cannot report geometry as numbers — every judgement about the four
  * screens has therefore come from an accessibility tree plus arithmetic. That
  * is enough to catch a clipped string and useless for the things R208, R215 and
  * R222 turned on: whether a block floats, whether two groups read as related,
