@@ -76,8 +76,20 @@ test suite and obvious in a picture.
    RE-MEASURED R532, same control, all three numbers held: pointer-only 0 sets, bare click 1,
    full five-event sequence exactly 1 more — so the five-event form used throughout R511-R531
    is one press, and R521's tap counts rest on that.
-5. **Do not toggle a `Modal` with `visible`** — on react-native-web a transparent modal stays
-   on screen. Render it conditionally instead.
+5. **Do not toggle a `Modal` with `visible`** — this said "on react-native-web a transparent
+   modal stays on screen", and R547 could not reproduce that on the version actually installed.
+   Probe: forced `visible={false}` onto the `<Modal>` inside `ScreenModal` and drove the CLEAR
+   confirm sheet — nothing appeared, no CANCEL, no copy. Reverted the one-line probe and drove
+   the identical clicks — "Clear this workout? ... CANCEL / CLEAR". So on react-native-web
+   0.21.0 `visible={false}` hides a transparent modal, and the reason for the two runs is that
+   "no sheet" only means something once the same steps are shown to produce one.
+
+   THE ADVICE STANDS ANYWAY, for a different and better reason than the one it gave.
+   `ScreenModal` returns null when it is not focused, and that conditional render is what makes
+   the entrance and exit animations possible at all — a modal held mounted behind `visible`
+   has no unmount to animate out of. Keep rendering conditionally; just do not keep repeating
+   the web bug as the reason, because a session that tests it will find it false and then has
+   no idea which half of the entry to trust.
 6. **The web database is sql.js** (`src/data/web-db.ts`, dev only, backed by localStorage under
    `proof.db.v1`). Clear it from the page to simulate a fresh install. Native uses expo-sqlite.
    Both go through the same two-method `Db` interface, so `Repo` is identical on each.

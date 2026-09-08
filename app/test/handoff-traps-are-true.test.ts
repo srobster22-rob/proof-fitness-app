@@ -122,7 +122,17 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
        * verified but the mechanism is not. Dropping that sentence would turn a
        * measurement into a folk explanation.
        */
-      ['trap 15 keeps its caveat', /do not repeat the mechanism as though it were/]
+      ['trap 15 keeps its caveat', /do not repeat the mechanism as though it were/],
+      /*
+       * Trap 5 is the second one found FALSE (after trap 11's screenshots).
+       * The correction has two halves and both have to survive: the claim it
+       * used to make did not reproduce, and the practice it recommended is
+       * still right for a different reason. Losing the first half restores a
+       * false claim; losing the second invites somebody to delete a
+       * conditional render that the enter/exit animation depends on.
+       */
+      ['trap 5 records that the web bug did not reproduce', /`visible=\{false\}` hides a transparent modal/],
+      ['trap 5 keeps the real reason to render conditionally', /has no unmount to animate out of/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +
