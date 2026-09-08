@@ -1772,3 +1772,13 @@ worth carrying forward is the one this round enacted rather than just
 described — before trusting a green extension of an existing gate, check what
 it actually matched, not just whether it passed. Four owner questions remain,
 tab bar first since R523.
+
+R571 — PICK (logged first): stabilise R565's timing test, which has failed
+under full-suite load in R566, R568 and R570 — three rounds running, each time
+noted and deferred as "out of scope" for that round's pick. A test that fails
+under real conditions and is routinely waved off is worse than no test: it
+trains the habit of re-running rather than reading, which is the exact failure
+this session spent rounds warning against in OTHER tests. Contract: make the
+timing assertion robust to load without weakening what it actually catches —
+verified by re-planting R494's real defect and confirming it still fails, same
+as R565's original review.
