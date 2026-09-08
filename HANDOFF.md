@@ -73,6 +73,9 @@ test suite and obvious in a picture.
    **one**, and the full five-event sequence also fires exactly one, not two. Following the old
    note gets you a button that never responds, which looks exactly like the broken button it was
    written to warn about. Send `click`; the pointer events are harmless but do nothing.
+   RE-MEASURED R532, same control, all three numbers held: pointer-only 0 sets, bare click 1,
+   full five-event sequence exactly 1 more — so the five-event form used throughout R511-R531
+   is one press, and R521's tap counts rest on that.
 5. **Do not toggle a `Modal` with `visible`** — on react-native-web a transparent modal stays
    on screen. Render it conditionally instead.
 6. **The web database is sql.js** (`src/data/web-db.ts`, dev only, backed by localStorage under
@@ -91,6 +94,8 @@ test suite and obvious in a picture.
    to accept input. Read `el.value` off the node. Related: with the Browser pane hidden,
    `blur` events do not reliably fire, so never wait on a blur-commit to observe a value — drive
    the commit the user would (tap the button) instead.
+   MEASURED R532 rather than asserted: typing 205 into the weight field gives `el.value === '205'`
+   while `document.body.innerText` does not contain 205 at all.
 9. **A cross-unit weight bug does not look like a bug.** A `LoggedSet` carries no unit — the
    SESSION owns it — so any comparison of `s.weight` across sessions is silently wrong for
    anyone who has ever switched lb/kg. Five independent instances were found this way (R179-R181)

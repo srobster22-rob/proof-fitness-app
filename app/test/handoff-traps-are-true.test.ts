@@ -56,6 +56,29 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
     }
   });
 
+  test('the traps that have been re-measured say so, with their numbers', () => {
+    /*
+     * R531 found trap 11 false and corrected it. R532 re-measured traps 4 and
+     * 8 and found both exactly right. Recording WHICH have been checked, and
+     * against what, is the part that stops the next session either trusting a
+     * stale claim or — the failure I nearly made — doubting a sound one
+     * because a neighbour turned out to be wrong.
+     *
+     * The numbers are the point, not the round number: a trap that says "this
+     * was measured and here is what it read" can be re-run by anybody. This
+     * asserts the evidence stays attached.
+     */
+    const handoff = DOCS.find(([n]) => n === 'HANDOFF.md')![1];
+    for (const [what, evidence] of [
+      ['the click sequence (trap 4)', /pointer-only 0 sets, bare click 1/],
+      ['reading a typed field (trap 8)', /el\.value === '205'/]
+    ] as Array<[string, RegExp]>) {
+      assert.match(handoff, evidence,
+        `${what} no longer carries the measurement it was verified with, so the ` +
+        'next session cannot tell an evidenced claim from an inherited one');
+    }
+  });
+
   test('and the geometry tool is kept for the reason it is actually good for', () => {
     /*
      * `screen-render.cjs` was justified as the ONLY way to see a screen, which
