@@ -2305,3 +2305,41 @@ the fix is reading what the tool actually claims before trusting a plant
 against it. Two gates now re-verified this segment (R573's typecheck-in-suite,
 this round's orphan scan); both hold. Still five owner decisions waiting,
 tab bar first, 61 rounds.
+
+R589 - Stage 0: OWNER.md unchanged since R586. IDEATE: after two rounds of
+re-verifying gates by planting real defects (R587 typecheck, R588 orphan-scan)
+and finding both genuinely live, widened the same "trust but verify" pass
+across ground this segment had not yet looked at, rather than planting a
+third artificial defect for its own sake -- diminishing returns on that
+specific move, and R565-R571's lesson was to vary the METHOD of doubting
+prior work, not just repeat it. Read rather than tested this round.
+BUILD/REVIEW (a reading audit, not a planted defect):
+  - link/copy.js (the landing page's A/B copy engine, four variants, `?v=`
+    selected) has never been touched or re-checked this whole segment.
+    test/landing-copy.test.ts already covers it thoroughly -- every variant
+    against every payload shape, the ?v= fallback, the query-vs-hash
+    boundary, the shared NAME constant with og.cjs. Read the module in full
+    (104 lines): no gap found against its own tests.
+  - Ran test/bundle-parity.test.ts and test/link-build-is-self-contained.test.ts
+    directly rather than assuming green-in-the-full-suite means they still
+    exercise the real build -- both rebuild link/dist themselves as part of
+    the test rather than trusting a stale dist, so there was nothing further
+    to verify by hand; 14/14 pass.
+  - Re-read the coach's actual call site in now-model.ts (~L1284-1320) against
+    OWNER.md's new Vision ask, since that code just became directly relevant
+    to answering the owner rather than incidental history. Confirmed
+    `this.equipment` (not the R573-fixed `exercises.get(id)?.equipment` bug)
+    and traced `trainingGoal(this.repo)` end to end: training-goal.ts's
+    `PREF_GOAL` key, read here and in settings.tsx's COACHING row, both
+    importing the same function -- no drift between what Settings shows and
+    what the coach actually reads. No gap found.
+SHIP: nothing changed; no rebuild needed.
+| next: three independent subsystems (typecheck gate, orphan-scan gate,
+landing-page copy + coach wiring) all re-verified clean this segment with
+three different methods (plant-a-bug, run-the-self-testing-build,
+read-the-code-against-its-tests). That is real signal the codebase is in a
+stable, well-guarded state right now, not proof there is nothing left --
+the next fresh find in this app's history has repeatedly come from an angle
+nobody had used yet, not from repeating the same angle a fourth time. Genuine
+technical queue is thin; the highest-value remaining lever is still the five
+owner decisions waiting in OWNER.md, tab bar first, now 62 rounds.
