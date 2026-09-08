@@ -66,6 +66,12 @@ const SWIPE_MIN = 48;
 
 const VOLT = '#CCFF00';
 const BG = '#08090A';
+
+/*
+ * The rail's right-edge fade, left to right. Five steps is enough to read as a
+ * fade at this width; fewer banded visibly when tried at three.
+ */
+const RAIL_FADE = [0.12, 0.3, 0.55, 0.8, 1];
 const MUTED = '#7C8792';
 
 /**
@@ -907,6 +913,24 @@ export function NowScreen({
             <Text style={s.railLabel}>
               {T(state.planDay ? DAY_HEADING_KEY[state.planDay] : 'nextUpToday')}
             </Text>
+            {/*
+              The chips scroll, and until R514 nothing said so: the row simply
+              stopped mid-word at the screen edge — 'DB Shoul' — which reads as
+              broken rather than as more-to-come. A fade is the standard answer
+              and a gradient is a dependency §12 does not allow, so this is a
+              ramp of solid background slices instead: five Views of BG at
+              rising opacity, absolutely positioned, `pointerEvents` none.
+
+              Absolute on purpose. R512 established that this column has no
+              vertical slack — the 568px phone was already 56px over budget —
+              so anything added here has to cost zero layout height, and an
+              overlay does.
+
+              It needs no is-it-overflowing check: the slices are the SAME
+              colour as the background, so when the chips do not reach the edge
+              the fade is background drawn over background and cannot be seen.
+            */}
+            <View style={s.railScroller}>
             <ScrollView
               ref={railDrag}
               horizontal
@@ -958,6 +982,12 @@ export function NowScreen({
                 </Pressable>
               ))}
             </ScrollView>
+              <View style={s.railFade} pointerEvents="none">
+                {RAIL_FADE.map((opacity, i) => (
+                  <View key={i} style={[s.railFadeSlice, { opacity }]} />
+                ))}
+              </View>
+            </View>
           </View>
         )}
 
@@ -2408,6 +2438,12 @@ const s = StyleSheet.create({
     letterSpacing: SPACING.micro, marginBottom: 4
   },
   railRow: { flexDirection: 'row', gap: 8, paddingTop: 8, paddingRight: 20 },
+  // A plain wrapper so the fade has something to be absolute inside. It sets
+  // no size of its own, so the band is still exactly as tall as its content —
+  // the property the railBand comment insists on.
+  railScroller: { position: 'relative' },
+  railFade: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 32, flexDirection: 'row' },
+  railFadeSlice: { flex: 1, backgroundColor: BG },
   railChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     height: RAIL_CHIP, paddingHorizontal: 14, borderRadius: RAIL_CHIP / 2,
