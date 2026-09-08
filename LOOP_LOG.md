@@ -1430,3 +1430,47 @@ the data is intact. SHIP: `--check` current, `link/build.cjs` dist/ ready, plant
 reverted, `git status` clean on `app/src`. | next: every destructive and
 data-losing path is now exercised and derived rather than listed. What is left
 is the four owner questions and a fifth I am holding back deliberately.
+
+R562 — PICK (logged first): the SETTINGS screen end to end. Shortlist was (a)
+Settings, (b) the exercise search/add path, (c) the skip-reasons filing. Picked
+(a): it is the last screen never walked in full, and it is where every
+preference the app honours is set — so a control that stores something the app
+does not read, or reads something it does not store, is invisible from every
+other surface. R519 found exactly that shape once (a goal preference that was
+stored and never acted on) and R555 found `prefillSource` computed and never
+read; Settings is where the reverse would hide. Contract: every control on the
+screen writes a pref the app actually consumes, and every pref the app consumes
+that a user can change has a control.
+
+R562 — BUILD/REVIEW/SHIP on the pick logged above, and walking Settings found a
+REGRESSION I SHIPPED IN R550. Every control on the screen writes a pref the app
+actually reads, and every pref the app reads that a user can change has a
+control — the correspondence is clean in both directions, and the two jump
+fields are populated (45 lb, 5 reps) rather than empty, which is §4's rule. Then
+I asked what each control is actually WORTH, and the plate-jump field is not
+honoured. R550 stopped the plate buttons stranding a lifter off the grid by
+rounding EVERY result, and that silently overrode a jump the lifter had set
+themselves: `jump.lb` at 7 moved them 5, `jump.kg` at 3 moved 2.5. Ask for
+seven, get five, with nothing said. Before R550 it was exact, so this is two
+rounds old and mine. It is invisible from Settings, which stores the number
+correctly, and invisible from the Now screen, which just moves by the wrong
+amount — the only way to see it is to set the value and count. THE TWO GOALS
+ONLY LOOKED OPPOSED. A weight already on the grid plus the lifter's own jump is
+exactly what they asked for and needs no correction; a weight OFF the grid is
+the case R550 existed for — 189.5 from a converted kilo session, where +45 gave
+234.5 and every press kept the half. Snapping only the second honours both, and
+it is the same rule R518 and R549 each reached from another side: their own
+evidence outranks the default. REVIEW: suite 2090 pass / 0 fail (real count, up
+7). Planted in BOTH directions, because this fix sits between two failures:
+restore R550's snap-everything and the four custom-jump tests fail by name;
+remove the snap entirely and five tests fail across two files, including R550's
+own. Verified in the PRODUCT: set the jump to 7 in Settings, and the Now screen
+button reads "Add 7 lb" and moves 175 to 182 — not 180. State restored, seed
+regenerated, button back to "Add 45 lb". SHIP: `--check` current,
+`link/build.cjs` dist/ ready. | next: this is the second time a fix of mine
+introduced a defect two rounds later (R548's grid work forced the Settings copy
+change, R550's snap broke the custom jump), and both were caught by walking a
+DIFFERENT surface than the one I changed. That is worth more than the fix: the
+rule is to re-walk the screens a change can reach, not just the one it was aimed
+at. Four owner questions remain, and the tab bar has been the top item since
+R523.

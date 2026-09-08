@@ -1853,9 +1853,27 @@ export class NowModel {
    */
   bumpPlate(steps: number): void {
     const jump = this.plateJump();
-    const grid = Math.min(WEIGHT_STEP[this.session.unit], jump);
+    const grid = WEIGHT_STEP[this.session.unit];
     const target = this.weight + steps * jump;
-    this.setWeight(grid > 0 ? Math.round(target / grid) * grid : target);
+    /*
+     * SNAP ONLY WHEN THE STARTING WEIGHT IS OFF THE GRID (R562).
+     *
+     * R550 rounded every result, and that silently overrode a jump the lifter
+     * had set themselves: with `jump.lb` at 7, pressing +7 from 135 moved them
+     * to 140, and in kilos a jump of 3 moved 2.5. Ask for seven, get five. The
+     * app was correcting equipment it had been told about, which is the mistake
+     * R518 and R549 each fixed from the other side — their own evidence
+     * outranks the default.
+     *
+     * The two goals are not in tension once the condition is right. A weight
+     * already on the grid plus their jump is exactly what they asked for and
+     * needs no help. A weight OFF the grid is the case R550 existed for — 189.5
+     * from a converted kilo session, where +45 gave 234.5 and every further
+     * press kept the half — and snapping there returns them to loadable
+     * numbers without touching anyone else.
+     */
+    const onGrid = Math.abs(this.weight / grid - Math.round(this.weight / grid)) < 1e-9;
+    this.setWeight(onGrid ? target : Math.round(target / grid) * grid);
   }
 
   /**
