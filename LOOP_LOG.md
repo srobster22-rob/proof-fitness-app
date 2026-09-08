@@ -2275,3 +2275,33 @@ SHIP: no source changed once reverted; nothing to rebuild.
 technical queue looking thin, but that reading has been wrong before (R538,
 R565) -- the next round should look somewhere this segment has not yet
 re-audited rather than conclude the well is dry from two data points.
+
+R588 - Stage 0: OWNER.md unchanged since R586. IDEATE: continuing R587's
+"re-verify a load-bearing gate is still live" direction onto a different one --
+tools/orphan-scan.cjs / test/orphan-scan.test.ts (R205, hardened through R483),
+which exists to catch a tested export with no production caller: code that
+LOOKS covered because a test exercises it, while nothing the app actually runs
+calls it. Same failure class the AI-coach seam and several past "known, kept
+on purpose" entries describe.
+BUILD/REVIEW, first attempt was itself a lesson: planted a plain unused export
+in coach.ts with no test referencing it and reran the scan -- it reported
+CLEAN. Before calling that a bug, read the tool's own docstring and output
+format: it only flags exports a TEST calls that production does not, by
+design (an ordinary dead export with zero callers anywhere is a different,
+simpler problem this tool was never built to catch). My first plant did not
+match the invariant being tested, not the tool. Redid it correctly: added
+`__r588_orphan_probe` to coach.ts plus a new test file that imports and calls
+it, matching the exact shape (tested, no production caller) the gate exists
+for. Reran: `node tools/orphan-scan.cjs` printed "NEW -- tested, but no
+production caller" naming the probe by file and line, and
+`node --test test/orphan-scan.test.ts` failed by name -- "the scan is clean,
+or names exactly what changed" -- exactly as it should. Removed the probe
+function and its test file, reran the full suite: clean 2139 pass / 0 fail.
+SHIP: no source changed once reverted; nothing to rebuild.
+| next: the false-negative-that-wasn't is worth remembering as its own
+category -- verifying a scoped detector with an input outside its stated
+scope produces a misleading "still works" or "broken" result either way, and
+the fix is reading what the tool actually claims before trusting a plant
+against it. Two gates now re-verified this segment (R573's typecheck-in-suite,
+this round's orphan scan); both hold. Still five owner decisions waiting,
+tab bar first, 61 rounds.
