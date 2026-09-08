@@ -2502,3 +2502,43 @@ worth keeping as the default move whenever a fix states an invariant
 ("X is always true"), since a codebase this heavily self-documented tends to
 repeat exact promises verbatim in more than one place. Five owner decisions
 still wait, tab bar first, 66 rounds.
+
+R594 - Stage 0: OWNER.md unchanged since R586. IDEATE: continued R592/R593's
+tracing method onto a different invariant that has bitten this app twice
+before by its own admission -- pr.ts's own docstring says "convert a set's
+weight into `unit` BEFORE combining it with anything else" broke this exact
+module in two separate, undetected ways once already (a ~220 lb history read
+as 100, producing a false PR). Traced every caller of `realLoad` for the same
+convert-before-combine discipline `loadOf` (pr.ts:69) already follows.
+FINDING, reported honestly rather than as a fix: `findPRs` (pr.ts:279) calls
+`realLoad(set, measurements, unit)` for the `realWeight` field WITHOUT first
+converting `set.weight` into `unit` the way `loadOf` does two lines above it
+for the exact same set -- structurally the identical shape as the bug the
+module's own comment describes having already fixed once. Before reporting it
+as live, checked whether it is actually REACHABLE: `findPRs` has exactly two
+callers (now-model.ts:1063, recap-model.ts:88), and both pass `session.unit`
+as `unit` while iterating `sessionSets` -- sets that belong to THAT session by
+construction. So `sessionUnits.get(set.sessionId)` for every set this loop
+ever sees is always `session.unit`, which is always `unit` -- the missing
+conversion is a no-op in both real call paths today. Confirmed by reading the
+call sites directly, not assumed from the shape alone; the same discipline
+that ruled out a false contrast-audit result in R591 and a false orphan-scan
+result in R588 applies again.
+DECIDED NOT TO EDIT: the inconsistency is real (this one call site does not
+follow the pattern the rest of the file uses and could silently break if a
+future caller ever passed a `unit` other than the session's own), but with no
+live defect to plant-and-catch against, a source change here would be
+housekeeping dressed as a fix -- risk for a cosmetic-only gain, and this
+segment's own history (R565-R571) is a caution against treating "looks more
+consistent" as equivalent to "verified different behavior." Left a decision
+for a future round if a caller ever needs `unit` != `session.unit` here:
+convert first, the same one-line pattern `loadOf` already demonstrates.
+REVIEW: no code changed; suite unaffected, 2142 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: three rounds running the same "trace a stated invariant to its other
+call sites" method (R592 real fix, R593 filed gap, R594 verified-safe) --
+worth keeping in rotation, but this round's more useful lesson is the second
+half: finding a structural inconsistency is not the same as finding a bug,
+and the checking step (does this actually run with mismatched inputs, ever)
+is where the difference gets decided. Five owner decisions still wait, tab
+bar first, 67 rounds.
