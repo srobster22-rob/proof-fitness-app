@@ -1290,3 +1290,50 @@ territory — four questions are filed and measured, and the tab bar has been th
 top item since R523. The useful next rounds are the kind R551 and R554 were:
 turning things this session learned the hard way into rules that hold, rather
 than hunting defects that increasingly are not there.
+
+R559 — PICK (logged first): a gate against the FIXTURE defect that cost me most
+this session — a set logged with an `at` EARLIER than its own session's
+startedAt. Shortlist was (a) that, (b) a rule for "verify the plant applied AND
+fired" (already trap 10), (c) more product hunting (three rounds running found
+no defects, so the returns are gone). Picked (a) on evidence: it burned a large
+part of R540, where my seed logged sets two minutes before `startSession`
+stamped the session, so today's own sets satisfied `x.at < session.startedAt`,
+became their own prior best, and the screen showed NOTHING — which reads exactly
+like "the fix works" when the fix is not even under test. A fixture can be wrong
+in the direction that looks like success, and nothing in the repo says so.
+Contract: find every seed and fixture that builds a session then logs sets into
+it, and fail any whose set times precede the session start.
+
+R559 — BUILD/REVIEW/SHIP on the pick logged above, and the checker found SIX
+broken fixtures the moment it existed — all six written by me, this session.
+`Repo.startSession` stamps `started_at` from its own clock, correctly, for an
+app that only ever starts a session in the present. A seed that builds HISTORY
+with a fixed clock therefore gives every past session a start time of today, and
+the app's rule for history (`x.at < session.startedAt`) then reads that
+session's own sets as its prior best. `seed-web.ts` already knew this — R37,
+documented at length in its own comment: wrong date labels and every workout
+"1 MIN" because `endedAt - startedAt` goes negative and clamps. My six seeds
+reintroduced it one at a time and nothing said so. THE POINT IS THE DIRECTION OF
+THE FAILURE. R540 lost half a round here: the seed logged its sets two minutes
+before the session holding them, so the card correctly claimed nothing and the
+screen looked exactly like the fix working — while the planted defect was never
+under test. A fixture that renders an empty screen is obviously broken; one that
+renders a PLAUSIBLE screen quietly answers a different question. Fix is
+`assertSaneTimes`, called by every seed immediately before it writes, so the
+fixture proves itself rather than being trusted. It throws rather than warns,
+because a warning in a tool nobody watches is trap 16 in another costume — the
+run still succeeds and the bad file still ships. Verified in the PRODUCT both
+ways: with the seeds fixed, Progress reads "Sun, Sep 6 / Thu, Sep 3 / Mon, Aug
+31 / Fri, Aug 28"; regenerating one seed the old way and reloading, every single
+workout reads "Tue, Sep 8". Same screen, same data, four different days
+collapsed into one. REVIEW: suite 2077 pass / 0 fail (real count, up 5). Three
+plants: a new seed that forgets the check (caught by name, and the scan is
+derived from the directory so tomorrow's seed is covered without anybody
+remembering), a seed that checks AFTER writing (caught — order matters, since
+checking late still ships the file), and downgrading the checker to a
+`console.warn` (three tests fail). SHIP: `--check` current, `link/build.cjs`
+dist/ ready, all seeds regenerated, app reseeded and confirmed. | next: this is
+the third round in a row whose value was a rule rather than a fix, and the
+fixtures were the last piece of instrument this session had proved unreliable.
+Everything now measured is measured with something that has been shown to fail
+when it should. The remaining work is genuinely the owner's four questions.

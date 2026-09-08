@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Repo } from '../src/data/repo.ts';
+import { assertSaneTimes } from './seed-sanity.ts';
 import { BUILTIN } from '../src/domain/coldstart.ts';
 
 const DAY = 86_400_000, MIN = 60_000;
@@ -147,6 +148,8 @@ if (MODE === 'many-goals') {
 
 // Close before reading: Windows refuses to remove a file SQLite still has open,
 // and an unclosed handle can also leave the last pages unflushed.
+// Prove the fixture before writing it (R559).
+assertSaneTimes(repo);
 db.close();
 const bytes = fs.readFileSync(file);
 fs.rmSync(file, { force: true });

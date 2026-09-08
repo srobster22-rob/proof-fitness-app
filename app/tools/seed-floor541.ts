@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Repo } from '../src/data/repo.ts';
+import { assertSaneTimes } from './seed-sanity.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(HERE, '..', 'public', 'floor541.b64');
@@ -23,10 +24,12 @@ const repo = new Repo(db as never, () => now);
 let n = 0;
 for (const [d, reps] of [[10, 8], [7, 6], [4, 5]] as [number, number][]) {
   const id = `s${d}`;
-  repo.startSession(id, 'lb');
+  repo.startSession(id, 'lb', undefined, now - d * DAY);
   repo.logSet({ id: `x${n++}`, sessionId: id, exerciseId: 'bench', weight: 45, reps, at: now - d * DAY });
   repo.endSession(id, now - d * DAY + 3600_000);
 }
+// Prove the fixture before writing it (R559).
+assertSaneTimes(repo);
 db.close();
 fs.writeFileSync(OUT, fs.readFileSync(TMP).toString('base64'));
 fs.rmSync(TMP, { force: true });

@@ -27,6 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Repo } from '../src/data/repo.ts';
+import { assertSaneTimes } from './seed-sanity.ts';
 import { devPort } from './dev-port.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -112,7 +113,9 @@ function main(): void {
     createdAt: now - 30 * DAY, targetDate: now + 60 * DAY, unit: 'lb'
   });
 
-  db.close();
+  // Prove the fixture before writing it (R559).
+assertSaneTimes(repo);
+db.close();
   const bytes = fs.readFileSync(TMP);
   fs.writeFileSync(OUT, bytes.toString('base64'));
   fs.rmSync(TMP, { force: true });

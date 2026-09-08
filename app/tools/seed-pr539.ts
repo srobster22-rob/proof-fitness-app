@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Repo } from '../src/data/repo.ts';
+import { assertSaneTimes } from './seed-sanity.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(HERE, '..', 'public', 'pr539.b64');
@@ -23,7 +24,7 @@ const repo = new Repo(db as never, () => now);
 let n = 0;
 for (const d of [12, 9, 6]) {
   const id = `s${d}`;
-  repo.startSession(id, 'lb');
+  repo.startSession(id, 'lb', undefined, now - d * DAY);
   repo.logSet({ id: `x${n++}`, sessionId: id, exerciseId: 'pullup', weight: 25, reps: 5, at: now - d * DAY });
   repo.endSession(id, now - d * DAY + 3600_000);
 }
@@ -42,6 +43,8 @@ repo.saveMeasurement({ id: 'bw0', kind: 'bodyweight', value: 300, unit: 'lb', at
 repo.saveMeasurement({ id: 'bw1', kind: 'bodyweight', value: 195, unit: 'lb', at: now - 60_000 });
 repo.startSession('today', 'lb');
 repo.logSet({ id: 'xt', sessionId: 'today', exerciseId: 'pullup', weight: 30, reps: 5, at: now });
+// Prove the fixture before writing it (R559).
+assertSaneTimes(repo);
 db.close();
 fs.writeFileSync(OUT, fs.readFileSync(TMP).toString('base64'));
 fs.rmSync(TMP, { force: true });
