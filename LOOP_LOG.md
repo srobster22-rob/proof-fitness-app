@@ -2251,3 +2251,27 @@ still first since R523, now 60 rounds. Until the owner looks and answers,
 self-directed work should keep going the R585 direction -- structural
 hardening and auditing prior "verified" claims -- rather than guessing at
 visual taste calls that explicitly need their eye.
+
+R587 - Stage 0: OWNER.md unchanged since R586 (still five filed decisions,
+no owner response yet). IDEATE: two rounds in a row (R585, R586) found no new
+product defect, which is itself worth treating with suspicion rather than
+declared as "done" -- R565-R571's lesson was that a clean result can mean the
+check never really ran. Picked the highest-leverage thing to distrust:
+R573's own headline fix, the `tsc --noEmit` gate moved INSIDE the test suite
+so a type error cannot silently fail to surface the way it did for months
+before that round. If that gate had quietly stopped working, it would be the
+single biggest blind spot in this whole loop, and eighty-something more
+rounds might pass before anyone noticed a real type error again.
+BUILD/REVIEW: planted a genuine type error directly in src/domain/coach.ts
+(`const __r587_typecheck_probe: number = "not a number";`) and ran the full
+suite. It failed correctly and by name -- "tsc --noEmit passes" inside "a
+type error fails loudly inside the suite, not silently after it (R573)" --
+count moved 2139 pass -> 2138 pass / 1 fail, not just a generic red. Restored
+with `git checkout -- src/domain/coach.ts` (exact revert, not hand-editing)
+and reran: clean 2139 pass / 0 fail again. The gate is proven live, twenty
+-some rounds after it was built, not merely assumed still working.
+SHIP: no source changed once reverted; nothing to rebuild.
+| next: two consecutive rounds confirming rather than finding leaves the
+technical queue looking thin, but that reading has been wrong before (R538,
+R565) -- the next round should look somewhere this segment has not yet
+re-audited rather than conclude the well is dry from two data points.
