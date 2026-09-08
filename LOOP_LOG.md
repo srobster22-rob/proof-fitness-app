@@ -1836,3 +1836,55 @@ Contract: find every test using performance.now() or a timing threshold,
 check whether its margin is order-of-magnitude (safe) or a tight ratio/percent
 (risk), and only touch the ones that are actually at risk — not a rewrite for
 its own sake.
+
+R573 — Stage 0: OWNER.md still four blocked decisions. Ran \`npm run typecheck\`
+directly rather than through \`npm test\`'s grep-filtered output, and found TWO
+real type errors that had shipped and sat unnoticed. FIRST: \`now-model.ts\`
+read \`exercises.get(this.exerciseId)?.equipment\` — but \`Exercise\` has never
+had an \`equipment\` field (it lives on \`LoggedSet\`, per SET, not per
+exercise). The expression type-checked as \`any\` and silently evaluated to
+\`undefined\` on every call since R541 shipped, so \`?? 'barbell'\` always won:
+the deload floor was always 45/20 regardless of what the lift actually was.
+MEASURED THE REAL CONSEQUENCE rather than just the type error: a lifter
+grinding at 40 lb on a weighted (bodyweight) pull-up, reps falling, was told
+"hold here" when the correct floor (0, not 45) allows a real deload to 35 —
+§8's protection silently disabled for every equipment but barbell. Fixed by
+reading \`this.equipment\`, the model's own tracked field for the CURRENT lift,
+which R541 could have used from the start. SECOND: \`NowScreen.tsx\` had
+\`allowFontScaling={false}\` TWICE on one TextInput — my own R569 fix, which
+added the prop without checking whether one already existed a few lines below.
+A JSX duplicate attribute, which tsc flags immediately and nothing else does.
+THE ROOT CAUSE IS MINE, NOT THE CODE'S. \`npm test\` already chains
+\`tsc --noEmit\` as its last step and has all session — but every \`npm test\`
+run this session was piped through a grep for the test runner's own lines
+("^✖ ", "^ℹ (tests|pass|fail)"), and tsc's error output has a completely
+different shape that never matches that pattern. A clean "ℹ fail 0" from the
+grep was read as "everything passed" when the grep could only ever speak for
+the test runner, not for tsc running after it — the same blind-instrument
+shape as R539's backspace, R554's empty matcher, R565's misattributed plant,
+now in my own terminal habit rather than in a test file. Closed the gap the
+only way that survives a repeated habit: moved \`tsc --noEmit\` INSIDE the
+suite as its own test, so a type error now fails as an ordinary "✖ <name>"
+line — exactly the shape every grep pattern used all session already catches
+and shows. REVIEW: fixing the duplicate-attribute bug shifted three EXISTING
+tests' anchor windows (R563's coach-call check, two of R569's own gate) past
+comments that had grown around the fix — not silently broken, LOUDLY broken,
+each with a clear reason once read, each widened with the real measured
+distance rather than a guess. Found and fixed a THIRD, unrelated bug in R569's
+own scan while widening it: its closing-\`>\` search treated an arrow
+function's \`=>\` as a tag close, which the original narrow window had never
+been wide enough to reach. Planted all three original defects (equipment
+lookup, duplicate attribute, and separately re-confirmed each existing test)
+and every one is caught by name. Suite: 2126 pass / 0 fail, exit code checked
+EXPLICITLY this time (0), not inferred from grep output. Verified in the
+PRODUCT: seeded a lifter grinding at 40 lb on a bodyweight-equipment pull-up,
+set the equipment through the real picker, and the screen read "40 is
+grinding — back off to 35" — the exact number the fix predicts. \`--check\`
+current; no share code moved so link/build.cjs was not needed; probe fixture
+removed, app reseeded and confirmed clean. Committed as 852762f inside
+fitness-app. | next: worth checking whether \`npm run check-deps\`, the OTHER
+step \`npm test\` chains, has the same theoretical blind spot — it has never
+been observed failing, so there is nothing to fix yet, but the same "moved
+inside the suite" treatment would remove the risk entirely rather than trust
+future greps to be careful. Four owner questions remain, tab bar first since
+R523.
