@@ -1661,3 +1661,33 @@ skipped" with no way to learn a backup is damaged. Contract: the reason is
 visible somewhere reachable from the restore result, in both languages, without
 turning "3 skipped" into a wall of technical detail on a screen §15 keeps
 deliberately quiet.
+
+R568 — Stage 0: OWNER.md still four blocked decisions. Shipped the skip-reasons
+gap flagged in R560 and deliberately deferred three rounds rather than file a
+fifth question behind four unanswered ones — small, contained, product-facing,
+no overlap with anything pending. `report.skipped` has always carried a REASON
+string per row and only the COUNT reached the user: "3 skipped" with no way to
+learn whether that meant nothing or something real. The design question was
+noise, not plumbing: naming every skip on a badly mismatched file could print
+hundreds of near-identical reasons on a status line, which is the wall of detail
+§15 keeps this screen quiet against. Split on the one distinction that actually
+matters — "already on this device" is the ORDINARY case, restoring the same file
+twice or one already partly merged, and stays silent; the moment even one skip
+is something else, the first REAL reason is named, so a lone genuine problem
+cannot get buried under a pile of harmless duplicates. Kept the reason string
+itself untranslated on purpose, the same choice `applyBackup` already makes for
+parse errors — it is meant to be pasted into a support message as-is, and
+translating it would mean support has to translate it back. REVIEW: suite 2116
+pass / 0 fail (real count, up 5; one unrelated flake in R565's own timing test
+under full-suite load, confirmed clean alone, not silenced). Two plants: revert
+to count-only and three tests fail on the missing reason; always name a reason
+even on an all-duplicate restore and the quiet-on-duplicate tests fail, catching
+noise in the OTHER direction. Verified in the PRODUCT, not just the harness: hit
+the real RESTORE button on the seeded app with a genuinely damaged file dropped
+through it (an orphan set naming a session not in the file), and the screen
+printed "Restored 0 sets, 0 sessions. 1 skipped (session ghost not in file)."
+Reloaded afterward and the real history was untouched. `--check` current; no
+share code moved so link/build.cjs was not needed. Committed as 9383166 inside
+fitness-app, diff confirmed free of plant residue. | next: that closes every
+filed non-owner item from this session. What remains with real product value is
+entirely the four owner decisions — tab bar first, waiting since R523.
