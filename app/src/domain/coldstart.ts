@@ -135,7 +135,24 @@ export const EQUIPMENT_BASE: Record<Equipment, Record<Unit, number>> = {
   bodyweight: { lb: 0, kg: 0 }
 };
 
-/** What one plate change is worth, for rounding a suggestion to something loadable. */
+/**
+ * What one plate change is worth, for rounding a suggestion to something
+ * loadable.
+ *
+ * FILED, NOT FIXED (R593, found by R592's own method — tracing a promise like
+ * this one to every place it is made rather than trusting one fix covers the
+ * class): this is the fixed default, the same way `WEIGHT_STEP` was before
+ * R592 taught the coach to prefer `plateJump()` when the lifter has declared
+ * something finer. `startingWeight` below carries the identical claim
+ * ("rounded to something loadable") for a lift with no history at all, and it
+ * has the same blind spot — a lifter on 1.25 kg microplates still gets a
+ * first-time suggestion rounded to 2.5. Not fixed here because `prefillFor`,
+ * which calls `startingWeight`, is shared with `measure-model.ts` for body
+ * measurements (bodyweight, height) where a "plate jump" has no meaning at
+ * all — threading a weight-training preference through a function two
+ * different domains call needs more care than a parameter rename, unlike
+ * R592's single call site in now-model.ts.
+ */
 const ROUND_TO: Record<Unit, number> = { lb: 5, kg: 2.5 };
 
 /**

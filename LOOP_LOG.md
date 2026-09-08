@@ -2470,3 +2470,35 @@ R562, applied to a function with substantially more existing branches.
 coach's actual inputs end to end rather than auditing it in isolation again --
 worth remembering as its own method. Five owner decisions still wait, tab bar
 first, 65 rounds.
+
+R593 - Stage 0: OWNER.md unchanged since R586. IDEATE: applied R592's own
+closing method -- a promise ("every weight is loadable") is worth tracing to
+every place it is made, not just the one place it was just fixed. Grepped for
+the same loadability language across src/ and found it in three files:
+coach.ts (fixed R592), now-model.ts (bumpPlate, already correct since R562),
+and src/domain/coldstart.ts -- never checked against this specific promise.
+BUILD/REVIEW: `startingWeight()` in coldstart.ts makes the identical claim
+("rounded to something loadable") for a lift with NO history at all -- the
+number that seeds the Now screen the first time someone ever selects a new
+exercise. It rounds to a fixed `ROUND_TO` (5 lb / 2.5 kg), the exact same
+blind spot `WEIGHT_STEP` had in coach.ts before R592: a lifter on 1.25 kg
+microplates gets a first-time suggestion rounded to the coarser default,
+same as the plateau case did.
+Traced whether R592's fix (pass `plateJump()` in) generalizes here and found
+it does NOT, cleanly: `prefillFor` (which calls `startingWeight`) is called
+from BOTH now-model.ts (barbell/dumbbell weight prefill) AND
+measure-model.ts + app/measure.tsx (body measurements -- bodyweight, height),
+confirmed by grep across src/ui, app/ and test/. A "plate jump" preference has
+no meaning for a bodyweight reading, so threading it through a function two
+unrelated domains share needs a real design decision about how the two call
+sites diverge, not a parameter rename at one call site the way R592's fix was.
+Filed rather than fixed: added a comment on `ROUND_TO` naming the gap,
+pointing at R592 as the precedent and prefillFor's shared-caller shape as the
+reason it needs more care. No behaviour changed -- comment only.
+SHIP: nothing to rebuild; suite unaffected, 2142 pass / 0 fail, unchanged from
+R592's count since no logic moved.
+| next: R592's tracing method paid off a second time in the very next round --
+worth keeping as the default move whenever a fix states an invariant
+("X is always true"), since a codebase this heavily self-documented tends to
+repeat exact promises verbatim in more than one place. Five owner decisions
+still wait, tab bar first, 66 rounds.
