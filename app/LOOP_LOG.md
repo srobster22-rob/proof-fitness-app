@@ -67,3 +67,30 @@ with this closed and R571's fix holding for ten consecutive full-suite runs,
 every self-directed thread from this session is genuinely exhausted. The four
 owner questions are the only remaining product-facing work, tab bar first
 since R523 — now 47 rounds waiting.
+
+R574 — Stage 0: OWNER.md still four blocked decisions. Checked \`check-deps.cjs\`
+directly (R573's other open question): exit 0, correctly, nothing to fix. The
+larger question — whether other property accesses share the equipment bug's
+exact shape (a field read off a type that never had it, silently typed \`any\`)
+— turned into a discovery rather than a manual audit. A hand-grep for
+\`?.propertyName\` chains found nine matches, and all nine read \`.name\` or
+\`.id\`, both genuinely on \`Exercise\`; none share the defect. But before trusting
+that grep, checked what actually makes it trustworthy: \`tsconfig.json\` covers
+\`app/\`, \`src/\`, \`test/\` and \`tools/\` with \`strict: true\` (which is what
+produced \`TS7053\` on the original bug) and no exclusions beyond
+\`node_modules\`/\`dist\`. R573's fix was never really a fix for one file — moving
+\`tsc --noEmit\` inside the suite means EVERY property access in the whole
+codebase is checked on every run, which is strictly more thorough than any
+grep this round could write. Proved it rather than assumed it: planted the
+identical bug shape (\`exercises.get(id)?.nonExistentField\`) in \`weekly.ts\`,
+a file R573 never touched, and the gate caught it immediately by name —
+\`TS2339: Property 'nonExistentField' does not exist on type 'Exercise'\`.
+No product code needed to change this round; the manual sweep I set out to do
+was already done, structurally, by last round's fix. REVIEW: suite 2126 pass /
+0 fail, unchanged; \`git status\` on src/test/tools confirms nothing was left
+touched; the plant was reverted with a diff check before moving on. No SHIP
+step needed — nothing to build. | next: this closes R573's own follow-up
+question. With that done, every self-directed thread from this session —
+including the ones opened by earlier self-directed threads — is genuinely
+exhausted. The four owner questions are the only work left with real product
+value, tab bar first since R523, now 49 rounds waiting.

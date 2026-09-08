@@ -1888,3 +1888,12 @@ been observed failing, so there is nothing to fix yet, but the same "moved
 inside the suite" treatment would remove the risk entirely rather than trust
 future greps to be careful. Four owner questions remain, tab bar first since
 R523.
+
+R574 — PICK (logged first): check whether check-deps.cjs (the OTHER step
+npm test chains before the test runner) shares R573's blind-spot shape, and
+sweep for any OTHER production code path that reads a field the way the
+equipment bug did — a property access that silently types as `any`. Shortlist
+was (a) that, (b) wait idle. Contract: run check-deps directly and read its
+real exit code rather than trust it; grep for other `?.propertyName` chains on
+types that might not carry that property, and verify each one against its
+declared interface before deciding it's fine.
