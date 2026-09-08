@@ -1049,6 +1049,36 @@ export class NowModel {
     return this.prCacheValue;
   }
 
+  /**
+   * The history for one exercise, from an index built once per history.
+   *
+   * Keyed on `allSets()`'s array identity, sound for the reason R495, R509 and
+   * R522 all rely on: `Repo.allSets` hands back a frozen array and drops its
+   * memo on every write, so a new object appears exactly when the contents
+   * could have changed.
+   *
+   * One pass to bucket, then every lookup is free — the same move R494 made
+   * for `activeGoals`, which had the identical shape: a function scoped to one
+   * exercise being handed the whole log.
+   */
+  private byExerciseKey: LoggedSet[] | null = null;
+  private byExercise = new Map<string, LoggedSet[]>();
+
+  private setsFor(exerciseId: string): LoggedSet[] {
+    const all = this.repo.allSets();
+    if (all !== this.byExerciseKey) {
+      const built = new Map<string, LoggedSet[]>();
+      for (const s of all) {
+        const bucket = built.get(s.exerciseId);
+        if (bucket) bucket.push(s);
+        else built.set(s.exerciseId, [s]);
+      }
+      this.byExercise = built;
+      this.byExerciseKey = all;
+    }
+    return this.byExercise.get(exerciseId) ?? [];
+  }
+
   private historyInSessionUnit(): LoggedSet[] {
     const all = this.repo.allSets();
     const units = this.repo.sessionUnits();
@@ -1347,8 +1377,22 @@ export class NowModel {
   private goalHint(): GoalHint | null {
     const goal = this.repo.goals().find(g => g.exerciseId === this.exerciseId);
     if (!goal) return null;
-    const all = this.repo.allSets();
-    const p = goalProgress(goal, all, this.repo.exercises(), this.now(), this.repo.sessionUnits());
+    /*
+     * Only this lift's sets, not the whole history.
+     *
+     * `goalProgress` touches `history` three times and filters by
+     * `goal.exerciseId` every time — twice through `bestAt` and once for
+     * `trainedSince` — so handing it the whole log makes it walk 14,000 rows to
+     * look at a few dozen. Measured at that size: 1.43 ms, on a function that
+     * runs inside `state()`, which runs on every tap.
+     *
+     * Behaviour-identical rather than an approximation: every use of the array
+     * inside that function is already scoped to this exercise, so the sets
+     * being withheld are ones it would have skipped.
+     */
+    const p = goalProgress(
+      goal, this.setsFor(goal.exerciseId), this.repo.exercises(),
+      this.now(), this.repo.sessionUnits());
     /*
      * The goal is measured in ITS own unit and shown in the SESSION'S.
      *
@@ -1372,7 +1416,10 @@ export class NowModel {
      * session's sets is the state the user walked in with, so if the goal was
      * already met then, nothing happened today and the line stays quiet.
      */
-    const before = all.filter(x => x.sessionId !== this.session.id);
+    // This lift's sets only, for the same reason as above: `isAchieved` is
+    // scoped to the goal's exercise (R494 established that when it bucketed
+    // `activeGoals`), so the rest of the log is rows it would skip.
+    const before = this.setsFor(goal.exerciseId).filter(x => x.sessionId !== this.session.id);
     if (isAchieved(goal, before, this.repo.sessionUnits())) return null;
     return { ...base, remaining: 0, justHit: true };
   }
