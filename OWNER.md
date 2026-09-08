@@ -21,10 +21,6 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
-- Main screen redesign to professional-app standard: clear hierarchy, room to
-  breathe, one obvious next action, nothing that reads as generated filler.
-  Judge it against a well-known fitness app's home screen, not against the
-  current one. Keep every existing behaviour — this is look and layout.
 - The suggestion feature ("AI coach"): on the Now screen, for the exercise in
   front of you, use the last two weeks of history to say what to lift today
   and why, in one line ("185 lb the last two weeks — try 190"), tuned to the
@@ -49,3 +45,33 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Main screen redesign** — R511-R516. Done as far as I can take it; please
+  look and say whether it matches what you meant.
+  - R511: the exercise name was styled exactly like the chrome labels around
+    it (22px, wide tracking), so the one thing the screen is about read as
+    furniture. Tracked in; it reads as a title now.
+  - R513: inside THIS WORKOUT the set numbers were louder than the lift name
+    grouping them, so three exercises read as one field of small numbers. The
+    name anchors its group now.
+  - R514: the day rail scrolls and nothing said so — it cut a chip mid-word at
+    the edge. It fades out now, built from plain Views (a gradient would be a
+    dependency, which §12 forbids).
+  - R515: the weight and reps rows are one control and nothing grouped them.
+    They sit on a surface now, in the card style the plan chooser already uses.
+  - R516: judged the whole screen at real phone size (375x812) rather than in a
+    wide window, which is how the earlier rounds had been looking at it. It
+    holds up. Three things I suspected were defects turned out not to be, and I
+    left them alone: the nav links already carry hitSlop so their real tap
+    target is ~64px despite measuring 36px; the LB unit is baseline-aligned to
+    the number exactly as intended; and the first-run sheet only looks broken
+    if you screenshot it mid-animation.
+
+  TWO THINGS I DID NOT DO, both deliberate:
+  - A bottom tab bar is what every well-known fitness app uses and this app
+    cannot have one. A tab bar costs ~50px and R512 measured the shortest
+    shipping phone (568px) at 624px of unshrinkable content ALREADY. Adding one
+    means dropping something else off the screen — your call, not mine.
+  - Content is centred; most fitness apps left-align everything but the hero
+    number. That is taste rather than defect, and changing it touches every row,
+    so I have not.
+
