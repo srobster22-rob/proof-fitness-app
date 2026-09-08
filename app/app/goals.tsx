@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useGuardedLeave } from '../src/ui/guarded-push.ts';
 import { getRepo } from '../src/data/db.ts';
 import { t, fill, languageOf, dateLocale, FILTER_KEY, SORT_KEY, HORIZON_KEY } from '../src/domain/i18n.ts';
@@ -68,6 +68,34 @@ export default function Goals() {
   // Honour the system's reduced-motion setting — see `useReducedMotion`.
   const still = useReducedMotion();
   const [undo, setUndo] = useState<{ goals: Goal[]; label: string } | null>(null);
+
+  /*
+   * R581. `editing`, `wiping` and `undo` all hold a SNAPSHOT of goal data —
+   * not just an id — and none of it was cleared on the way back to this
+   * screen. Today that costs nothing: the only way off Goals is `leave`
+   * (`router.back()`, a pop), and popping destroys this component's state
+   * along with it, so none of these can outlive a trip to another screen.
+   *
+   * That safety is a property of the CURRENT stack navigation, not of this
+   * code, and it is not guaranteed to stay true. Measured directly: with the
+   * pop-based safety net set aside, `restoreGoals` — an upsert — happily
+   * resurrects a wiped goal even after `eraseAll()`, which is the one action
+   * in this app that explicitly promises "this cannot be undone." A future
+   * navigation model that keeps this screen mounted alongside others (a tab
+   * bar, OWNER.md's own open question, keeps every tab mounted rather than
+   * popping) would make that reachable with nobody expecting it.
+   *
+   * `NowScreen` already has exactly this shape of problem solved via
+   * `resume()`, called on `useFocusEffect` — re-sync stale UI state on
+   * arrival rather than trust it survived whatever happened while this
+   * screen was not the one on screen. Same idea, scoped to what this screen
+   * actually holds.
+   */
+  useFocusEffect(useCallback(() => {
+    setEditing(null);
+    setWiping(null);
+    setUndo(null);
+  }, []));
 
   const wipe = useCallback((ids: string[], label: string) => {
     const taken = removeGoals(repo, ids);

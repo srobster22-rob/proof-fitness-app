@@ -575,4 +575,38 @@ describe('wiping goals is reversible', () => {
     assert.equal(restoreGoals(repo, []), 0);
     assert.equal(repo.goals().length, 2);
   });
+
+  /*
+   * R581. `restoreGoals` is an upsert with no memory of WHY the goal it is
+   * given no longer exists — it cannot tell "wiped a second ago, undo makes
+   * sense" from "the device was erased on purpose a minute ago, undo must
+   * not." Pinned here as a fact about this function, not a bug in it: the
+   * function is a correct, general primitive, and the guarantee that a
+   * post-erase undo can never reach it lives in the SCREEN (`app/goals.tsx`'s
+   * `useFocusEffect`, which clears `undo` the moment the screen is not the
+   * one that has been on screen the whole time), not here.
+   *
+   * If this test ever starts failing an expectation of "erase wins," that is
+   * the signal to push the guard down into `restoreGoals` itself rather than
+   * rely on the screen alone.
+   *
+   * A BUILTIN exercise on purpose, not `seeded()`'s cap-testing fixture:
+   * those use `addExercise`, real custom exercises `eraseAll` genuinely
+   * deletes, so `saveGoal` inside `restoreGoals`'s try/catch throws for a
+   * different reason (the exercise is gone) and the real point -- that the
+   * GOAL ROW ITSELF comes back with no memory of the erase -- never gets
+   * isolated. `bench` survives erase (`seedBuiltins` puts it straight back).
+   */
+  test('an upsert cannot tell an erase from an ordinary gap (documented, not fixed here)', () => {
+    const repo = new Repo(new DatabaseSync(':memory:') as any, () => T0);
+    repo.saveGoal({ id: 'g1', exerciseId: 'bench', targetWeight: 225, targetReps: 5,
+      createdAt: T0, targetDate: T0 + 90 * DAY, unit: 'lb' });
+    const taken = removeGoals(repo, ['g1']);
+    repo.eraseAll();
+    assert.equal(repo.goals().length, 0, "erase said 'cannot be undone'");
+    const back = restoreGoals(repo, taken);
+    assert.equal(back, 1,
+      'restoreGoals stopped being a plain upsert -- if it now refuses this on ' +
+      'purpose, delete this test and the useFocusEffect guard becomes redundant belt-and-braces');
+  });
 });
