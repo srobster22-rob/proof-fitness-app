@@ -2198,3 +2198,56 @@ tab bar first since R523, now 60 rounds waiting. Technical queue genuinely
 thin again after this; the next self-directed round likely needs to go back
 to re-auditing older "verified" rounds (R540-R571's lesson) rather than
 hunting fresh ground.
+
+R586 - Stage 0: OWNER.md changed for the first time since R557 -- a new
+"## Vision (2026-09-08)" section, in the owner's own words: make the app less
+bland and more TikTok-attention-span-appropriate, add an AI weight-suggestion
+feature tuned to the person's goals, and improve the UI because the main
+screen "looks a little sloppy and AI-generated." This outranks every
+self-directed idea per Stage 0.
+IDEATE: checked the AI-feature ask against the code before assuming it needed
+building. It does not -- src/domain/coach.ts (R517-R519, already in
+OWNER.md's ## Done) is exactly this: a local rule engine reading the last
+WINDOW_DAYS=14 days of the named lift, tuned by a COACHING setting
+(strength/size/consistency), saying things like "175 and climbing, 2 sessions
+-- try 180". Building a second one would have duplicated real, tested,
+already-shipped work because the owner could not currently see the first one.
+BUILD (of a kind -- this round's deliverable is a demo-fidelity fix, not a
+source change): loaded the live preview and asked for the coach line myself.
+Got "Last time 175 x 5" -- no suggestion -- on BENCH PRESS despite full seeded
+history. Root cause: public/seed.b64 (dev-only, gitignored, `tools/seed-web.ts`)
+is a snapshot baked once against `Date.now()` at generation time, and enough
+real time had passed since it was last regenerated that every session in it
+had aged past the coach's own 14-day window. The feature was never gone, only
+invisible in the exact place anyone would look to judge it -- the same shape
+as a stale fixture, applied to a demo artifact instead of a test. Fixed with
+`npm run seed` inside app/, which writes a fresh public/seed.b64 against
+today's real clock.
+REVIEW: no source file changed, so there is nothing to plant a bug into and no
+new test to prove failing by name -- the fix is regenerating a gitignored dev
+artifact, and `git status` confirms it stays untracked. Ran the full suite
+anyway as a sanity check that nothing else moved: 2139 pass / 0 fail, same
+count as R585, confirming this round touched no app code. Verified the fix in
+the PRODUCT directly: reloaded with the regenerated seed.b64 in the browser
+console and the Now screen changed from "Last time 175 x 5" to "175 and
+climbing, 2 sessions -- try 180" on BENCH PRESS, with zero code changes.
+SHIP: nothing to rebuild -- seed.b64 is a dev tool, not a shipped artifact,
+and the app's own build is unaffected by it (`--check` would report the same
+either way; not re-run since no share code moved).
+Instead of silently building UI changes I would be guessing at, filed a
+detailed response in OWNER.md's ## Next, above the existing four decisions: it
+tells the owner exactly how to see the working coach line themselves
+(including that they may need to `npm run seed` first, since the same
+staleness would otherwise blindside them the way it did me), and it explains
+why the "looks sloppy and AI-generated" half of the Vision needs their eye
+before I touch anything -- R511-R516's own lesson was that this exact screen
+was judged wrong when sized in a wide dev window instead of a real phone, so a
+guess from here risks the same mistake at a much larger scale than a single
+row. Pointed them at the already-built, already-filed tab bar as the single
+highest-leverage lever for "looks like a real app" if they want one concrete
+next step rather than a screenshot-and-circle conversation.
+| next: five owner questions now wait (four prior plus this round's), tab bar
+still first since R523, now 60 rounds. Until the owner looks and answers,
+self-directed work should keep going the R585 direction -- structural
+hardening and auditing prior "verified" claims -- rather than guessing at
+visual taste calls that explicitly need their eye.
