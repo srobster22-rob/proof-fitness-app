@@ -2148,3 +2148,53 @@ computes live from repo on every render per earlier rounds' findings; Settings
 has no comparable data memo). This closes the "stale-on-return" class for the
 whole app, not just one screen. Four owner questions remain the only work
 with real product value, tab bar first since R523, now 59 rounds waiting.
+
+R585 - Stage 0: OWNER.md still four blocked decisions, no change since R584.
+IDEATE: R584 closed the "stale-on-return" gap for every screen that HAD it
+(Goals, Measure). The obvious next move is not a third instance -- there
+wasn't one -- but making sure there never quietly is one again. Audited
+progress.tsx, recap.tsx and settings.tsx before assuming:
+  - progress.tsx already had `useFocusEffect(() => setTick(t => t+1))` since
+    before this segment; its `note` status string (the "everything erased" /
+    export-result line) persists across a refocus by design, not by gap -- it
+    reports the LAST action taken, which stays true regardless of navigation,
+    unlike Goals' `editing` snapshot or Measure's sheet state, which claimed to
+    reflect CURRENT data. Left alone; relabeling that as a bug would be a
+    product call, not a technical one.
+  - recap.tsx has no `useFocusEffect` at all, and correctly so: it is pushed
+    fresh per session (`?session=<id>` or none) and its one memo keys off
+    `sessionParam`, which cannot change without a fresh mount already handling
+    it. No gap.
+  - settings.tsx seeds its local fields once from `repo.getPref(...)` and has
+    no tick-gated list memo of the Goals/Measure shape; the one known gap
+    there (machine-name commit-on-blur) is already OWNER.md's R557 filing, not
+    a new find.
+BUILD: rather than leave that audit as a one-time note that rots, wrote a
+structural gate, test/tick-memo-needs-refocus-guard.test.ts: a scan that greps
+every screen in app/app/*.tsx for a `useMemo` whose dependency array contains
+`tick`, and asserts each such screen also contains a `useFocusEffect` block
+that refreshes it. This is exactly the shape R565-R571's saga argued for --
+catching the CLASS, not just today's two instances -- and it would have caught
+goals.tsx's R581 gap and measure.tsx's R584 gap on day one had it existed then.
+REVIEW: suite 2136 -> 2139 pass / 0 fail (real count). Planted: removed
+measure.tsx's useFocusEffect block with a small script, ran the new gate test
+alone, confirmed it fails BY NAME ("measure.tsx: a tick-gated memo is
+refreshed on focus, not just on its own actions"); restored with
+`git checkout -- app/measure.tsx` rather than reassembling the block by hand
+(a first reassembly attempt landed the block in the wrong spot with a stray
+blank line -- caught by `git diff` before it went anywhere, fixed by reverting
+to the tracked copy instead of patching the patch), reran, clean 2139/0.
+Nothing in the PRODUCT changes this round -- this is a build-time guard, not
+runtime behavior. `--check` current; no share code moved so link/build.cjs
+was not needed. Diff is one new test file only.
+Correction to how this entry itself was produced: an earlier heredoc append
+for this round's draft landed in the WRONG file, C:\Users\srobs\LOOP_LOG.md
+(the parent, untracked, unrelated loop-machinery log, not this repo's own) --
+cwd drift from a prior shell command, caught before anything was committed
+there. That file was confirmed unchanged from the memory rule to never write
+or commit inside the parent repo; this is the only correctly-placed copy.
+| next: four owner questions remain the only work with real product value,
+tab bar first since R523, now 60 rounds waiting. Technical queue genuinely
+thin again after this; the next self-directed round likely needs to go back
+to re-auditing older "verified" rounds (R540-R571's lesson) rather than
+hunting fresh ground.
