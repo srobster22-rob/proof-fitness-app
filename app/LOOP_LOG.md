@@ -124,3 +124,32 @@ crash-recovery, typechecking, and now this UI-interaction-hypothesis lines are
 all closed with either a real fix or a verified-clean result. Four owner
 questions remain the only work with real product value, tab bar first since
 R523, now 52 rounds waiting.
+
+R578 — Stage 0: OWNER.md still four blocked decisions. Continued R577's method
+on its natural sibling: \`editingSet\` holds a SNAPSHOT of a \`LoggedSet\` object,
+not just an id, and nothing clears it on \`resume()\`. Hypothesis: Now is the
+root route and is never unmounted (per its own comments), so a user could open
+the edit-set sheet, navigate to Progress, ERASE EVERYTHING or CLEAR the
+workout there, navigate back, and the sheet — if it survived — would still
+hold a snapshot of a set that no longer exists; tapping SAVE would call
+\`model.editSet(editingSet.id, patch)\` with its return value ignored by the
+screen. Checked at the layer that IS testable (the model, since this repo has
+no render harness): \`updateSet\` in \`repo.ts\` re-queries \`WHERE id = ? AND
+deleted = 0\` before writing, so a vanished set is caught there regardless of
+what the snapshot believes. Verified directly rather than trusted: logged a
+set, called \`clearWorkout()\`, then \`editSet\` against the now-gone id —
+returns \`false\`, zero sets afterward, \`allSets()\` empty, no exception. Then
+checked whether this exact case already had a test before writing one:
+\`test/now-model.test.ts:2294\`, "editing a set that is not there fails rather
+than inventing one," pins precisely this. No gap, nothing to add. The screen
+ignoring the boolean means the sheet closes silently on a no-op rather than
+complaining — reasonable behavior for data that is genuinely gone, not a UX
+lie, and not a crash or corruption risk. REVIEW: suite 2129 pass / 0 fail,
+unchanged; \`git status\` confirms nothing touched. No SHIP step — nothing
+shipped. | next: the UI-state-snapshot-goes-stale question, raised by R577 and
+extended here, is now checked on both pieces of local state that hold
+anything beyond an id (\`typing\`'s value, \`editingSet\`'s object) and both are
+either naturally covered or explicitly guarded. \`addingTo\` holds only a
+string id, not a snapshot, so the same staleness question does not apply to
+it the same way. Four owner questions remain the only work with real product
+value, tab bar first since R523, now 53 rounds waiting.
