@@ -1,7 +1,8 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  coachSuggestion, WINDOW_DAYS, MIN_SESSIONS, PLATEAU_SESSIONS, type TrainingGoal
+  coachSuggestion, WINDOW_DAYS, MIN_SESSIONS, PLATEAU_SESSIONS, MAX_CLIMB_FRACTION,
+  type TrainingGoal
 } from '../src/domain/coach.ts';
 import { t, fill } from '../src/domain/i18n.ts';
 import type { LoggedSet } from '../src/domain/types.ts';
@@ -291,5 +292,63 @@ describe('a lifter who moves up every session (the real common case)', () => {
       assert.doesNotMatch(line, /\{[a-z]+\}/i, `${lang} left a placeholder: "${line}"`);
       assert.notEqual(line, s.key, `${lang} has no translation for ${s.key}`);
     }
+  });
+});
+
+describe('a jump too big to be a rung is not a climb (R524)', () => {
+  /*
+   * Shipped in R518 and found in R522 by looking at the screen: two sessions,
+   * 185 then 320, and the coach said "320 and climbing, 2 sessions — try 455".
+   * Even +45 came out as "try 275". The climbing rule took the lifter's own
+   * increment, which is right, and trusted it without bound, which is not.
+   *
+   * The fix is not a cap on the number. A 73% jump in one session is not
+   * evidence of a repeatable increment, so "keep climbing" is the wrong KIND of
+   * advice rather than merely the wrong size — and there is already an honest
+   * thing to say about a weight hit once, which is to repeat it.
+   */
+  const twoSessions = (from: number, to: number) => [
+    ...session(1, [[to, 5]]), ...session(7, [[from, 5]])
+  ];
+
+  test('the exact line that shipped is gone', () => {
+    const s = coachSuggestion(twoSessions(185, 320), 'bench', NOW, lb)!;
+    assert.notEqual(s.key, 'coachClimbing',
+      'a 135 lb jump is still being read as linear progression');
+    assert.equal(s.key, 'coachSettle');
+    const line = fill(t('en', s.key as never), s.params);
+    assert.doesNotMatch(line, /455/, `still extrapolating: "${line}"`);
+  });
+
+  test('and so is the merely silly one', () => {
+    // +45 on a bench in one session. No bencher reads "try 275" as advice.
+    const s = coachSuggestion(twoSessions(185, 230), 'bench', NOW, lb)!;
+    assert.equal(s.key, 'coachSettle');
+  });
+
+  test('real progression is untouched, at any scale', () => {
+    /*
+     * The guard on the other side, and the reason the bound is a FRACTION
+     * rather than a number of pounds: 5 lb is ordinary on a 185 bench and
+     * enormous on a 45 lb one, and a fixed cap would have to be wrong for one
+     * of them.
+     */
+    for (const [from, to] of [[185, 190], [185, 195], [100, 102.5], [45, 47.5], [400, 410]]) {
+      const s = coachSuggestion(twoSessions(from, to), 'bench', NOW, lb)!;
+      assert.equal(s.key, 'coachClimbing',
+        `${from} to ${to} is normal progression and was not read as a climb`);
+    }
+  });
+
+  test('the boundary is where the constant says it is', () => {
+    // Derived from the exported constant, so moving it moves the test with it
+    // rather than leaving a number here that quietly disagrees.
+    const from = 200;
+    const justInside = from + from * MAX_CLIMB_FRACTION;
+    const justOutside = justInside + 5;
+    assert.equal(coachSuggestion(twoSessions(from, justInside), 'bench', NOW, lb)!.key,
+      'coachClimbing', `${justInside} is inside the bound and was rejected`);
+    assert.equal(coachSuggestion(twoSessions(from, justOutside), 'bench', NOW, lb)!.key,
+      'coachSettle', `${justOutside} is outside the bound and was accepted`);
   });
 });

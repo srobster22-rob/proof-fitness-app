@@ -118,6 +118,25 @@ function topSets(history: LoggedSet[], exerciseId: string, now: number): TopSet[
 const STEP: Record<TrainingGoal, number> = { strength: 5, size: 2.5, consistency: 0 };
 
 /** Target reps per goal — the rep count a set should reach before load moves. */
+
+/**
+ * The largest single-session increase that still counts as CLIMBING, as a
+ * fraction of the weight climbed from.
+ *
+ * Ten per cent, and the number matters less than the existence of a bound.
+ * Real progression moves in 2.5-10% steps; anything past that in one session
+ * is a different event — a new lift, a corrected entry, a machine that loads
+ * differently, or a genuinely exceptional day. Treating it as a trend and
+ * extrapolating produced the defect this constant exists to stop: two
+ * sessions, 185 then 320, and the coach said "320 and climbing — try 455".
+ * Even +45 came out as "try 275", which no bencher would read as advice.
+ *
+ * The fix is NOT to cap the number and keep the sentence. A 73% jump is not
+ * evidence of a repeatable increment, so "keep climbing" is the wrong KIND of
+ * advice, not merely the wrong size — and the engine already has the honest
+ * thing to say about a weight you have hit once: repeat it before adding.
+ */
+export const MAX_CLIMB_FRACTION = 0.1;
 const TARGET_REPS: Record<TrainingGoal, number> = { strength: 5, size: 8, consistency: 8 };
 
 /**
@@ -261,7 +280,10 @@ export function coachSuggestion(
   if (sets.length >= MIN_SESSIONS && atSameWeight === 1) {
     let rising = true;
     for (let i = 0; i + 1 < sets.length; i++) {
-      if (sets[i].weight <= sets[i + 1].weight) { rising = false; break; }
+      const from = sets[i + 1].weight, to = sets[i].weight;
+      // Up, and up by a believable amount. A step past MAX_CLIMB_FRACTION is
+      // not a rung on a ladder, so the whole run stops being a climb.
+      if (to <= from || to - from > from * MAX_CLIMB_FRACTION) { rising = false; break; }
     }
     if (rising) {
       const theirStep = sets[0].weight - sets[1].weight;
