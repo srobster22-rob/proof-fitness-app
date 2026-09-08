@@ -80,7 +80,20 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
        * that would have caught most of them.
        */
       ['the blind-instrument count (trap 10)', /at least FOURTEEN times/],
-      ['the defence trap 10 teaches', /ACTUALLY FIRED AND ACTUALLY APPLIED/]
+      ['the defence trap 10 teaches', /ACTUALLY FIRED AND ACTUALLY APPLIED/],
+      /*
+       * Trap 13 held up `lang` as its example of a properly stated exemption,
+       * and R526 found that exemption FALSE — recap.tsx does read payload.lang.
+       * The entry was teaching a pattern from a case that did not work, which is
+       * worse than an out-of-date count: a count misleads about frequency, an
+       * exemplar misleads about method.
+       */
+      ['trap 13 no longer teaches from the false exemption', /A stated reason is necessary and is not/],
+      ['trap 13 names what actually defines a list', /asking what DEFINES the list/],
+      // Gated like trap 10s, for the same reason and for consistency: both are
+      // frequency claims whose force IS the number. Two-versus-eight is the
+      // difference between a curiosity and the thing to expect.
+      ['the drifting-list count (trap 13)', /Eight times now/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +

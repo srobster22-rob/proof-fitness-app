@@ -157,7 +157,7 @@ test suite and obvious in a picture.
    `document.body.innerText` in the SAME execution reports 0 sets; reading it after a delay
    reports 1. The press landed both times — only the read was early.
 
-13. **A hand-maintained list of "things that must all do X" drifts, every time.** Twice: every
+13. **A hand-maintained list of "things that must all do X" drifts, every time.** Eight times now, and the first two were:
    `RecapPayload` field had to reach `recap.tsx`, `shareText` and `spike/recap.js`, and enumerating
    them by hand let `pr.heaviest` and `multiple` ship silently absent from the render surfaces
    (R435-442) — `firstSession` was caught only because the *fourth* one derived the list from the
@@ -178,6 +178,20 @@ test suite and obvious in a picture.
    check that has never been watched to fail is a claim, not a gate. The next class of this shape
    — "every X must do Y" enforced only by someone remembering — should get the same three-part
    treatment rather than a fifth hand-swept instance.
+   SIX MORE SINCE (R507, R508, R520, R526, R527, R529), which is why the count above moved from
+   two to eight: `build-domain.cjs` verified a hand-written list of 28 export names while the
+   bundle published 108; `bundle-parity` checked seven names under the title "everything the
+   harness needs", of which the harness needed two; the preference sweep, two allow-lists, and a
+   test count in this very file. Every one was found by asking what DEFINES the list rather than
+   by reading the list.
+   AND THE EXEMPTION EXAMPLE ABOVE WAS ITSELF WRONG, which is the sharpest illustration this
+   entry has. `lang` was exempted from the `recap.tsx` check on the stated grounds that the live
+   screen knows its own language — and `recap.tsx` reads `payload.lang` to format the volume,
+   because a thousands separator is a locale decision. So the field was being skipped by the very
+   test written to catch an unread field, for the reason that it did not need checking. R526
+   removed it and made each exemption assert that the consumer genuinely does NOT read the field,
+   so a reason that stops being true now fails the build. A stated reason is necessary and is not
+   sufficient: prose does not fail. The surviving exemptions are `kind` and `watermark`.
 
 14. **A `<Text>` child does NOT give a control an accessible name.** react-native-web renders
    `<Text>` as a `<div>`, and Chrome's name-from-content does not cross it — measured against a
