@@ -705,6 +705,15 @@ export function NowScreen({
           {typing !== null ? (
             <TextInput
               style={[s.weight, s.weightInput, { fontSize: L.hero }]}
+              /*
+               * R569: the sibling of the R339 fix a few lines below, missed
+               * when this typed-weight field was added. L.hero is the same
+               * already-fitted value the resting <Text> exempts at line 737 —
+               * Dynamic Type multiplies on top of a fontSize regardless of
+               * which element carries it, and this is not paragraph text, it
+               * is the same dial in its editable form.
+               */
+              allowFontScaling={false}
               value={typing}
               onChangeText={typeWeight}
               onBlur={() => setTyping(null)}
