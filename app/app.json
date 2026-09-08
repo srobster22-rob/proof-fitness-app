@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "PROOF",
+    "slug": "proof",
+    "version": "0.1.0",
+    "scheme": "proof",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "backgroundColor": "#08090A",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "backgroundColor": "#08090A",
+      "resizeMode": "contain",
+      "image": "./assets/splash-icon.png"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.example.proof",
+      "buildNumber": "1",
+      "associatedDomains": [
+        "applinks:example.app"
+      ],
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.example.proof"
+        ]
+      },
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "PROOF adds your set's numbers to a clip you already filmed. Clips stay on your device.",
+        "NSSupportsLiveActivities": true,
+        "NSSupportsLiveActivitiesFrequentUpdates": true,
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.example.proof",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#08090A"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "example.app",
+              "pathPrefix": "/r"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}

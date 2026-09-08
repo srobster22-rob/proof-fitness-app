@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kill test harness</title>
+<style>
+  :root{ --panel:#0F1113; --line:#1E2226; --volt:#CCFF00; --muted:#7C8792; }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0B0C0E;color:#E8EAED;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:22px;display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+  .previews{display:flex;gap:16px;flex:0 0 auto}
+  .pv{display:flex;flex-direction:column;gap:8px}
+  .pv h2{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    margin:0;font-weight:700}
+  .pv h2 span{color:#4A535C;font-weight:500;letter-spacing:.02em;text-transform:none}
+  canvas{width:272px;height:483px;border-radius:16px;display:block;background:#000;
+    box-shadow:0 18px 50px rgba(0,0,0,.6)}
+  .side{flex:1;min-width:340px;max-width:520px}
+  h1{font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 4px;font-weight:700}
+  p.sub{color:#5A646E;font-size:12.5px;margin:0 0 16px;line-height:1.6}
+  label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin:14px 0 6px;font-weight:600}
+  input[type=text],input[type=number],textarea,select{
+    width:100%;background:#0A0C0D;color:#E8EAED;border:1px solid var(--line);
+    border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit}
+  textarea{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:11.5px;
+    line-height:1.55;resize:vertical}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  button,label.btn{background:var(--panel);color:#E8EAED;border:1px solid var(--line);
+    padding:9px 14px;border-radius:9px;font-size:13px;cursor:pointer;font-weight:500;
+    margin:0;text-transform:none;letter-spacing:0}
+  button:hover,label.btn:hover{border-color:#333A41}
+  button.primary{background:var(--volt);color:#000;border-color:var(--volt);font-weight:700}
+  button.on{border-color:var(--volt);color:var(--volt)}
+  button:disabled{opacity:.45;cursor:default}
+  input[type=file]{display:none}
+  input[type=range]{width:100%;accent-color:var(--volt);margin-top:8px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:13px;color:#E8EAED;
+    text-transform:none;letter-spacing:0;margin:14px 0 0}
+  .chk input{accent-color:var(--volt);width:16px;height:16px}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px;font-size:11.5px;line-height:1.6;margin:14px 0 0;white-space:pre-wrap;
+    font-family:ui-monospace,Consolas,monospace;color:#9AA5AE;max-height:190px;overflow:auto}
+  .bar{height:4px;background:#1A1D20;border-radius:3px;overflow:hidden;margin-top:12px}
+  .bar i{display:block;height:100%;width:0;background:var(--volt);transition:width .12s}
+</style>
+</head>
+<body>
+
+<div class="previews">
+  <div class="pv">
+    <h2>Clip <span>— FYP + group chat</span></h2>
+    <canvas id="cClip" width="1080" height="1920"></canvas>
+  </div>
+  <div class="pv">
+    <h2>Card <span>— stories + group chat</span></h2>
+    <canvas id="cCard" width="1080" height="1920"></canvas>
+  </div>
+</div>
+
+<div class="side">
+  <h1>Kill test harness</h1>
+  <p class="sub">Makes both shareable artifacts as real 1080×1920 H.264 .mp4 files, from one
+  real workout. Protocol and results ledger in <code>KILL-TEST.md</code>. Ten subjects,
+  fewer than three sending within 48 h kills the thesis.</p>
+
+  <label for="subject">Subject id <span style="text-transform:none;letter-spacing:0">(used in the filename — no real names)</span></label>
+  <input type="text" id="subject" value="S01">
+
+  <label for="json">Workout</label>
+  <textarea id="json" rows="14"></textarea>
+
+  <div class="row" style="margin-top:10px">
+    <button id="derive">Derive from raw sets</button>
+    <button id="sample">Load raw-set example</button>
+  </div>
+
+  <label for="clipSet">Number on the clip</label>
+  <select id="clipSet"></select>
+
+  <div class="row">
+    <label class="btn" for="clip">Load footage…</label>
+    <input type="file" id="clip" accept="video/*">
+    <button id="safe">Safe area</button>
+    <span id="clipInfo" style="font-size:12px;color:#5A646E;align-self:center"></span>
+  </div>
+
+  <label for="start">Clip window start — <span id="startLabel">0.0s</span>, 7 s long</label>
+  <input type="range" id="start" min="0" max="0" value="0" step="0.1" disabled>
+
+  <div class="row">
+    <button class="primary" id="both">Render both .mp4</button>
+    <button id="justClip">Clip only</button>
+    <button id="justCard">Card only</button>
+  </div>
+
+  <label for="base">Share link base <span style="text-transform:none;letter-spacing:0">— the message carries this next to the file</span></label>
+  <input type="text" id="base" value="https://example.app/r">
+
+  <label for="variant">Copy variant <span style="text-transform:none;letter-spacing:0">— assign round-robin across the ten subjects, record it in the ledger</span></label>
+  <select id="variant"></select>
+
+  <div class="row">
+    <button id="copyLink">Copy share link</button>
+    <button id="openLink">Open it</button>
+  </div>
+
+  <div class="bar"><i id="prog"></i></div>
+  <pre id="log">Ready. Paste a real workout above, load that lifter's footage, render.</pre>
+</div>
+
+<script src="../spike/recap.js"></script>
+<script src="../link/share-url.js"></script>
+<script src="../link/copy.js"></script>
+<script src="../app/dist/proof-domain.js"></script>
+<script src="clip.js"></script>
+<script src="mp4-muxer.js"></script>
+<script src="encode.js"></script>
+<script>
+const cClip = document.getElementById('cClip'), xClip = cClip.getContext('2d', {alpha:false});
+const cCard = document.getElementById('cCard'), xCard = cCard.getContext('2d', {alpha:false});
+const $ = id => document.getElementById(id);
+const log = m => { $('log').textContent = m; };
+const addLog = m => { $('log').textContent += '\n' + m; $('log').scrollTop = 1e6; };
+
+let video = null, videoDur = 0, safeGuides = false, busy = false;
+
+const SAMPLE = {
+  title: "PUSH DAY",
+  date: "TUE 28 JUL",
+  volume: 18420,
+  sets: 24,
+  duration: "52 MIN",
+  streak: 12,
+  unit: "lb",
+  watermark: "APPNAME",
+  pr: { lift: "BENCH PRESS", weight: 225, reps: 5, prev: 215 },
+  lifts: [
+    ["Bench Press", "225 × 5", true],
+    ["Incline DB Press", "80 × 10", false],
+    ["Cable Fly", "45 × 12", false],
+    ["OHP", "135 × 6", false],
+    ["Lateral Raise", "25 × 15", false]
+  ]
+};
+$('json').value = JSON.stringify(SAMPLE, null, 2);
+
+function data() {
+  try { return JSON.parse($('json').value); }
+  catch (e) { log('Workout JSON is invalid: ' + e.message); return null; }
+}
+
+// Populate the "which set goes on the clip" dropdown from the workout.
+function refreshSets() {
+  const d = data(); if (!d) return;
+  const sel = $('clipSet'), prev = sel.value;
+  sel.innerHTML = '';
+  (d.lifts || []).forEach((l, i) => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = `${l[0]} — ${l[1]}${l[2] ? '  (PR)' : ''}`;
+    sel.appendChild(o);
+  });
+  // default to the PR set, which is the one worth posting
+  const prIdx = (d.lifts || []).findIndex(l => l[2]);
+  sel.value = prev && sel.querySelector(`option[value="${prev}"]`) ? prev
+            : (prIdx >= 0 ? prIdx : 0);
+}
+
+function clipData() {
+  const d = data(); if (!d) return null;
+  const l = (d.lifts || [])[+$('clipSet').value];
+  if (!l) return null;
+  const m = String(l[1]).match(/([\d.]+)\s*[×x]\s*(\d+)/);
+  return {
+    lift: l[0],
+    weight: m ? m[1] : l[1],
+    reps: m ? m[2] : null,
+    unit: d.unit || 'lb',
+    isPR: !!l[2],
+    watermark: d.watermark || 'APPNAME'
+  };
+}
+
+function source() {
+  if (!video || video.readyState < 2) return null;
+  return { image: video, width: video.videoWidth, height: video.videoHeight };
+}
+
+function drawClip() {
+  const cd = clipData(); if (!cd) return;
+  ClipRender.render(xClip, source(), cd, { safeGuides });
+}
+function drawCard(t) {
+  const d = data(); if (!d) return;
+  RecapRender.render(xCard, t == null ? 5.4 : t, { data: d, safeGuides });
+}
+function drawAll() { drawClip(); drawCard(); }
+
+// ---- inputs ---------------------------------------------------------------
+$('json').oninput = () => { refreshSets(); drawAll(); };
+$('clipSet').onchange = drawClip;
+$('safe').onclick = e => {
+  safeGuides = !safeGuides;
+  e.target.classList.toggle('on', safeGuides);
+  drawAll();
+};
+$('clip').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  video = document.createElement('video');
+  video.src = URL.createObjectURL(f);
+  video.muted = true;
+  video.onloadeddata = async () => {
+    videoDur = video.duration || 0;
+    const max = Math.max(0, videoDur - ClipRender.MAX_DURATION);
+    $('start').max = max.toFixed(1);
+    $('start').value = 0;
+    $('start').disabled = max <= 0;
+    $('clipInfo').textContent = `${video.videoWidth}×${video.videoHeight} · ${videoDur.toFixed(1)}s`;
+    await Encode.seekTo(video, 0);
+    drawClip();
+    addLog(`Loaded footage: ${video.videoWidth}×${video.videoHeight}, ${videoDur.toFixed(1)}s`);
+  };
+};
+$('start').oninput = async () => {
+  $('startLabel').textContent = (+$('start').value).toFixed(1) + 's';
+  if (video) { await Encode.seekTo(video, +$('start').value); drawClip(); }
+};
+
+// ---- rendering ------------------------------------------------------------
+function setBusy(b) {
+  busy = b;
+  ['both','justClip','justCard'].forEach(id => $(id).disabled = b);
+}
+const prog = p => { $('prog').style.width = (p * 100).toFixed(1) + '%'; };
+
+async function renderClip() {
+  const cd = clipData(); if (!cd) throw new Error('no set selected');
+  const start = +$('start').value;
+  const dur = video ? Math.min(ClipRender.MAX_DURATION, Math.max(1, videoDur - start))
+                    : ClipRender.MAX_DURATION;
+  addLog(`Clip: ${dur.toFixed(1)}s from ${start.toFixed(1)}s …`);
+  const t0 = performance.now();
+  const blob = await Encode.encodeMP4({
+    canvas: cClip, fps: ClipRender.FPS, duration: dur,
+    drawFrame: async (t) => {
+      if (video) await Encode.seekTo(video, start + t);
+      ClipRender.render(xClip, source(), cd, {});   // never burn guides into output
+    },
+    onProgress: prog
+  });
+  const name = `${$('subject').value || 'S'}-clip.mp4`;
+  Encode.download(blob, name);
+  addLog(`  ${name} — ${(blob.size/1e6).toFixed(1)} MB in ${((performance.now()-t0)/1000).toFixed(1)}s`);
+}
+
+async function renderCard() {
+  const d = data(); if (!d) throw new Error('bad workout json');
+  addLog(`Card: ${RecapRender.DURATION}s …`);
+  const t0 = performance.now();
+  const blob = await Encode.encodeMP4({
+    canvas: cCard, fps: RecapRender.FPS, duration: RecapRender.DURATION,
+    drawFrame: async (t) => RecapRender.render(xCard, t, { data: d }),
+    onProgress: prog
+  });
+  const name = `${$('subject').value || 'S'}-card.mp4`;
+  Encode.download(blob, name);
+  addLog(`  ${name} — ${(blob.size/1e6).toFixed(1)} MB in ${((performance.now()-t0)/1000).toFixed(1)}s`);
+}
+
+async function run(fn) {
+  if (busy) return;
+  setBusy(true); prog(0);
+  try { await fn(); addLog('Done.'); }
+  catch (e) { addLog('FAILED: ' + (e && e.message ? e.message : e)); }
+  finally { setBusy(false); prog(0); drawAll(); }
+}
+
+$('justClip').onclick = () => run(renderClip);
+$('justCard').onclick = () => run(renderCard);
+$('both').onclick = () => run(async () => { await renderClip(); await renderCard(); });
+
+// ---- derive the payload from raw sets, using the app's own domain logic ----
+// The harness used to render hand-typed payloads, which meant the videos shown
+// to real lifters were NOT produced by the product's logic — PR flags, volume
+// and streak were whatever the operator typed. Now they come from the same code
+// the app runs (app/dist/proof-domain.js, parity-tested against the source).
+const RAW_EXAMPLE = {
+  title: 'PUSH DAY',
+  unit: 'lb',
+  weeksOfHistory: 8,
+  // [exerciseId, display name, weight, reps, minutes into the session]
+  sets: [
+    ['bench', 'Bench Press', 135, 8, 4],
+    ['bench', 'Bench Press', 185, 5, 9],
+    ['bench', 'Bench Press', 225, 5, 15],
+    ['bench', 'Bench Press', 225, 5, 20],
+    ['incline', 'Incline DB Press', 80, 10, 28],
+    ['fly', 'Cable Fly', 45, 12, 35],
+    ['ohp', 'OHP', 135, 6, 43],
+    ['lateral', 'Lateral Raise', 25, 15, 50]
+  ],
+  // what they were doing before today, per exercise: [weight, reps]
+  previous: {
+    bench: [215, 5], incline: [75, 10], fly: [40, 12], ohp: [130, 6], lateral: [25, 15]
+  }
+};
+
+function deriveFromRaw(raw) {
+  const DAY = 864e5, MIN = 6e4;
+  const now = Date.now();
+  const startedAt = now - 55 * MIN;
+  const exercises = new Map();
+  for (const [id, name] of raw.sets) exercises.set(id, { id, name });
+
+  let uid = 0;
+  const mk = (id, w, r, at, sid) =>
+    ({ id: `x${uid++}`, sessionId: sid, exerciseId: id, weight: w, reps: r, at });
+
+  // Synthesise the prior weeks so PR detection has something real to compare
+  // against — including the 3-session cold-start guard.
+  const history = [];
+  const weeks = raw.weeksOfHistory ?? 8;
+  for (let w = weeks; w >= 1; w--) {
+    const at = now - w * 7 * DAY;
+    for (const [id] of exercises) {
+      const prev = raw.previous?.[id];
+      if (!prev) continue;
+      history.push(mk(id, prev[0], prev[1], at, `h${w}`));
+    }
+  }
+
+  const today = raw.sets.map(([id, , w, r, min]) => mk(id, w, r, startedAt + min * MIN, 'today'));
+  const session = { id: 'today', startedAt, endedAt: now, unit: raw.unit || 'lb' };
+  const prs = Domain.findPRs(today, history, exercises, raw.unit || 'lb');
+
+  return Domain.buildRecap({
+    session, sets: today, exercises, prs,
+    allSets: history.concat(today), now,
+    title: raw.title, watermark: Copy.NAME
+  });
+}
+
+$('sample').onclick = () => {
+  $('json').value = JSON.stringify(RAW_EXAMPLE, null, 2);
+  addLog('Loaded a raw-set example. Hit "Derive from raw sets".');
+};
+
+$('derive').onclick = () => {
+  let raw;
+  try { raw = JSON.parse($('json').value); }
+  catch (e) { return addLog('Invalid JSON: ' + e.message); }
+  if (!Array.isArray(raw.sets) || !Array.isArray(raw.sets[0])) {
+    return addLog('Expected a raw-set workout — hit "Load raw-set example" to see the shape.');
+  }
+  try {
+    const payload = deriveFromRaw(raw);
+    $('json').value = JSON.stringify(payload, null, 2);
+    refreshSets(); drawAll();
+    const badged = payload.lifts.filter(l => l[2]).map(l => l[0]);
+    addLog(`Derived by domain logic: ${payload.volume} ${payload.unit}, ${payload.sets} sets, ` +
+           `streak ${payload.streak}\nPR: ${payload.pr ? payload.pr.lift + ' ' + payload.pr.weight + '×' + payload.pr.reps : 'none'}` +
+           `\nbadged: ${badged.join(', ') || 'none'}`);
+  } catch (e) {
+    addLog('Derive failed: ' + e.message);
+  }
+};
+
+// ---- share link -----------------------------------------------------------
+// The send token identifies the SEND, not the person — it is what lets a later
+// install be attributed to a campaign without tracking anybody.
+Copy.ids.forEach(id => {
+  const o = document.createElement('option');
+  o.value = id; o.textContent = `${id} — ${Copy.VARIANTS[id].note}`;
+  $('variant').appendChild(o);
+});
+$('variant').value = 'c';   // the pre-registered prediction
+
+function shareLink(base) {
+  const d = data(); if (!d) return null;
+  const ref = ($('subject').value || 'S').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const url = ShareURL.buildURL(base || $('base').value.trim(), d, ref);
+  return url.replace('#', `&v=${$('variant').value}#`);
+}
+$('copyLink').onclick = async () => {
+  const url = shareLink(); if (!url) return;
+  try { await navigator.clipboard.writeText(url); addLog(`Copied (${url.length} chars):\n${url}`); }
+  catch (e) { addLog(`Clipboard blocked. Link (${url.length} chars):\n${url}`); }
+};
+$('openLink').onclick = () => {
+  const url = shareLink('../link/index.html');
+  if (url) window.open(url, '_blank');
+};
+
+refreshSets();
+drawAll();
+window.__h = { drawAll, renderClip, renderCard, data, clipData, shareLink };
+</script>
+</body>
+</html>

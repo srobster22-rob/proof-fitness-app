@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recap render spike</title>
+<style>
+  :root{ --panel:#0F1113; --line:#1E2226; --volt:#CCFF00; --muted:#7C8792; }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0B0C0E;color:#E8EAED;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    display:flex;gap:28px;padding:24px;align-items:flex-start;flex-wrap:wrap}
+  canvas{width:338px;height:600px;border-radius:22px;display:block;
+    box-shadow:0 24px 70px rgba(0,0,0,.65);background:#000}
+  .side{flex:1;min-width:330px;max-width:560px}
+  h1{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 4px;font-weight:600}
+  p.sub{color:#5A646E;font-size:12.5px;margin:0 0 18px;line-height:1.6}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  button,label.btn{background:var(--panel);color:#E8EAED;border:1px solid var(--line);
+    padding:9px 14px;border-radius:9px;font-size:13px;cursor:pointer;font-weight:500}
+  button:hover,label.btn:hover{border-color:#333A41}
+  button.primary{background:var(--volt);color:#000;border-color:var(--volt);font-weight:700}
+  button.on{border-color:var(--volt);color:var(--volt)}
+  input[type=range]{width:100%;accent-color:var(--volt)}
+  input[type=file]{display:none}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px;font-size:12px;line-height:1.65;overflow:auto;margin:0;
+    font-family:ui-monospace,"Cascadia Code",Consolas,monospace;white-space:pre-wrap}
+  .k{color:var(--volt)}
+</style>
+</head>
+<body>
+
+<canvas id="c" width="1080" height="1920"></canvas>
+
+<div class="side">
+  <h1>Recap render spike</h1>
+  <p class="sub">Drawing comes from <code>recap.js</code> — the same file
+  <code>render-frames.cjs</code> uses in Node and that <code>RecapRenderer.swift</code>
+  is ported from. Edit it and reload; no build step.</p>
+
+  <div class="row">
+    <button class="primary" id="play">▶ Play</button>
+    <button id="safe">Safe area</button>
+    <button id="bench">Benchmark</button>
+    <button id="rec">● Export .webm</button>
+    <label class="btn" for="clip">Load a real clip</label>
+    <input type="file" id="clip" accept="video/*">
+  </div>
+
+  <input type="range" id="scrub" min="0" max="6000" value="5400" step="16">
+  <div style="height:14px"></div>
+  <pre id="out">Scrub the timeline, or hit Benchmark.</pre>
+</div>
+
+<script src="recap.js"></script>
+<script>
+const R = window.RecapRender;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d', { alpha: false });
+const out = document.getElementById('out');
+const scrub = document.getElementById('scrub');
+
+let clipEl = null;        // optional <video> composited underneath
+let safeGuides = false;
+
+function opts() {
+  const o = { safeGuides };
+  if (clipEl && clipEl.readyState >= 2) {
+    o.clip = { image: clipEl, width: clipEl.videoWidth, height: clipEl.videoHeight };
+  }
+  return o;
+}
+const draw = t => R.render(ctx, t, opts());
+
+// ---- playback --------------------------------------------------------------
+let raf = null, t0 = 0;
+function stop(){ if (raf) cancelAnimationFrame(raf); raf = null;
+  document.getElementById('play').textContent = '▶ Play'; }
+function loop(now) {
+  const t = (now - t0) / 1000;
+  if (t >= R.DURATION) { stop(); draw(R.DURATION); scrub.value = R.DURATION * 1000; return; }
+  draw(t); scrub.value = t * 1000;
+  raf = requestAnimationFrame(loop);
+}
+document.getElementById('play').onclick = () => {
+  if (raf) return stop();
+  t0 = performance.now();
+  if (clipEl) { clipEl.currentTime = 0; clipEl.play().catch(()=>{}); }
+  document.getElementById('play').textContent = '❚❚ Pause';
+  raf = requestAnimationFrame(loop);
+};
+scrub.oninput = () => { stop(); const t = scrub.value / 1000;
+  if (clipEl) clipEl.currentTime = Math.min(t, clipEl.duration || t);
+  draw(t); };
+
+document.getElementById('safe').onclick = e => {
+  safeGuides = !safeGuides;
+  e.target.classList.toggle('on', safeGuides);
+  draw(scrub.value / 1000);
+};
+
+document.getElementById('clip').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  clipEl = document.createElement('video');
+  clipEl.src = URL.createObjectURL(f); clipEl.muted = true; clipEl.loop = true;
+  clipEl.onloadeddata = () => {
+    draw(scrub.value / 1000);
+    out.textContent = `Clip: ${clipEl.videoWidth}×${clipEl.videoHeight}, ${clipEl.duration.toFixed(1)}s`;
+  };
+};
+
+// ---- benchmark: the number that decided the architecture -------------------
+document.getElementById('bench').onclick = () => {
+  const N = Math.round(R.DURATION * R.FPS), times = [];
+  for (let i = 0; i < 30; i++) draw(i / R.FPS);            // warm up
+  for (let i = 0; i < N; i++) {
+    const a = performance.now();
+    draw(i / R.FPS);
+    ctx.getImageData(0, 0, 1, 1);                          // force rasterisation
+    times.push(performance.now() - a);
+  }
+  times.sort((a, b) => a - b);
+  const sum = times.reduce((s, v) => s + v, 0), avg = sum / N, budget = 1000 / R.FPS;
+  out.innerHTML =
+`frames        <span class="k">${N}</span> @ ${R.W}×${R.H}, ${R.FPS}fps
+wall clock    <span class="k">${sum.toFixed(0)} ms</span> for ${(R.DURATION*1000).toFixed(0)} ms of video
+avg / frame   <span class="k">${avg.toFixed(2)} ms</span>
+p95 / frame   <span class="k">${times[Math.floor(N*0.95)].toFixed(2)} ms</span>
+worst frame   <span class="k">${times[N-1].toFixed(2)} ms</span>
+30fps budget  33.33 ms → using <span class="k">${(avg/budget*100).toFixed(1)}%</span>
+draw speed    <span class="k">${(budget/avg).toFixed(1)}× realtime</span> (overlay only, no encode)`;
+};
+
+// ---- webm export (proves an encodable sequence, not the iOS encoder) -------
+document.getElementById('rec').onclick = () => {
+  const chunks = [];
+  const mr = new MediaRecorder(cv.captureStream(R.FPS),
+    { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 12e6 });
+  mr.ondataavailable = e => e.data.size && chunks.push(e.data);
+  mr.onstop = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
+    a.download = 'recap.webm'; a.click();
+    out.textContent = 'Exported recap.webm';
+  };
+  mr.start();
+  t0 = performance.now();
+  if (clipEl) { clipEl.currentTime = 0; clipEl.play().catch(()=>{}); }
+  raf = requestAnimationFrame(loop);
+  setTimeout(() => { mr.stop(); stop(); }, R.DURATION * 1000 + 250);
+};
+
+draw(5.4);
+window.__draw = draw;   // handle for automated screenshotting
+</script>
+</body>
+</html>

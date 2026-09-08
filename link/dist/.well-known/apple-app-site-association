@@ -1,0 +1,22 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.com.example.appname"],
+        "components": [
+          {
+            "/": "/r",
+            "comment": "recap share link, bare"
+          },
+          {
+            "/": "/r/*",
+            "comment": "recap share link with a send token"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": []
+  }
+}
