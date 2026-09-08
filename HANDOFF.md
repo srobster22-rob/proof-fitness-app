@@ -24,7 +24,7 @@ Read these in order before touching anything:
 
 ```bash
 cd C:\Users\srobs\fitness-app\app
-npm test        # 1,561 green — deps audit + domain bundle + tests + tsc
+npm test        # deps audit + domain bundle + tests + tsc; run it for the count
 npm run web     # the SAME app, running through react-native-web at localhost:8099
 ```
 
