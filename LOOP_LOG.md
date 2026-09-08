@@ -2380,3 +2380,38 @@ earlier ~18-strategy edge search concluded similarly. Five owner decisions
 remain the highest-value lever, tab bar first, 63 rounds waiting -- the
 Vision response filed in R586 asked for a screenshot with what looks off,
 which is now the most likely unlock for further product-shaped work.
+
+R591 - Stage 0: OWNER.md unchanged since R586. IDEATE: a genuinely new angle
+after six rounds of code-correctness auditing -- WCAG colour contrast, never
+checked anywhere in this segment or (by grep) in any existing test file.
+Chose it because it is OBJECTIVE rather than a taste call: unlike "does the
+main screen look professional" (explicitly filed back to the owner in R586),
+a contrast ratio either clears 4.5:1 for body text or it does not, and fixing
+one needs no product judgement.
+BUILD (a reading/computation audit, no code changed): pulled every text
+`color:` and `backgroundColor:` hex literal out of src/ui/*.ts and app/*.tsx,
+computed WCAG relative-luminance contrast ratios for the real pairings.
+First pass cross-multiplied every text colour against every background colour
+found anywhere and got two apparent failures under 4.5:1 -- #7C8792 and
+#B87A7A against #2A323A (3.55 and 3.78) and #7C8792 against #1A2026 (4.49).
+Before reporting either, checked whether that PAIRING actually occurs in the
+product rather than trusting the cross-product, the same discipline this
+segment has needed before (R586's stale-seed lesson, HANDOFF trap 16's empty
+matcher): #2A323A is used only as a border colour and a 4px decorative drag
+handle, never a text-bearing fill; #1A2026 is only a 6px progress-bar track.
+Neither ever sits under real text. Recomputed against backgrounds actually
+used as text-bearing surfaces (#131A08, #0E1114, #111417, #0C0E10, #101519,
+plus the base #08090A) and every real pairing clears 4.5:1, most well above
+7:1. One colour, #39414A, appears in the source only inside a comment
+recording that R117 already retired it for measuring 1.83:1 -- confirmed by
+grep that no live style still uses it.
+REVIEW: no code changed, nothing to plant. Ran the suite as a floor: 2139
+pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: seven rounds (R585-R591) across six different methods, all clean.
+Filed nowhere new needed -- there is no contrast gap to hand the owner. The
+technical queue is now about as thin as this segment has found it since the
+18-strategy edge search concluded; self-directed work should keep rotating
+through fresh METHODS rather than repeating audits already run clean, but the
+five owner decisions (tab bar first, 64 rounds) remain the actual ceiling on
+further product-shaped progress until the owner looks.
