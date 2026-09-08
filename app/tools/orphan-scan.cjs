@@ -102,6 +102,18 @@ const ACKNOWLEDGED = {
    * acknowledged list whose reasons are wrong is worse than no list, which
    * R462 already found out the hard way with `headline`.
    */
+  coachSuggestion:
+    'the OWNER.md #2 rule engine (R517). Deliberately unwired for exactly one round: ' +
+    'the engine is the half that can be proven right against fixtures and against the ' +
+    "app's own seeded history, and it already caught a real defect that way — it told a " +
+    'lifter on linear progression to "stay here" at a weight they had hit once. The ' +
+    'screen half is a separate problem and a harder one: the Now column has no vertical ' +
+    'room at all (R512 measured the 568px phone at 624px of unshrinkable content), so ' +
+    'where a suggestion line goes has to be solved before it can be rendered, and ' +
+    'solving it badly is how R511 pushed LOG SET below the fold. Removes when: the Now ' +
+    'screen renders the line, which is the next round — if this entry is still here ' +
+    'several rounds later, the engine is speculative code and should be deleted rather ' +
+    'than kept.',
   lastSetOf:
     'a Repo method whose own comment calls it "the single hottest read in the app" and ' +
     'says the §4 prefill "is where the value comes from" — and no production code calls ' +

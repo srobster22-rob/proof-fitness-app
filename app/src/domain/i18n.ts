@@ -142,6 +142,20 @@ const EN = {
   nextUpToday: 'NEXT UP TODAY',
 
   // Progress
+  /*
+   * The coach line (OWNER.md #2). Keys, not sentences, because `coach.ts` is
+   * not allowed to produce English — see the note on `Suggestion.key`.
+   *
+   * Each one names what you DID before what to try, because the evidence is
+   * what makes the advice worth reading: '185 lb for 3 sessions' is checkable
+   * against the list further down the same screen, and 'try 190' on its own is
+   * not.
+   */
+  coachIncrease: '{weight} for {n} sessions — try {suggest}',
+  coachPlateau: 'Stuck at {weight} for {n} — try {suggest}',
+  coachDeload: '{weight} is grinding — back off to {suggest}',
+  coachSettle: 'First time at {weight}×{reps} — repeat it before adding',
+  coachHold: '{weight} last {n} — stay here and add a rep',
   goalTagWord: 'GOAL',
   toWord: 'TO',
   pushDay: 'PUSH DAY',
@@ -773,6 +787,11 @@ const ES: Partial<Record<Key, string>> = {
   nextOnFull: 'SIGUE HOY EN CUERPO COMPLETO',
   nextUpToday: 'LO SIGUIENTE HOY',
 
+  coachIncrease: '{weight} en {n} sesiones — prueba {suggest}',
+  coachPlateau: 'Atascado en {weight} durante {n} — prueba {suggest}',
+  coachDeload: '{weight} te cuesta — baja a {suggest}',
+  coachSettle: 'Primera vez con {weight}×{reps} — repítelo antes de subir',
+  coachHold: '{weight} las últimas {n} — quédate y suma una repetición',
   goalTagWord: 'META',
   toWord: 'A',
   pushDay: 'DÍA DE EMPUJE',
