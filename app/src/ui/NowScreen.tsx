@@ -2329,10 +2329,10 @@ const s = StyleSheet.create({
   todayTotals: { color: MUTED, fontSize: 12, fontWeight: '700' },
   todayScroll: { flex: 1, minHeight: 0 },
 
-  liftBlock: { paddingVertical: 9 },
+  liftBlock: { paddingVertical: 12 },
   liftHead: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   liftDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: VOLT },
-  liftName: { color: '#9AA5AF', fontSize: 12, fontWeight: '700', letterSpacing: .4, flexShrink: 1 },
+  liftName: { color: '#C7CED6', fontSize: 14, fontWeight: '800', letterSpacing: .2, flexShrink: 1 },
   liftNameCurrent: { color: '#E8EAED' },
   liftCount: { color: '#7C8792', fontSize: 11, fontWeight: '700', marginLeft: 'auto' },
   liftEmpty: { color: '#7C8792', fontSize: 12, marginTop: 5, fontStyle: 'italic' },
