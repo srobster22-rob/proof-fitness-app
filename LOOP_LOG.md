@@ -1513,3 +1513,47 @@ in my OWN recent work (R559's six seeds, R562's regression, R563's duplicate),
 and none was found by the surface I was changing. If there is a rule here it is
 that a change should be checked from where it is CONSUMED, not from where it is
 written. The four owner questions still stand, tab bar first since R523.
+
+R564 — PICK (logged first): the exercise PICKER and the add-a-custom-exercise
+path. Shortlist was (a) that, (b) a duplicate-object-key scanner off R563's
+find, (c) the skip-reasons filing. Picked (a): it is the last user flow never
+walked — equipment, goals, settings, progress, recap, first run, restore and
+erase have all had a pass — and it is the one place a user TYPES something the
+app then stores forever under a name of their choosing. R446 already showed
+custom exercises interact with erase in a way nobody had noticed. Ruled out (b)
+as too broad for its evidence: one duplicate key is not a class until it happens
+twice, and R563 already gates the site it happened at. Contract: a name the user
+types is either accepted and findable afterwards, or rejected with a reason —
+never silently dropped, and never creating a second entry for a lift they
+already have.
+
+R564 — BUILD/REVIEW/SHIP on the pick logged above. Walked the exercise picker
+and the add-a-custom-exercise path, the last user flow never exercised, and it
+is SOUND — the third surface in a row where the honest result is "nothing
+broken". Blank names refused; duplicates resolved rather than duplicated, across
+case, hyphens AND runs of spaces, so "  Bench   Press  " finds the builtin; a
+96-letter name accepted and ellipsized cleanly at 375px with no horizontal
+overflow, which `now-layout.test.ts` already guards with the definite-width fix
+that makes ellipsis possible at all. Wrote nothing for any of that, because
+duplicating coverage to make a round look productive is the opposite of the job.
+ONE PATH HAD NOTHING ON IT and it is the one where a failure would be silent. A
+name made entirely of characters the slug drops — "---" — slugifies to the
+empty string, so the id falls through to a generated one built from
+`Date.now()`, and two added in the same millisecond share a stem. Everywhere
+else in this flow a collision would error on the primary key; here it would
+quietly MERGE two of a lifter's own movements, with every set logged against
+either landing on one. The behaviour is right — `freeSlug` de-duplicates against
+the ids already taken, so seven punctuation-only names really are seven lifts,
+each keeping the text that was typed — and nothing said so. Also pinned that the
+generated id survives being used as an id: selectable, and a set can be logged
+against it, because an id that only half works fails later and somewhere else.
+REVIEW: suite 2103 pass / 0 fail (real count, up 4). Two plants: make `freeSlug`
+skip its de-duplication and seven movements collapse into two, caught by name;
+drop the whitespace collapse and a second Bench Press appears. Product verified
+by adding a 96-letter movement through the real picker and reading the hero at
+mobile width, then reseeding — the custom lift is gone and the app is back on
+the seeded history. SHIP: `--check` current, `link/build.cjs` dist/ ready. |
+next: every flow in the app has now been walked. Three consecutive rounds found
+no defect in the product and two found defects in MY recent work, which is the
+clearest signal yet about where the risk actually is. Four owner questions
+remain, tab bar first since R523.
