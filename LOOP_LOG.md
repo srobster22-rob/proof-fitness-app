@@ -1782,3 +1782,46 @@ this session spent rounds warning against in OTHER tests. Contract: make the
 timing assertion robust to load without weakening what it actually catches —
 verified by re-planting R494's real defect and confirming it still fails, same
 as R565's original review.
+
+R571 — Stage 0: OWNER.md still four blocked decisions. Went to stabilise
+R565's timing test, flaky under full-suite load for three rounds running, and
+the investigation found the original test's own claim was WRONG, not just
+noisy. Re-planting R494's "actual defect" as R565 described it — a loop
+inside \`goalProgress\` — never once affected the "eight times the history"
+test, because that fixture has zero goals and \`goalHint()\` returns before
+\`goalProgress\` is ever called; the round-565 log's claim of a reliable catch
+was itself noise misread as signal, the exact failure this session has spent
+many rounds warning against, this time in my own earlier work. Traced the REAL
+regression to the call site — \`this.setsFor(goal.exerciseId)\` reverted to
+\`this.repo.allSets()\` — and measured it properly: isolated, a stable 1.46x
+against a clean 1.31-1.36x, a real ~10% gap with no overlap across five
+separate runs. Tried to gate that gap directly and it BACKFIRED: tightening
+the threshold to sit inside the isolated-measurement gap (1.42) made the test
+flake on CLEAN code under full-suite load, because the app's own MAX_GOALS
+cap (100) means the signal cannot be amplified past what contention noise can
+swamp. WIDENING WAS THE HONEST FIX, NOT MORE PRECISION. Reverted the goals
+threshold to 3x (R565's original) and the eight-times threshold to 10x — both
+now catch only order-of-magnitude regressions reliably, and BOTH SAY SO
+in their own comments rather than implying a precision they cannot deliver
+under load. The specific 1.4x regression gets a DIFFERENT kind of backstop: a
+new source-level test asserting \`goalHint\` still calls \`this.setsFor\`, not
+\`this.repo.allSets()\` — cheap, sub-2ms, and unaffected by contention because
+it reads a file rather than a clock. Caught the exact regression on all three
+plant attempts, instantly, every time. A third test ("re-rendering... nearly
+free") also flaked once during ten full-suite verification runs and got the
+same honest treatment — widened from 2x to 4x margin with the reasoning
+stated. REVIEW: ten consecutive full-suite runs (2123 tests each) with zero
+failures, after multiple rounds of failing 1-2 times per 3 runs before the
+fix. Three separate plants of the real regression, each caught reliably by
+the new source check. Verified in the PRODUCT: Now screen renders normally on
+the seeded history. \`--check\` current; no share code moved so
+\`link/build.cjs\` was not needed. Committed as 7d1ecb6 inside fitness-app;
+diff on now-model.ts and goals.ts is EMPTY — every plant during this
+investigation was fully reverted, only the test file changed. | next: the
+honest lesson is bigger than this one file — a timing-based test run inside a
+large parallel suite cannot reliably gate a regression under roughly 2x the
+size of normal run-to-run noise, no matter how the samples are massaged
+(median, sum, more iterations all tried and all failed under real
+contention). Where that precision matters, the fix is a structural source
+check, not a faster stopwatch. Four owner questions remain, tab bar first
+since R523.
