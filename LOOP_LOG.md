@@ -912,3 +912,44 @@ saying so, because five rounds of grid work is exactly the context in which
 somebody "fixes" it. Tab bar remains the top item and the owner's; R548's
 strength-vs-size question is filed beside it. Also owner-only: the R508 bundle
 scope (~48 kB) and the two R483 items.
+
+R551 — PICK (logged first): finish the grid work by protecting what must NOT be
+snapped. Shortlist was (a) the `MAX_CLIMB_FRACTION` note, (b) sweep the OTHER
+screens (Progress, Goals, recap) for weights the app invents rather than
+reports, (c) the typed-weight path, which is now the only way to reach an
+off-grid number. Picked (a)+(b) as one round, because they are the same
+question asked twice: after five rounds of "put it on the grid", the live risk
+is somebody rounding a weight the lifter actually LIFTED. §16 wants the real
+number reported and a reachable one suggested, and nothing states which side of
+that line each number is on.
+
+R551 — BUILD/REVIEW/SHIP on the pick logged above, and this round FOUND NOTHING
+WRONG, which is the finding. Swept every surface with a converted history: Now
+header "189.5 and climbing", the weight field 189.5, Progress `best` 189.5 and
+`trend` 14.5, the recap card 86 in kg — the unit it was typed in. All exact, all
+correct. What is missing is not a fix, it is the RULE, because five rounds of
+putting weights on the grid have made "round it" the obvious move in this repo
+and the next person to make it will be right four times and wrong once. §16
+draws the line and nothing enforced it: a SUGGESTED weight must exist on a rack
+because the lifter is asked to load it, a REPORTED weight must match what
+happened because the lifter is asked to recognise it. 86 kg is 189.5 lb, so
+"190 and climbing" is a sentence they cannot check against anything they did.
+Five tests, one per surface, plus a note on `MAX_CLIMB_FRACTION` — the last bare
+fraction in coach.ts and therefore the obvious next target — recording that it
+is a TEST rather than a suggestion, applied to weights already lifted, and never
+reaches a screen. REVIEW: suite 2032 pass / 0 fail (real count, up 5). Four
+plants, each the tidy-up a reasonable person would make, and each fails by its
+own name: rounding Progress's `best` fails the Progress test, snapping the
+coach's `recentWeight` fails the header test, rounding the prefill fails the
+field test, deleting the note fails the note test. Verified in the PRODUCT on
+the off-grid seed — Now reads "189.5 and climbing, 4 sessions — try 195" with
+the field at 189.5, and Progress reads "189.5 × 5" and "+14.5 lb" — both sides
+of the line visible on two screens at once. SHIP: `--check` current,
+`link/build.cjs` dist/ ready, plants reverted, app reseeded to seed.b64. | next:
+the weight story is now closed end to end — stored exactly (R544), consumed in
+the right form (R542/R543), suggested on plates (R548/R549/R550), reported
+honestly (R551). Worth moving somewhere else entirely next round rather than
+mining the same seam a seventh time; the recap/share surface has had one real
+defect this session (R540) and no systematic pass. Tab bar remains the top item
+and the owner's; R548's strength-vs-size question is filed beside it. Also
+owner-only: the R508 bundle scope (~48 kB) and the two R483 items.

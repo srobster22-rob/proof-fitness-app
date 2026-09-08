@@ -136,6 +136,16 @@ const STEP: Record<TrainingGoal, number> = { strength: 5, size: 2.5, consistency
  * advice, not merely the wrong size — and the engine already has the honest
  * thing to say about a weight you have hit once: repeat it before adding.
  */
+/*
+ * NOT A SUGGESTION, AND SO NOT ON THE GRID (R551).
+ *
+ * R548 through R550 put every weight the app SUGGESTS onto loadable plates, and
+ * this is the one bare fraction left in the file — which makes it the obvious
+ * next thing to "fix". Do not. It is a TEST applied to weights the lifter has
+ * already lifted, asking whether a jump is believable; it never reaches the
+ * screen and no plate has to make it. Rounding it would only move the
+ * threshold, and the threshold is deliberately soft.
+ */
 export const MAX_CLIMB_FRACTION = 0.1;
 const TARGET_REPS: Record<TrainingGoal, number> = { strength: 5, size: 8, consistency: 8 };
 
