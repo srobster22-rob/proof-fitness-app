@@ -85,10 +85,38 @@ describe('every RecapPayload field is at least mentioned in recap.tsx', () => {
    * inconvenient otherwise; this exact assumption is what R290's own version
    * of this test warns against making blindly.
    */
-  const EXEMPT = new Set(['lang', 'kind', 'watermark']);
+  /*
+   * R526 corrected this. `lang` was exempt on the stated grounds that "the
+   * live screen already knows its own language" — and recap.tsx:155 reads
+   * `payload.lang` to format the volume, because a thousands separator is a
+   * locale decision (11,130 against 11.130). The exemption was skipping a
+   * field the screen genuinely depends on, which is the exact gap this suite
+   * exists to catch.
+   *
+   * So an exemption now has to prove itself: `absent` means the consumer must
+   * NOT mention the field at all, and the test fails if it ever starts to.
+   * A reason written in prose above a bare Set cannot do that — R464 made the
+   * same correction in accent.test.ts and it was never swept to here.
+   */
+  const EXEMPT: Record<string, { why: string; expect: 'absent' }> = {
+    kind: { why: 'the live screen always renders the per-session card, never the weekly digest', expect: 'absent' },
+    watermark: { why: 'signs an artifact that leaves the app unaccompanied; this screen IS the app', expect: 'absent' }
+  };
+
+  for (const [field, { why }] of Object.entries(EXEMPT)) {
+    test(`recap.tsx genuinely does not need "${field}"`, () => {
+      // `\\.` and `\\b`, not `\.` and `\b`: inside a template literal the single
+      // backslash is dropped, so the pattern became `payload.kind<backspace>`
+      // and matched nothing. The guard passed while blind — which is the exact
+      // defect this round is about, in the code written to catch it.
+      assert.doesNotMatch(src, new RegExp(`payload\\.${field}\\b`),
+        `${field} is exempt because "${why}" — and recap.tsx reads payload.${field}, ` +
+        'so the reason is false and the field is going unchecked');
+    });
+  }
 
   for (const field of FIELDS) {
-    if (EXEMPT.has(field)) continue;
+    if (field in EXEMPT) continue;
     test(`recap.tsx mentions "${field}"`, () => {
       assert.match(src, new RegExp(`\\b${field}\\b`),
         `RecapPayload.${field} is never referenced in recap.tsx — the live screen the user sees first ` +
@@ -112,10 +140,29 @@ describe('every RecapPayload field is at least mentioned in shareText', () => {
    * payload). `title`/`date`/`duration` are chrome the message never quotes;
    * a sentence does not print its own timestamp.
    */
-  const EXEMPT = new Set(['title', 'date', 'duration', 'lang', 'kind']);
+  /*
+   * `lang` is exempt HERE and not above, and the difference is real rather
+   * than an oversight: `shareText` takes `lang` as its own PARAMETER and never
+   * reads `payload.lang`. So its check is that the payload field is unused,
+   * not that the word is absent — the word appears thirteen times.
+   */
+  const EXEMPT: Record<string, string> = {
+    title: 'chrome the message never quotes',
+    date: 'a sentence does not print its own timestamp',
+    duration: 'chrome the message never quotes',
+    lang: 'taken as a parameter, never read off the payload',
+    kind: 'the message is always about one session'
+  };
+
+  for (const [field, why] of Object.entries(EXEMPT)) {
+    test(`shareText genuinely does not read payload.${field}`, () => {
+      assert.doesNotMatch(src, new RegExp(`payload\\.${field}\\b`),
+        `${field} is exempt because "${why}" — and shareText reads payload.${field}`);
+    });
+  }
 
   for (const field of FIELDS) {
-    if (EXEMPT.has(field)) continue;
+    if (field in EXEMPT) continue;
     test(`shareText mentions "${field}"`, () => {
       assert.match(src, new RegExp(`\\b${field}\\b`),
         `RecapPayload.${field} is never referenced in shareText — the message that actually leaves ` +
