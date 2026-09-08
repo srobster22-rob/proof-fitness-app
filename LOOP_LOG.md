@@ -1102,3 +1102,50 @@ surfaces are the Goals screen and the first-run path, and neither has had a pass
 this session. Tab bar remains the top item and the owner's; R548's
 strength-vs-size question is filed beside it. Also owner-only: the R508 bundle
 scope (~48 kB) and the two R483 items.
+
+R555 — PICK (logged first): the FIRST-RUN path, walked in the product. Shortlist
+was (a) the Goals screen, (b) first run, (c) more test infrastructure — (c) is
+ruled out by my own last entry, which is the point of writing the ratio down.
+Picked (b) over (a) because it is the one screen every user sees and the one
+nobody in this session has looked at: every measurement for eighteen rounds has
+been taken against a SEEDED history, and OWNER.md's complaint was that the main
+screen "looks a little sloppy and AI-generated" — a judgement about what a
+person sees on opening the app, which on day one is a cold start with nothing in
+it. Method: clear the database in the running app and walk it as a new user,
+recording what is actually on screen rather than what the code says should be.
+
+R555 — BUILD/REVIEW/SHIP on the pick logged above, and the round's best decision
+was NOT to build the thing I found. Walked first run in the product with the
+database cleared: split chooser, day chooser, first logged set, the SESSION ONE
+recap ("SESSION ONE / 45 x 8 / BENCH PRESS — THE ONE TO BEAT", streak correctly
+suppressed because one week is not a streak), then Progress and Goals on a
+one-session history. All correct, and Progress prints "—" for a change it cannot
+compute rather than inventing a trend, which is the §8 behaviour most apps get
+wrong on day one. Noted but did not touch: while the split sheet is open the
+whole weight control above it is dimmed and LOG SET is fully occluded — normal
+modal behaviour, and a design judgement rather than a defect. THE ONE UNKEPT
+PROMISE is stated in `coldstart.ts` itself: `source` exists "so the UI can tell
+the user which it is — a seeded guess should not pretend to be their history",
+and the app shows a confident 45 under "First time" and never says which.
+`prefillSource` is computed on every render and read by no screen. I was two
+minutes from writing the label when I checked the acknowledgement — R299 had
+already weighed exactly this and left it, because "the Now hero is the most
+crowding-sensitive surface in the app", with a Removes-when naming the owner.
+So I measured the premise instead of repeating it, and it has CHANGED: on a
+375x568 phone with a full twelve-week history the column now fits with ZERO
+overflow, and that line uses 115px of a 335px column — nearly three times its
+width still free. The constraint there is vertical and a one-line label adds no
+height, and the label would only ever appear on day one or on a movement never
+trained, which is the emptiest that screen ever is. So the first half of the
+Removes-when is met on measurement and the second half is the owner's, and it is
+filed in OWNER.md with the number attached — a filing without one is just an
+opinion forwarded, which is what happened the first time. REVIEW: suite 2056
+pass / 0 fail (real count, up 4). Two plants: drop the barbell floor and the
+new-user test fails on the opening weight; delete the measurement from the
+acknowledgement and the pin fails, so the reasoning cannot silently revert to
+inherited. Product verified by walking it, viewport emulation reset to desktop
+and the seeded app confirmed healthy afterwards. | next: the app's day-one path
+is sound and its owner-facing questions are now three, all measured and all
+waiting. Goals is the last screen with no pass this session. Tab bar remains the
+top item; R548's strength-vs-size and R555's day-one label are filed beside it.
+Also owner-only: the R508 bundle scope (~48 kB) and the two R483 items.

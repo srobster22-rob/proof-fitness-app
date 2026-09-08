@@ -86,8 +86,15 @@ const ACKNOWLEDGED = {
     'the Now hero is the most crowding-sensitive surface in the app; ' +
     'unlike the three Progress-row wins (bestAt/trendSince/lastTrainedAt), ' +
     'forcing a fourth label here has no clean home. Acknowledged for good. ' +
-    'Removes when: the Now hero grows room for a finer-grained label than lastTimeParts already ' +
-    'gives it, or an owner decides the extra distinction is worth the crowding (R464).'
+    'R555 RE-MEASURED THE CROWDING PREMISE and it no longer holds as stated: on a 375x568 ' +
+    'phone with a full twelve-week history the column fits with ZERO overflow, and the ' +
+    'head line uses 115px of a 335px column - 2.9x its current width still free. The ' +
+    'constraint on that hero is VERTICAL, and a longer one-line label adds no height. ' +
+    'Note also WHEN the label would ever show: only on day one or a movement never ' +
+    'trained, which is the emptiest the screen ever is. So the first half of the ' +
+    'Removes-when condition is arguably met on measurement; the second half is not ours ' +
+    'to decide and is filed in OWNER.md. Left unsurfaced, deliberately, pending that. ' +
+    'Removes when: an owner decides the extra distinction is worth the crowding (R464).'
 };
 
 function fields(file, ifaceName) {

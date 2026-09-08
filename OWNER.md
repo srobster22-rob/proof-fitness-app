@@ -21,6 +21,24 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
+- OWNER DECISION, FILED R555: on day one the app shows a confident "45" under
+  the words "First time", and never says the 45 is a STARTING SUGGESTION rather
+  than something you did. The app already knows the difference — the prefill
+  carries seed / history / fallback — and R299 decided not to show it, because
+  the Now hero is the most crowding-sensitive surface in the app.
+
+  I RE-MEASURED THAT and the premise has changed. On a 375x568 phone (the short
+  one) with a full twelve-week history the column now fits with ZERO overflow,
+  and that line uses 115px of a 335px column — nearly three times its width
+  still free. The constraint there is vertical, and a longer one-line label adds
+  no height. The label would also only ever appear on day one or on a movement
+  you have never trained, which is the emptiest that screen ever is.
+
+  So it now fits. Whether it EARNS the space is yours: your rule is "if it needs
+  explaining, it's wrong", and one reading is that a starting weight explaining
+  itself is exactly that. Something like "First time — 45 is a starting point",
+  shown only when the number was seeded. I have not built it.
+
 - OWNER DECISION, FILED R548 (no action needed unless you disagree): should the
   STRENGTH goal climb faster than SIZE? It used to, by 2.5 lb — but every
   suggested weight now snaps to the loadable grid (5 lb / 2.5 kg), because the
