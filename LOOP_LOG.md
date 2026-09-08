@@ -2415,3 +2415,58 @@ technical queue is now about as thin as this segment has found it since the
 through fresh METHODS rather than repeating audits already run clean, but the
 five owner decisions (tab bar first, 64 rounds) remain the actual ceiling on
 further product-shaped progress until the owner looks.
+
+R592 - Stage 0: OWNER.md unchanged since R586. IDEATE: after seven straight
+audit-only rounds, went back to first principles on the AI coach specifically
+-- it is now the feature the Vision ask is measured against -- and traced
+every input it depends on rather than re-reading what R573 already fixed.
+Found `plateJump()` (the user's OWN customizable plate-jump preference,
+`jump.<unit>` in Settings, "someone running microplates wants 2.5... the app
+has no business insisting") is real and used by `bumpPlate` (R562), but the
+coach's own `grid` parameter at the coachSuggestion call site ignored it
+completely and always passed the fixed `WEIGHT_STEP` (5 lb / 2.5 kg) instead.
+BUILD/REVIEW: reproduced directly against coach.ts before touching anything --
+a lifter on a 1.25 kg custom jump, plateaued at 60 kg, got "try 62.5" (a full
+2.5 kg jump, exactly double what their own setting exists to avoid), while
+the coach's own docstring promises "every weight the coach names is one the
+lifter can reach in the app AND load on the bar." That promise was false for
+anyone whose declared equipment is finer than the default. Fixed the FINER
+direction: `grid: Math.min(WEIGHT_STEP[unit], this.plateJump())` at the call
+site in now-model.ts. Added test/coach-respects-a-finer-jump.test.ts (3
+cases: a 1.25 kg custom jump, a 1 lb custom jump, and a coarser-than-default
+jump proven UNCHANGED as a no-regression check). Planted the bug back (reverted
+the grid line only) and the first two cases failed by name; restored and
+reran clean.
+CAUGHT MID-ROUND, worth recording on its own: my first version of the fix put
+a 20-line explanatory comment directly inside the `coachSuggestion(...)` call
+args, which broke test/the-button-does-what-it-says.test.ts's "the coach is
+handed each option exactly once" -- the exact R573 lesson repeating (a longer
+comment pushes `grid:`/`base:` past that test's fixed 1400-char scan window).
+Caught by running the FULL suite, not just the new test, before calling this
+done. Moved the reasoning to the comment block above `lastTime:` (well outside
+the scanned window) and left one short line at the call site; full suite
+green again at 2142/0 after the move.
+SHIP: `build-domain.cjs --check` reports current; no rebuild needed since this
+is UI-layer (now-model.ts), not shared domain. Verified live: set jump.lb to
+2.5 in the running Settings screen (via a dispatched input event -- form_input
+alone did not fire RN Web's onChangeText), confirmed the plate buttons
+relabelled to "-2.5 / +2.5" and the coach line kept rendering sensibly with
+no crash. The exact off-grid-suggestion scenario is only proven at the
+domain-test level, not independently reproduced live, because the seeded
+demo data has no plateau sitting on a fractional weight to demonstrate against
+-- noted honestly rather than overclaiming; reset the demo pref back to
+default afterward. Also hit and diagnosed unrelated dev-server noise this
+round (a stale Metro/HMR "tabBar is not defined" + phantom module error) --
+confirmed via `tsc --noEmit` clean and a full server restart that it is
+environment flakiness, not a defect in this change; the page rendered
+correctly throughout regardless.
+NOT FIXED, filed in the new code comment rather than OWNER.md (an engineering
+gap, not a taste call): a jump COARSER than WEIGHT_STEP (fixed-increment
+dumbbells, e.g. jump.lb=7) can still put real history off the WEIGHT_STEP
+grid, and this round's fix does not re-derive a grid from that case -- it
+needs the same "only snap when actually off-grid" care bumpPlate took in
+R562, applied to a function with substantially more existing branches.
+| next: the first real product defect since R584/R585, found by tracing the
+coach's actual inputs end to end rather than auditing it in isolation again --
+worth remembering as its own method. Five owner decisions still wait, tab bar
+first, 65 rounds.
