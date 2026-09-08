@@ -161,8 +161,8 @@ const EN = {
   goalStrength: 'STRENGTH',
   goalSize: 'SIZE',
   goalConsistency: 'CONSISTENCY',
-  trainingGoalHelp: 'What the line under the lift name suggests. Strength adds ' +
-    'weight in bigger steps, size in smaller ones, consistency keeps the weight ' +
+  trainingGoalHelp: 'What the line under the lift name suggests. Strength moves the ' +
+    'weight once you hit 5 reps, size waits for 8, consistency keeps the weight ' +
     'where it is.',
   coachClimbing: '{weight} and climbing, {n} sessions — try {suggest}',
   coachSettle: 'First time at {weight}×{reps} — repeat it before adding',
@@ -808,7 +808,7 @@ const ES: Partial<Record<Key, string>> = {
   goalSize: 'TAMAÑO',
   goalConsistency: 'CONSTANCIA',
   trainingGoalHelp: 'Lo que sugiere la línea bajo el nombre del ejercicio. Fuerza ' +
-    'sube el peso a pasos más grandes, tamaño a pasos más pequeños, constancia lo ' +
+    'sube el peso al llegar a 5 repeticiones, tamaño espera a 8, constancia lo ' +
     'deja donde está.',
   coachClimbing: '{weight} y subiendo, {n} sesiones — prueba {suggest}',
   coachSettle: 'Primera vez con {weight}×{reps} — repítelo antes de subir',

@@ -149,13 +149,35 @@ export function coachSuggestion(
   history: LoggedSet[],
   exerciseId: string,
   now: number,
-  opts: { goal?: TrainingGoal; unit: Unit; base?: number }
+  opts: { goal?: TrainingGoal; unit: Unit; base?: number; grid?: number }
 ): Suggestion | null {
   const goal = opts.goal ?? 'size';
   const sets = topSets(history, exerciseId, now);
   if (sets.length < MIN_SESSIONS) return null;
 
   const step = STEP[goal] * MIN_INCREMENT[opts.unit];
+  /*
+   * THE SMALLEST CHANGE THE LIFTER CAN ACTUALLY MAKE (R548).
+   *
+   * `MIN_INCREMENT` is the resolution of the DATA - 1 lb, 0.5 kg - and using it
+   * to round advice produced numbers nobody can put on a bar. Measured: a
+   * plateaued lifter on the size goal was told "stuck at 60 for 3 - try 61.25",
+   * and 1.25 kg total means 0.625 kg a side, which is not a plate. In pounds it
+   * said 137.5, off the app's own 5 lb stepper, so the lifter cannot even dial
+   * the suggestion in without typing it.
+   *
+   * The caller passes its stepper's increment (`WEIGHT_STEP`), the same number
+   * the + and - buttons move by, so every weight the coach names is one the
+   * lifter can reach in the app AND load on the bar. Defaults to
+   * Defaults to NO snapping at all - not to `MIN_INCREMENT` - and the
+   * difference is not cosmetic. Defaulting to `MIN_INCREMENT` looks like "the
+   * old behaviour" and is not: the plateau branch never rounded, so a caller
+   * passing nothing started getting 61.5 where it used to get 61.25. A test
+   * pinning the default caught that, which is the whole reason to pin one.
+   * Same contract as `base`, which defaults to a floor of zero.
+   */
+  const grid = opts.grid ?? 0;
+  const snap = (w: number) => (grid > 0 ? roundTo(w, grid) : w);
   const target = TARGET_REPS[goal];
   const latest = sets[0];
 
@@ -194,7 +216,7 @@ export function coachSuggestion(
      * equipment gets exactly the old arithmetic rather than a wrong floor.
      */
     const base = opts.base ?? 0;
-    const back = Math.max(base, roundTo(latest.weight * 0.9, MIN_INCREMENT[opts.unit]));
+    const back = Math.max(base, snap(roundTo(latest.weight * 0.9, MIN_INCREMENT[opts.unit])));
     /*
      * At the floor there is nothing to back off TO, and the branches below
      * must not get the question: with reps falling and three sessions at one
@@ -240,7 +262,7 @@ export function coachSuggestion(
    * immediately.
    */
   if (atSameWeight >= PLATEAU_SESSIONS && sets[0].reps <= sets[atSameWeight - 1].reps) {
-    const up = latest.weight + step;
+    const up = snap(latest.weight + step);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachPlateau',
@@ -253,7 +275,7 @@ export function coachSuggestion(
    * the rep target, so the weight is no longer the limiting thing.
    */
   if (atSameWeight >= MIN_SESSIONS && latest.reps >= target) {
-    const up = latest.weight + step;
+    const up = snap(latest.weight + step);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachIncrease',

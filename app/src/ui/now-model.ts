@@ -1311,6 +1311,12 @@ export class NowModel {
             // The empty implement, so a deload cannot suggest a weight the
             // rack does not have (R541). The engine defaults this to 0, so
             // it is this line that makes the floor real.
+            // The stepper's own increment, so a suggested weight is one the +
+            // and - buttons can reach and a bar can be loaded to (R548).
+            grid: WEIGHT_STEP[this.session.unit],
+            // The stepper's own increment, so a suggested weight is one the +
+            // and - buttons can reach and a bar can be loaded to (R548).
+            grid: WEIGHT_STEP[this.session.unit],
             base: EQUIPMENT_BASE[
               exercises.get(this.exerciseId)?.equipment ?? 'barbell'
             ][this.session.unit]

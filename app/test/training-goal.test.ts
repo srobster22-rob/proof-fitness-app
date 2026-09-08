@@ -94,8 +94,41 @@ describe('the stated training goal is real, stored and acted on (R519)', () => {
       settled.setPref(PREF_GOAL, goal);
       return new NowModel(settled, () => T0, 'en-US').state().lastTime.head;
     };
-    assert.notEqual(flatLine('size'), flatLine('strength'),
-      'with no increment of their own to read, the goal must decide the step');
+    /*
+     * THE DIFFERENCE MOVED, and R548 is why. This asserted the goal changes the
+     * STEP, which was true by 2.5 lb — and R548 put every suggestion on the
+     * loadable grid (5 lb, 2.5 kg), because the engine was naming weights like
+     * 61.25 kg that no plate can make. A 2.5 lb difference does not survive
+     * that rounding in either unit the app supports, so on a plateau the two
+     * goals now agree.
+     *
+     * They still differ, in the thing that actually distinguishes them and
+     * survives any grid: the rep target that releases the weight, 5 against 8.
+     * A lifter sitting at six reps is told to add weight on strength and to
+     * hold and earn another rep on size — which is the difference Settings now
+     * describes, having previously promised a step size the grid rounds away.
+     *
+     * Weakening the assertion would have been the easy move here. This is a
+     * stronger one: it names a case where the goals visibly diverge, and it
+     * fails if that stops being true.
+     */
+    assert.equal(flatLine('size'), flatLine('strength'),
+      'on a plateau the goals should now agree — a 2.5 lb difference cannot survive ' +
+      'the loadable grid, which is why Settings stopped promising one');
+
+    const atSix = climbing();
+    atSix.startSession('six', 'lb');
+    atSix.logSet({ id: 'six1', sessionId: 'six', exerciseId: 'bench', weight: 205, reps: 6, at: T0 - 2 * DAY });
+    atSix.endSession('six', T0 - 2 * DAY + 3600_000);
+    atSix.startSession('six2', 'lb');
+    atSix.logSet({ id: 'six2set', sessionId: 'six2', exerciseId: 'bench', weight: 205, reps: 6, at: T0 - DAY });
+    atSix.endSession('six2', T0 - DAY + 3600_000);
+    const sixLine = (goal: string) => {
+      atSix.setPref(PREF_GOAL, goal);
+      return new NowModel(atSix, () => T0, 'en-US').state().lastTime.head;
+    };
+    assert.notEqual(sixLine('size'), sixLine('strength'),
+      'at six reps the goals must diverge: strength releases the weight at 5, size waits for 8');
   });
 
   test('consistency really does leave the weight alone', () => {

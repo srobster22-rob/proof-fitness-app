@@ -67,9 +67,16 @@ describe('a deload cannot suggest a weight the rack does not have (R541)', () =>
   });
 
   test('a real deload well above the floor is untouched', () => {
+    /*
+     * 165, not 167. R548 put every suggested weight on the loadable grid, and
+     * 185 less ten per cent is 166.5 — a number no barbell makes. The FLOOR
+     * still does nothing here, which is what this test is for; the grid is a
+     * separate correction and 165 is the same advice expressed in plates.
+     */
     const said = line(grinding('bench', 185), 'bench');
-    assert.match(said, /back off to 167/,
+    assert.match(said, /back off to 165/,
       `the floor changed advice it had no business changing: "${said}"`);
+    assert.equal(165 % 5, 0, 'the number this test pins is not on the 5 lb grid');
   });
 
   test('the floor is the equipment\'s, not one number for everything', () => {
