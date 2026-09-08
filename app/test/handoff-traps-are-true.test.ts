@@ -141,7 +141,15 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
        * a vague warning about empty lists.
        */
       ['trap 16 states which way an empty matcher fails', /it reads as "the FIRST branch", on every input/],
-      ['trap 16 keeps its one-line defence', /make the empty case throw or fail,/]
+      ['trap 16 keeps its one-line defence', /make the empty case throw or fail,/],
+      /*
+       * Trap 17 is device-blocked territory, and its value is the NUMBER: zero
+       * focus events fired while activeElement demonstrably moved. Without that
+       * the entry reads as a vague warning and the next session re-runs the
+       * same hour to rediscover it.
+       */
+      ['trap 17 carries the measurement', /ZERO events fired/],
+      ['trap 17 names the wrong conclusion it prevents', /is not what happened/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +

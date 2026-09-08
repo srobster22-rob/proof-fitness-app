@@ -21,6 +21,23 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
+- OWNER DECISION, FILED R557 (small, and I could not verify the fix from here):
+  type a machine name — "Arsenal" — then tap outside instead of pressing Return,
+  and the app keeps MACHINE and silently drops the name. Return is the only
+  commit, which is what the code intends ("the name is the optional half").
+
+  Two things make it worth your ruling rather than mine. The app's own rule for
+  the equipment right beside it is the opposite — it saves the moment you
+  answer, because "an answer given and then abandoned is an answer thrown away"
+  — and tapping outside is how a phone keyboard usually gets dismissed. The fix
+  is one line and uses machinery that already exists (`onApply` records without
+  closing the sheet).
+
+  I built it, then removed it: focus events are not delivered to the preview
+  pane at all (HANDOFF trap 17, measured this round), so I could not prove it
+  works in the product, and an unverifiable change is not one I should ship.
+  Say the word and it goes in with a device check rather than a pane check.
+
 - OWNER DECISION, FILED R555: on day one the app shows a confident "45" under
   the words "First time", and never says the 45 is a STARTING SUGGESTION rather
   than something you did. The app already knows the difference — the prefill

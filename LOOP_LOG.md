@@ -1190,3 +1190,60 @@ equipment/machine picker (the last unwalked surface) or stopping the audit and
 asking what the app still LACKS rather than what it gets wrong. Tab bar remains
 the top item; R548's strength-vs-size and R555's day-one label are filed beside
 it. Also owner-only: the R508 bundle scope (~48 kB) and the two R483 items.
+
+R557 — PICK (logged first): the EQUIPMENT / MACHINE picker, the last unwalked
+surface. Shortlist was (a) the picker, (b) stop auditing and ask what the app
+LACKS, (c) the exercise picker/search. Picked (a) to FINISH the sweep rather
+than abandon it one surface short — nineteen rounds of walking screens have
+turned up six real defects including R556's, so the method is still paying, and
+after this I can say the audit is complete instead of nearly complete. It is
+also the surface with the most state per §4: equipment is remembered per
+exercise, a machine name rides along only when the equipment is a machine, and
+"don't ask which machine" is a preference that changes the flow. Contract to
+check: what the app REMEMBERS matches what it SHOWS, and the machine name never
+survives a change of equipment.
+
+R557 — BUILD/REVIEW/SHIP on the pick logged above, and the round's result is a
+change I BUILT AND THEN REMOVED. Walked the equipment picker: BARBELL /
+DUMBBELL / MACHINE / BODYWEIGHT, the machine-name step, "Don't ask again". The
+model layer is already thoroughly covered — a colon in the machine name, a blank
+name, and switching kit away all have tests, and the pref really does round-trip
+"machine:Hammer Strength: Iso Row" intact. What I found is a DECISION nothing
+pins: the typed machine name commits on Return and on nothing else, so typing
+"Arsenal" and tapping outside keeps the kit and silently drops the name. That is
+the opposite of the rule the equipment beside it follows, quoted in
+`setEquipment`'s own comment — "an answer given and then abandoned is an answer
+thrown away" — and tapping outside is how a phone keyboard usually gets
+dismissed. So I wrote the one-line fix, using `onApply`, which exists precisely
+to record without closing the sheet. THEN I COULD NOT PROVE IT WORKED, and
+chasing that is the round. The handler was in the bundle (grepped), focus
+demonstrably moved (`activeElement` changed both ways), and nothing happened —
+which reads exactly like "react-native-web drops onBlur", and trap 15 is a real
+instance of that shape, so it is a believable and WRONG conclusion. Attached
+listeners for `blur`, `focusout`, `focus` and `focusin` to the same element:
+ZERO fired, `document.hasFocus()` false, `visibilityState` hidden, and fronting
+the tab does not clear it because the pane is hidden by the window rather than
+by the tab. The pane delivers no focus events at all. That is HANDOFF trap 17
+now, with the numbers, and it is device-blocked territory — so the fix came back
+out. An unverifiable change does not ship, and §12 says device-blocked checks
+stay blocked and unfaked. The behaviour is filed for the owner instead, with the
+evidence and the note that it needs a device check. AND THE SUITE CAUGHT MY
+BLIND INSTRUMENT BEFORE I DID, which is a first this session: my new test sliced
+source with a bare `indexOf`, the repo has a gate against exactly that, and it
+failed on the full run. Switching to `around` then failed AGAIN, loudly, because
+the first `onSubmitEditing=` in the file is the typed-weight field six hundred
+lines away — which legitimately has an `onBlur`. Anchored on the placeholder,
+which appears once. The bare form would have passed while reading the wrong
+control. REVIEW: suite 2063 pass / 0 fail (real count, up 3). Three plants: add
+a second commit path (the screen test fails and tells the next session to answer
+the filing and verify on a device), truncate the pref at the separator (the
+round-trip test fails), soften trap 17's number (the pin fails). Product
+verified for what IS verifiable — the picker sets BARBELL and the chip follows —
+and `git status` on `app/src` is empty, so the removed fix is byte-for-byte
+gone. SHIP: `--check` current, `link/build.cjs` dist/ ready, app reseeded. |
+next: every surface is now walked and the audit is genuinely complete, which was
+the point of doing this one rather than abandoning it a screen short. Four
+owner questions are filed, all measured. The honest next move is what the app
+LACKS rather than what it gets wrong — and that is mostly owner territory, so
+the first job is proposing options rather than building one. Tab bar remains the
+top item.

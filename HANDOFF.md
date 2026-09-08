@@ -279,6 +279,26 @@ test suite and obvious in a picture.
    `([a-zA-Z_][A-Za-z0-9_]*)`, which cannot match an empty string, so their patterns cannot
    collapse; the derived-population loops in the suite each assert their population first.
 
+17. **A hidden pane delivers NO focus events, so `onBlur`/`onFocus` behaviour cannot be
+   tested from here.** Measured R557 and the numbers are unambiguous: `el.focus()` moved
+   `document.activeElement` (so focus really changed), moving focus away changed it back, and
+   across `blur`, `focusout`, `focus` and `focusin` listeners attached to that same element,
+   ZERO events fired. `document.hasFocus()` was false and `document.visibilityState` was
+   "hidden" throughout — and fronting the tab does not clear it, because the pane is hidden by
+   the window, not by the tab.
+
+   Why it costs a round if you do not know it: the app looks like it is ignoring a handler.
+   R557 added an `onBlur` to the machine-name field, confirmed the handler was IN THE BUNDLE,
+   drove a real focus change, and saw nothing happen — which reads exactly like "react-native-
+   web drops onBlur" (trap 15 is a real instance of that shape, so it is a believable
+   conclusion) and is not what happened. `NowScreen.tsx` already uses `onBlur` in two places
+   for the typed weight and reps fields, so the handler is not the suspect; the pane is.
+
+   This is device-blocked, like the native-only checks: do not "verify" a focus behaviour from
+   this pane and do not ship a change whose only evidence would have to come from one. The
+   pieces that ARE testable stay testable — the model behind the field is pure and covered by
+   `recent-surface-edges.test.ts` (colon in the name, blank name, switching kit).
+
 
 ## Architecture in one paragraph
 
