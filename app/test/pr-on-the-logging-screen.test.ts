@@ -96,8 +96,18 @@ describe('a personal record is marked where it happens (R522)', () => {
     const call = around(model, 'this.prCacheValue = findPRs(', 0, 300);
     assert.match(call, /historyBefore\(this\.session\.id\)/,
       'the screen measures records against a history that includes today');
-    assert.match(call, /this\.repo\.measurements\(\), this\.repo\.sessionUnits\(\)/,
+    /*
+     * R539 hoisted `this.repo.measurements()` into a local, because the cache
+     * now keys on it as well as on the sets, so this read the literal call and
+     * failed on a change that strengthened the thing it was protecting. The
+     * argument is what matters, not where it was fetched — so check the
+     * argument, and check the local is bound to the repo just above it.
+     */
+    assert.match(call, /measurements, this\.repo\.sessionUnits\(\)/,
       'bodyweight movements and kilogram sessions are being compared dishonestly');
+    const body = around(model, 'private prSetIds(', 0, 700);
+    assert.match(body, /const measurements = this\.repo\.measurements\(\)/,
+      'the measurements handed to findPRs no longer come from the repo');
   });
 
   test('the screen actually draws the mark', () => {

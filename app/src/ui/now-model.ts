@@ -4,6 +4,7 @@ import { prefillFor, pickerFor, unitForNewSession, type Prefill } from '../domai
 import { nextCandidates, openingLift } from '../domain/predict.ts';
 import { autoEnd, isStale, lastSetAt, sessionStats } from '../domain/session.ts';
 import { findPRs } from '../domain/pr.ts';
+import type { Measurement } from '../domain/measure.ts';
 import { restSince, type RestState } from '../domain/rest.ts';
 import { PREF_UNIT } from './display-unit.ts';
 import { weekStreak } from '../domain/session.ts';
@@ -1032,20 +1033,39 @@ export class NowModel {
    * both rely on: `Repo.allSets` hands back a frozen array and drops its memo
    * on every write, so a new object appears exactly when the answer could have
    * changed. Logging, editing and deleting a set all write, so all three
-   * invalidate this; nothing else can.
+   * invalidate this.
+   *
+   * AND ON `measurements()`, which R539 found missing. The comment here used to
+   * end "nothing else can", and that was wrong: `findPRs` is handed the
+   * measurement list too, because the four bodyweight-carrying lifts are judged
+   * on real load. Stepping on the scale changes what a pull-up weighed without
+   * touching a single set.
+   *
+   * Measured, on a 25x5 history and a 30x5 today: log the set at an assumed
+   * bodyweight and it is marked a PR; then record today's actual weight, twenty
+   * pounds down, and `findPRs` correctly retracts it (225 lifted against 240 to
+   * beat) — while the cached screen kept the star. The app went on claiming a
+   * record it had already decided was not one, which is §8's cry-wolf produced
+   * by an optimisation rather than by a rule.
+   *
+   * The same identity trick works: `measurements()` is a frozen memo dropped on
+   * every write, so it is a key on exactly the same terms.
    */
   private prCacheKey: LoggedSet[] | null = null;
+  private prMeasureKey: readonly Measurement[] | null = null;
   private prCacheValue: string[] = [];
 
   private prSetIds(sessionSets: LoggedSet[], exercises: Map<string, Exercise>): string[] {
     if (!this.session.id || sessionSets.length === 0) return [];
     const all = this.repo.allSets();
-    if (all === this.prCacheKey) return this.prCacheValue;
+    const measurements = this.repo.measurements();
+    if (all === this.prCacheKey && measurements === this.prMeasureKey) return this.prCacheValue;
     this.prCacheValue = findPRs(
       sessionSets, this.repo.historyBefore(this.session.id), exercises,
-      this.session.unit, this.repo.measurements(), this.repo.sessionUnits()
+      this.session.unit, measurements, this.repo.sessionUnits()
     ).map(r => r.setId);
     this.prCacheKey = all;
+    this.prMeasureKey = measurements;
     return this.prCacheValue;
   }
 
