@@ -255,6 +255,30 @@ test suite and obvious in a picture.
    a hidden page defers style recalculation (it is the same condition that stops `rAF` firing —
    see trap 12). The ADVICE is right either way and that is what matters here. Whether a visible
    pane behaves differently is untested, so do not repeat the mechanism as though it were.
+16. **An empty matcher matches EVERYTHING, and an empty population asserts NOTHING.**
+   Both are ways a check passes while looking at nothing, and neither is visible in a diff.
+
+   Measured in R553, twice in one round. A vocabulary was parsed out of another file with a
+   regex whose escape had collapsed (trap 7), so it found no labels; `[].join("|")` is `""`,
+   `new RegExp("")` matches every string, and every card in both languages was then reported as
+   claiming a personal record. Note the direction: an empty pattern does NOT read as "no match",
+   it reads as "the FIRST branch", on every input. The same shape reaches interpolation:
+   a pattern built as `\b` plus an empty name plus `\b` is `/\b\b/`, which matches everywhere.
+
+   The sibling is quieter. `for (const x of derived) assert...` over an empty `derived` is a
+   test that passes without executing a single assertion, which is what `bundle-verify-is-
+   derived.test.ts` guards with a `deepEqual` on the population before the loop, and what
+   `no-control-bytes.test.ts` guards with "there are source files to scan at all".
+
+   The defence is the same both times and it is one line: **make the empty case throw or fail,**
+   **never continue.** Assert the population is non-empty before looping; throw when a matcher
+   is built from nothing. `anyOf` in `card-and-message-agree.test.ts` is the worked example.
+
+   RE-MEASURED R554: the rest of the repo is clean, and clean for a reason worth knowing rather
+   than by luck. `field-scan.cjs` and `orphan-scan.cjs` interpolate names captured by
+   `([a-zA-Z_][A-Za-z0-9_]*)`, which cannot match an empty string, so their patterns cannot
+   collapse; the derived-population loops in the suite each assert their population first.
+
 
 ## Architecture in one paragraph
 

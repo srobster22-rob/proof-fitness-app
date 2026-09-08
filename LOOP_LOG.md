@@ -1051,3 +1051,54 @@ own right, since "an empty matcher matches everything" is not obvious and cost
 this round twice. Tab bar remains the top item and the owner's; R548's
 strength-vs-size question is filed beside it. Also owner-only: the R508 bundle
 scope (~48 kB) and the two R483 items.
+
+R554 — PICK (logged first): the fail-OPEN matcher, as a HANDOFF trap and as a
+gate. Shortlist was (a) that, (b) the Goals screen, (c) first-run/cold-start.
+Picked (a) because it is the only item on the list with evidence behind it from
+this session rather than a hunch: four blind instruments in three rounds, and
+the two most expensive were the same mechanism — a matcher built from an empty
+list, which does not fail safe. `new RegExp('')` matches every string and
+`[].join('|')` is '', so a vocabulary that failed to parse reads as the FIRST
+claim on every input rather than as no claim. That is not obvious, it cost R553
+twice, and nothing in the repo says it. Contract: HANDOFF carries the trap with
+the measurement, and a gate finds any OTHER place building a pattern from a list
+that could be empty.
+
+R554 — BUILD/REVIEW/SHIP on the pick logged above. This round is written from a
+defect I CAUSED rather than found, which is the only reason it is worth a round:
+four blind instruments in three rounds, and the two most expensive were one
+mechanism. `[].join('|')` is the empty string, `new RegExp('')` matches every
+string, and the direction is what makes it invisible — an empty pattern does NOT
+read as "no match", it reads as THE FIRST BRANCH, on every input. In R553 that
+turned a failed parse into every card in both languages claiming a personal
+record. Trap 16 now records it with the measurement, together with its quieter
+sibling: `for (const x of derived) assert...` over an empty population is a test
+that passes without running a single assertion. The defence is one line in both
+cases — make the empty case throw or fail, never continue. AUDITED THE REST OF
+THE REPO AND IT IS CLEAN, for a reason rather than by luck: `field-scan.cjs` and
+`orphan-scan.cjs` interpolate names captured by `([a-zA-Z_][A-Za-z0-9_]*)`,
+which cannot match empty, and every derived-population loop in the suite asserts
+its population first — `bundle-verify-is-derived` with a `deepEqual` on the
+calls, `no-control-bytes` with "there are source files to scan at all". So the
+gate is a rule for the one shape that has actually gone wrong, not a sweep.
+AND THE GATE WAS BLIND ON ITS FIRST RUN, which is the fifth time this session
+and the fastest it has ever been caught. Its pattern used `[^)]*`, which cannot
+cross the `)` in `labels.map(quote).join('|')` — the exact line it exists to
+find — so it reported zero offenders, which is a pass. The "rule has something
+to protect" test caught it on the first run, and that test is in the file
+precisely because a rule with a zero population is indistinguishable from a rule
+that does not work. Writing HANDOFF's entry hit trap 7 as well: the backslashes
+in the sentence ABOUT collapsed escapes were themselves eaten, and the line was
+repaired by index. REVIEW: suite 2052 pass / 0 fail (real count, up 3). Three
+plants: remove the guard from the real instance (two tests fail), add a NEW
+unguarded list-built pattern in another file (caught and named by file and
+line), and soften trap 16's direction sentence in HANDOFF (the pin fails). SHIP:
+`--check` current, `link/build.cjs` dist/ ready, `git status` clean apart from
+the round's own files, app confirmed healthy. | next: the instrument-blindness
+theme is now documented and gated, and this is the point to stop mining it —
+five rounds of test infrastructure against one round of product is the wrong
+ratio for an app whose owner asked for a less bland UI. The untouched product
+surfaces are the Goals screen and the first-run path, and neither has had a pass
+this session. Tab bar remains the top item and the owner's; R548's
+strength-vs-size question is filed beside it. Also owner-only: the R508 bundle
+scope (~48 kB) and the two R483 items.

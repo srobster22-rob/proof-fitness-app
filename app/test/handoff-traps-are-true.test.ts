@@ -132,7 +132,16 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
        * conditional render that the enter/exit animation depends on.
        */
       ['trap 5 records that the web bug did not reproduce', /`visible=\{false\}` hides a transparent modal/],
-      ['trap 5 keeps the real reason to render conditionally', /has no unmount to animate out of/]
+      ['trap 5 keeps the real reason to render conditionally', /has no unmount to animate out of/],
+      /*
+       * Trap 16 is the only one written from a defect this session caused
+       * rather than found, and its value is entirely in the DIRECTION it
+       * states: an empty pattern does not read as "no match", it reads as the
+       * first branch, on every input. Lose that sentence and the entry becomes
+       * a vague warning about empty lists.
+       */
+      ['trap 16 states which way an empty matcher fails', /it reads as "the FIRST branch", on every input/],
+      ['trap 16 keeps its one-line defence', /make the empty case throw or fail,/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +
