@@ -1691,3 +1691,40 @@ share code moved so link/build.cjs was not needed. Committed as 9383166 inside
 fitness-app, diff confirmed free of plant residue. | next: that closes every
 filed non-owner item from this session. What remains with real product value is
 entirely the four owner decisions — tab bar first, waiting since R523.
+
+R569 — Stage 0: OWNER.md still four blocked decisions. With every self-directed
+item closed, checked whether Dynamic Type — a real, heavily-fixed surface (R339,
+R341, R347 and more, 39 individual \`allowFontScaling={false}\` exemptions
+across three files) — had any test protecting it. It had NONE: zero tests
+reference \`allowFontScaling\` at all, despite it being the fix for a defect that
+overflowed a screen by 80pt and pushed controls off the edge of the phone.
+Thirty-nine hand-placed fixes with nothing confirming the set stays complete is
+exactly R543/R566/R567's shape, so I looked for the sibling. FOUND ONE
+IMMEDIATELY: the typed-weight \`TextInput\` — the editable field that opens when
+a lifter taps the hero number — is styled with \`fontSize: L.hero\`, the
+IDENTICAL fitted value the resting \`<Text>\` three lines below correctly exempts
+per R339's own fix. It had no \`allowFontScaling\` prop at all. At 2.35x Dynamic
+Type this is the R339 defect exactly, in the sibling control the original fix
+never reached, because the two elements were added at different times and
+nobody re-checked the first one's reasoning against the second. Fixed with the
+same one-line exemption. THE GATE HIT ITS OWN BUG WHILE I WAS WRITING IT: the
+first version scanned forward from a fitted-size line to the element's closing
+\`>\` and required the exemption before it — and my own EXPLANATORY COMMENT
+above the fix contained the literal text \`<Text>\`, whose \`>\` closed the scan
+before it reached the real prop, so the test reported the very element it had
+just been fixed on as still broken. Stripped comments before scanning; the note
+about why is now itself pinned by a third test, in case the next round tidies
+the comment away without knowing it is load-bearing. REVIEW: suite 2119 pass /
+0 fail (real count, up 3, no flake this run). Planted the original defect back
+— remove the new \`allowFontScaling\` — and it is caught by name, naming the
+exact line. Verified in the PRODUCT: opened the typed-weight field on the
+running app, confirmed it renders at its fitted 109px size and functions
+normally; web has no OS-level Dynamic Type toggle to exercise live, so this is
+the limit of what is verifiable here, same as every other \`allowFontScaling\`
+fix in this codebase. \`--check\` current; no share code moved so
+\`link/build.cjs\` was not needed. Committed as 41d330a inside fitness-app, diff
+confirmed clean. | next: the FILES population in the new gate is currently just
+NowScreen.tsx — goals.tsx and recap.tsx carry the other 31 exemptions from the
+same fix pattern and are worth the same structural check rather than trusting
+their hand-placed set is complete either. Four owner questions remain, tab bar
+first since R523.
