@@ -242,7 +242,18 @@ export function coachSuggestion(
    * given to a lifter with a working plan is still wrong advice, and it is the
    * kind that makes a coach worth ignoring.
    *
-   * The step is THEIR step, not the table's. A lifter climbing in 5s is told
+   * The step is THEIR step, not the table's, and it OUTRANKS the stated goal
+   * (R519). A strength lifter climbing in 2.5s is told 2.5, not 5.
+   *
+   * That looks like the setting failing and is the opposite. Overriding a plan
+   * that is demonstrably working, because of a preference, is the same mistake
+   * R517 and R518 each fixed once — conservative advice to a lifter whose plan
+   * works, and eager advice to a tired one — pointed at a setting instead of
+   * at a default. Their own evidence beats a constant chosen here. The goal
+   * decides the step in every branch where there is no working increment to
+   * read, which is every other branch in this function.
+   *
+   * A lifter climbing in 5s is told
    * to try 5 more; one climbing in 10s is told 10. OWNER.md asks for the app
    * to be personalised to the person, and their own recent increment is a
    * better answer than a constant chosen here.

@@ -12,6 +12,7 @@ import {
   type SplitDay, type SplitGroup, type SplitPlan, type PlanDay
 } from '../domain/split.ts';
 import { coachSuggestion, type Suggestion } from '../domain/coach.ts';
+import { trainingGoal } from './training-goal.ts';
 import { PHONE_MAX } from './column.ts';
 import { loadLabel, convertWeight } from '../domain/types.ts';
 import { goalProgress, isAchieved } from '../domain/goals.ts';
@@ -1222,7 +1223,7 @@ export class NowModel {
         goal: this.goalHint(),
         coach: coachSuggestion(
           this.historyInSessionUnit(), this.exerciseId, this.now(),
-          { unit: this.session.unit }
+          { unit: this.session.unit, goal: trainingGoal(this.repo) }
         )
       }, this.lang()),
       loggedThisExercise: sessionSets.filter(s => s.exerciseId === this.exerciseId),

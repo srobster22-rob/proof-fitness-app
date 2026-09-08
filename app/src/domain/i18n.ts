@@ -154,6 +154,14 @@ const EN = {
   coachIncrease: '{weight} for {n} sessions — try {suggest}',
   coachPlateau: 'Stuck at {weight} for {n} — try {suggest}',
   coachDeload: '{weight} is grinding — back off to {suggest}',
+  /* Settings: what the coach line should optimise for. */
+  trainingGoal: 'COACHING',
+  goalStrength: 'STRENGTH',
+  goalSize: 'SIZE',
+  goalConsistency: 'CONSISTENCY',
+  trainingGoalHelp: 'What the line under the lift name suggests. Strength adds ' +
+    'weight in bigger steps, size in smaller ones, consistency keeps the weight ' +
+    'where it is.',
   coachClimbing: '{weight} and climbing, {n} sessions — try {suggest}',
   coachSettle: 'First time at {weight}×{reps} — repeat it before adding',
   coachHold: '{weight} last {n} — stay here and add a rep',
@@ -791,6 +799,13 @@ const ES: Partial<Record<Key, string>> = {
   coachIncrease: '{weight} en {n} sesiones — prueba {suggest}',
   coachPlateau: 'Atascado en {weight} durante {n} — prueba {suggest}',
   coachDeload: '{weight} te cuesta — baja a {suggest}',
+  trainingGoal: 'ENTRENAMIENTO',
+  goalStrength: 'FUERZA',
+  goalSize: 'TAMAÑO',
+  goalConsistency: 'CONSTANCIA',
+  trainingGoalHelp: 'Lo que sugiere la línea bajo el nombre del ejercicio. Fuerza ' +
+    'sube el peso a pasos más grandes, tamaño a pasos más pequeños, constancia lo ' +
+    'deja donde está.',
   coachClimbing: '{weight} y subiendo, {n} sesiones — prueba {suggest}',
   coachSettle: 'Primera vez con {weight}×{reps} — repítelo antes de subir',
   coachHold: '{weight} las últimas {n} — quédate y suma una repetición',

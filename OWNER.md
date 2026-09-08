@@ -21,14 +21,6 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
-- The suggestion feature ("AI coach"): on the Now screen, for the exercise in
-  front of you, use the last two weeks of history to say what to lift today
-  and why, in one line ("185 lb the last two weeks — try 190"), tuned to the
-  person's stated goal (strength / size / consistency). Build it as a local
-  rule engine first (progressive overload, deloads, plateau detection) so it
-  works offline with no key and no new dependency; a real model call is a
-  later owner decision (cost, key, privacy) — leave a seam for it, do not add
-  it unasked.
 - Personalization: goals, units, split, jump amounts and history should
   visibly shape what the app shows, not just what it stores.
 - Attention-span pass: every core flow (open → log a set → done) measured in
@@ -45,6 +37,23 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **AI coach** — R517-R519. Working; the line is under the lift name on Now.
+  - Local rule engine over the last two weeks: progressive overload, plateau,
+    deload, plus "you are climbing, keep going" and "this weight is new,
+    repeat it". No network, no key, no new dependency.
+  - COACHING in Settings picks strength / size / consistency, and you can see
+    it change the line: consistency says "185 last 2 — stay here and add a
+    rep", strength says "185 for 2 sessions — try 190".
+  - It stays SILENT unless it has two sessions of that lift in the window. A
+    coach that talks when it does not know teaches you to ignore it.
+  - ONE JUDGEMENT CALL you may want to overrule: when you have added weight
+    every session and made every one, it suggests YOUR increment rather than
+    the one the setting implies — a strength lifter climbing in 2.5s is told
+    2.5, not 5. Overriding a plan that is working seemed worse than ignoring
+    the setting in that one case. Say the word and I will flip it.
+  - The model-call seam is documented in coach.ts and NOT wired, per your line
+    about cost, key and privacy.
+
 - **Main screen redesign** — R511-R516. Done as far as I can take it; please
   look and say whether it matches what you meant.
   - R511: the exercise name was styled exactly like the chrome labels around

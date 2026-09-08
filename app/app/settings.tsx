@@ -6,6 +6,13 @@ import { useGuardedLeave } from '../src/ui/guarded-push.ts';
 import { getRepo } from '../src/data/db.ts';
 import { COLUMN } from '../src/ui/column.ts';
 import { displayUnit } from '../src/ui/display-unit.ts';
+import { trainingGoal, TRAINING_GOALS, PREF_GOAL } from '../src/ui/training-goal.ts';
+import type { TrainingGoal } from '../src/domain/coach.ts';
+
+/** The label for each goal, so the chip and its accessible name cannot drift. */
+const GOAL_KEY: Record<TrainingGoal, 'goalStrength' | 'goalSize' | 'goalConsistency'> = {
+  strength: 'goalStrength', size: 'goalSize', consistency: 'goalConsistency'
+};
 import {
   customJump, customRepJump, PLATE, REP_JUMP, PREF_SKIP_MACHINE, PREF_UNIT } from '../src/ui/now-model.ts';
 import { SPLIT_PLANS } from '../src/domain/split.ts';
@@ -59,6 +66,7 @@ export default function Settings() {
   // The same one definition every other surface uses — see display-unit.ts.
   const unit: Unit = displayUnit(repo);
   const plan = (repo.getPref(PREF_PLAN) as SplitPlan | null) ?? 'ppl';
+  const goal = trainingGoal(repo);
 
   const skipMachine = repo.getPref(PREF_SKIP_MACHINE) === '1';
   // Honour the system's reduced-motion setting — see `useReducedMotion`.
@@ -132,6 +140,37 @@ export default function Settings() {
           ))}
         </View>
         <Text style={s.help}>{t(lang, 'splitHelp')}</Text>
+
+        {/* ---- coaching --------------------------------------------------- */}
+        {/*
+          The half of OWNER.md #2 that was missing. The rule engine has taken a
+          goal since R517 and nothing passed one, so every lifter got the
+          default and "tuned to the person's stated goal" was not yet true.
+
+          Three chips, exactly like UNITS and SPLIT above, because a fourth
+          shape of control on one screen is a thing to learn for no reason. The
+          help line describes what each does to the SUGGESTION rather than
+          naming a training philosophy — OWNER.md's rule is that if it needs
+          explaining it is wrong, and "adds weight in bigger steps" needs no
+          explaining while "hypertrophy" does.
+        */}
+        <Text style={s.label}>{t(lang, 'trainingGoal')}</Text>
+        <View style={s.row}>
+          {TRAINING_GOALS.map(g => (
+            <Pressable accessibilityRole="button"
+              key={g}
+              onPress={() => set(PREF_GOAL, g)}
+              style={pressStyle([s.chip, g === goal && s.chipOn], 'surface', still)}
+              accessibilityLabel={t(lang, GOAL_KEY[g])}
+              {...onState(g === goal)}
+            >
+              <Text style={[s.chipText, g === goal && s.chipTextOn]} numberOfLines={2}>
+                {t(lang, GOAL_KEY[g])}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={s.help}>{t(lang, 'trainingGoalHelp')}</Text>
 
         {/* ---- units ---------------------------------------------------- */}
         <Text style={s.label}>{t(lang, 'units')}</Text>
