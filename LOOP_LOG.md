@@ -867,3 +867,48 @@ R547 — Stage 0: tab bar still the owner's. Cleared the last five unaudited tra
 R548 — Stage 0: tab bar still the owner's. Back to the product, following R541's thread past the branch it fixed. That round stopped a DELOAD suggesting a weight below the empty bar; every other branch was still free to name a weight nobody can load. Measured across both units and all three goals: a lifter plateaued at 60 kg on the size goal was told "Stuck at 60 for 3 — TRY 61.25". A 1.25 kg total increase is 0.625 kg a side and no such plate exists in any gym. In pounds it said 137.5, which is off the app's OWN 5 lb stepper — the lifter cannot even dial the advice in without typing it. Cause: the engine rounded to `MIN_INCREMENT`, which is the resolution of the DATA (1 lb, 0.5 kg), not of a barbell. Fix is `WEIGHT_STEP`, passed in the way R541 passed the floor, and it is the right grid for a reason worth writing down: it is simultaneously what the +/- buttons move by and the smallest standard plate pair (2x2.5 lb, 2x1.25 kg), so a suggestion on it is both reachable in the app and loadable on the bar. MY FIRST VERSION BROKE ITS OWN CONTRACT and a test I had just written caught it. I defaulted `grid` to `MIN_INCREMENT`, which reads like "unchanged" and is not — the plateau branch never rounded at all, so a caller passing nothing went from 61.25 to 61.5. Defaulting to zero, meaning no snapping, is the actual no-op. That is the second round running where the test pinning a default earned its place. THEN THE FIX HAD A CONSEQUENCE I HAD TO FOLLOW THROUGH rather than leave. The goals differed by 2.5 lb of step, and a 2.5 lb difference cannot survive rounding to 5 — so Settings' "strength adds weight in bigger steps, size in smaller ones" became false in both units the app ships. Rewrote it, en and es, to describe the difference that is real and survives any grid: strength releases the weight at 5 reps, size waits for 8. R519's test asserted the old difference and failed; the easy move was to weaken it, and instead it now asserts EQUALITY on a plateau (with the reason) plus a new case at six reps where the goals visibly diverge — strength says "try 210", size says "stay here and add a rep". Whether strength should also climb faster is a training judgement, not a bug fix, so it is filed in OWNER.md as a one-line change I did not make. SHIP: `npm test` 2018 pass / 0 fail; `--check` current; `link/build.cjs` dist/ ready; verified in the running app on a kg seed with the bundle grepped both ways — planted reads "try 61.25", fixed reads "try 62.5"; reseeded. | next: the coach has had three defects in four rounds (R541 floor, R548 grid, and R537's units before them) and they share a shape — it does arithmetic on weights while knowing nothing about the equipment they sit on. Worth one round asking what else it assumes: the climbing branch reads the lifter's OWN increment, which is the one place that is self-correcting, but `MAX_CLIMB_FRACTION` and the 0.9 deload are both bare fractions applied to a number that has to land on plates. Tab bar remains the top item and the owner's. Filed and still owner-only: the R508 bundle scope (~48 kB) and the two R483 items.
 
 R549 — Stage 0: tab bar still the owner's. Closed the hole R548 left ON PURPOSE, which turned out to be the interesting one. R548 put every suggested weight on the loadable grid and exempted CLIMBING, on R518's rule that a lifter's own working increment outranks the goal table. The rule is right; the exemption was not, because THEIR OWN INCREMENT IS ONLY THEIRS WHEN THEY LOADED IT. With one session logged in kilos, 86 kg reads as 189.5 lb and the step reads as 4.5, so the app said "189.5 and climbing, 4 sessions — TRY 194". Nobody ever put 4.5 lb on a bar; the unit conversion did, and the number came from their history in form only. Snapping the suggestion gives 195. The reported weight stays EXACT at 189.5 — that is what they lifted, and §16 wants it told honestly — so the split is: report the real number, suggest a reachable one. FOUND A SECOND DEFECT WHILE FIXING THE FIRST. `roundTo` goes to the nearest multiple, which can round a suggestion BELOW the weight being climbed from: 191 plus a 1 lb step is 192, and 192 on a 5 lb grid is 190, so the line reads "climbing, try 190" to somebody who just lifted 191 — the advice inverted, not rounded. Reachable exactly when the current weight is off-grid, which a converted history is by construction. Added a `raise` helper so every branch that says "go up" goes through it. AND MY GUARD TEST WAS BLIND. It looped over plateau fixtures and passed against the planted defect, because the size step of 2.5 on a 5 grid is always far enough above to round up — the down-round case never arose, so the test could not reach the thing it was named after. It takes a CLIMBING history with a small own-step to get there. Rewrote it that way and re-planted: now it fails. Both halves planted separately and both bite — remove the snap and the climb test fails, remove the guard and the increase test fails. Verified in the running app with the bundle grepped both ways: planted reads "try 194", fixed reads "try 195", same seed, same screen. SHIP: `npm test` 2021 pass / 0 fail; `--check` current; `link/build.cjs` dist/ ready; reseeded. | next: that is the coach's fourth defect in five rounds and they all had one shape — it does arithmetic on weights while knowing nothing about the equipment underneath. It now takes `base` and `grid` from the caller, which is the right direction, and the remaining bare constant is `MAX_CLIMB_FRACTION`. That one is a TEST rather than a suggestion, so it never has to land on plates — worth stating in the file so the next round does not "fix" it. Tab bar remains the top item and the owner's. Filed and still owner-only: the R508 bundle scope (~48 kB), the two R483 items, and R548's strength-vs-size question.
+
+R550 — PICK (logged before building, per AGENT_LOOP): the weight STEPPER after a
+unit switch. Shortlist was (a) note in coach.ts that `MAX_CLIMB_FRACTION` is a
+test rather than a suggestion so nobody "fixes" it onto the grid, (b) the +/-
+stepper, (c) sweep other screens for unloadable numbers. Picked (b): R548 and
+R549 put every SUGGESTED weight on plates, and the field the lifter actually
+types into was never looked at. R549's own seed shows the problem — the weight
+field opens at 189.5 (86 kg converted, honestly reported), and if + adds a flat
+5 the lifter walks 194.5, 199.5, 204.5 and can never reach a loadable weight
+again without typing one. Contract to check: pressing + or - from an off-grid
+weight should land ON the grid, and the app's own suggestion (195) should be
+reachable by pressing +.
+
+R550 — BUILD/REVIEW/SHIP on the pick logged above. The hypothesis was WRONG and
+measuring it first is what turned the round into a real fix. I expected the
+stepper to walk 194.5, 199.5 off-grid forever; it does not — `bumpWeight` has
+always snapped to `WEIGHT_STEP`, so from 189.5 the small + lands on 195, which
+is exactly the weight the coach suggests. One press, and the lifter is back on
+plates. THE DEFECT WAS THE BUTTON NEXT TO IT. `bumpPlate` did not snap, so from
+189.5 the big `+45` gave 234.5 and `-45` gave 144.5, and every further press
+kept the half — the two controls sit on the same row and disagreed about what a
+weight can be, with the large obvious one being the broken half. A lifter who
+logged a single session in kilos could never reach a loadable weight through
+the plate buttons; their only escape was typing a number, which is §4's "the app
+never asks a question it could answer" pointed straight at the thing it just
+made unanswerable. Fix routes it through the same rounding, with the grid being
+the FINER of the stepper increment and the lifter's own plate jump — a custom
+2.5 lb jump means they own micro-plates and are telling the app what they can
+load, and snapping that onto the 5 lb default would erase the setting. Their
+evidence outranks the default, the same rule R518 and R549 each reached from a
+different direction. REVIEW: suite 2027 pass / 0 fail (real count, up 6). Both
+halves planted separately and both fail BY NAME — restoring the old `bumpPlate`
+fails three tests reporting "+45 from 189.5 gave 234.5" and "-45 ... gave
+144.5"; snapping to `WEIGHT_STEP` alone fails "a lifter with micro-plates keeps
+them". Verified in the PRODUCT by clicking the real buttons, with the bundle
+grepped both ways: planted reads 234.5 and 144.5, fixed reads 235 and 145, and
+the ordinary seeded history is untouched (175 +45 -> 220 -> 175). SHIP: `--check`
+current, `link/build.cjs` dist/ ready, app reseeded to seed.b64. | next: the
+coach and the logging controls now agree that a weight has to exist. The one
+place left with a bare fraction is `MAX_CLIMB_FRACTION`, and it is a TEST rather
+than a suggestion so it never has to land on plates — worth one line in coach.ts
+saying so, because five rounds of grid work is exactly the context in which
+somebody "fixes" it. Tab bar remains the top item and the owner's; R548's
+strength-vs-size question is filed beside it. Also owner-only: the R508 bundle
+scope (~48 kB) and the two R483 items.

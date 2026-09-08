@@ -1835,9 +1835,27 @@ export class NowModel {
    * Add or strip a plate. Signed like `bumpWeight`, and routed through
    * `setWeight` so it inherits the same floor — stripping a plate off 20 lb
    * lands on 0, never below.
+   *
+   * LANDS ON A LOADABLE WEIGHT, like `bumpWeight` already did (R550).
+   *
+   * `bumpWeight` has always snapped to `WEIGHT_STEP`; this did not, and the two
+   * sit next to each other on the same row. Measured on a lifter who logged one
+   * session in kilos, so the field opens at 189.5 (86 kg, reported honestly):
+   * `+45` gave 234.5 and `-45` gave 144.5, and every further press kept the
+   * half — the big plate buttons could never return to a weight that exists,
+   * while the small ones beside them fixed it in one tap.
+   *
+   * The grid is the FINER of the stepper's increment and the lifter's own plate
+   * jump. Snapping a custom 2.5 lb jump onto a 5 lb grid would erase the point
+   * of setting it — somebody who owns micro-plates is telling the app what they
+   * can load, and that outranks the default, which is the same rule R518 and
+   * R549 both landed on from the other side.
    */
   bumpPlate(steps: number): void {
-    this.setWeight(this.weight + steps * this.plateJump());
+    const jump = this.plateJump();
+    const grid = Math.min(WEIGHT_STEP[this.session.unit], jump);
+    const target = this.weight + steps * jump;
+    this.setWeight(grid > 0 ? Math.round(target / grid) * grid : target);
   }
 
   /**
