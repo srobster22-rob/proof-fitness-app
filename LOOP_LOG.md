@@ -1825,3 +1825,14 @@ size of normal run-to-run noise, no matter how the samples are massaged
 contention). Where that precision matters, the fix is a structural source
 check, not a faster stopwatch. Four owner questions remain, tab bar first
 since R523.
+
+R572 — PICK (logged first): sweep the suite for OTHER timing-based tests that
+could share big-history-stays-fast's pre-R571 flakiness, before one bites in a
+future session the way this one bit three rounds running. Shortlist was (a)
+that sweep, (b) wait idle, (c) re-audit old "planted and caught" log claims
+generally (ruled out as too broad and speculative — R571's finding was
+specific and reproducible, a general audit is not bounded the same way).
+Contract: find every test using performance.now() or a timing threshold,
+check whether its margin is order-of-magnitude (safe) or a tight ratio/percent
+(risk), and only touch the ones that are actually at risk — not a rewrite for
+its own sake.

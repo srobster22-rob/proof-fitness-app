@@ -45,3 +45,25 @@ more seeds have been added since without anyone checking whether that promise
 still holds for all of them, or whether they are actually gitignored at all.
 Contract: nothing under public/ that a seed tool writes should ship in a
 production build, and .gitignore must actually match every file being written.
+
+R572 — Stage 0: OWNER.md still four blocked decisions. Swept the suite for
+other timing-based tests that could share R571's pre-fix flakiness, applying
+that round's lesson before it bites again rather than waiting for a fourth
+failure. Searched every real signal for the failure shape: \`performance.now()\`
+appears in exactly ONE file in the whole suite — the one R571 already fixed.
+Broadened the search to catch the same risk under a different name (a
+ratio/threshold assertion fed by anything environment-dependent) and every
+other hit was a false positive on inspection — pixel geometry, iteration
+guards, and one bounded-effort timeout in \`bundle-write-is-atomic.test.ts\`
+that stops trying after 8 seconds rather than comparing two measurements
+against each other, a genuinely different risk class with its own documented
+reasoning already in place. NO SIBLING EXISTS. This round shipped no code
+change, and that is the actual result rather than a gap to paper over — the
+question "is there another one of these waiting" is now closed rather than
+left open, which is worth recording even though nothing moved. Suite: 2123
+pass / 0 fail, unchanged; \`git status\` on src/test/tools confirms nothing was
+touched. No SHIP step needed — there is nothing to build or rebuild. | next:
+with this closed and R571's fix holding for ten consecutive full-suite runs,
+every self-directed thread from this session is genuinely exhausted. The four
+owner questions are the only remaining product-facing work, tab bar first
+since R523 — now 47 rounds waiting.
