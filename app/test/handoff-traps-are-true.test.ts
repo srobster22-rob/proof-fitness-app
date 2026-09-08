@@ -71,7 +71,16 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
     const handoff = DOCS.find(([n]) => n === 'HANDOFF.md')![1];
     for (const [what, evidence] of [
       ['the click sequence (trap 4)', /pointer-only 0 sets, bare click 1/],
-      ['reading a typed field (trap 8)', /el\.value === '205'/]
+      ['reading a typed field (trap 8)', /el\.value === '205'/],
+      ['same-execution reads (trap 12)', /SAME execution reports 0 sets/],
+      /*
+       * Trap 10's count is the claim, not decoration: it said "three times" while
+       * eleven further rounds had hit it, which made the most common failure in
+       * this repo read as a curiosity. The defence it now carries is the part
+       * that would have caught most of them.
+       */
+      ['the blind-instrument count (trap 10)', /at least FOURTEEN times/],
+      ['the defence trap 10 teaches', /ACTUALLY FIRED AND ACTUALLY APPLIED/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +

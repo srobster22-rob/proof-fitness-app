@@ -104,7 +104,21 @@ test suite and obvious in a picture.
    target of 110 lb for someone benching 220. Anything comparing weights across sessions needs
    `repo.sessionUnits()`; anything scoped to ONE session's own sets is already safe.
 
-10. **An instrument here has silently measured nothing three times.** The 320pt layout sweep
+10. **An instrument here has silently measured nothing at least FOURTEEN times** — this
+   entry said "three" until R533, and the number is the whole point of it, so being three
+   times out of date made it read as a curiosity rather than as the most common failure in
+   this repo. Eleven further rounds hit it (R500, R501, R510, R512, R513, R516, R520, R525,
+   R526, R529, R532), each by a DIFFERENT mechanism: a gate whose glob could not see a
+   planted failing test; a reporter that passed while incapable of failing; an assertion that
+   passed against the exact state it was written to rule out; a text check that cannot see
+   occlusion; four fixtures in one sitting that never exercised the path they judged; three
+   successive tests that could not fail; a regexp whose backslashes had collapsed so it
+   matched nothing; and plants that silently failed to apply and were read as "not caught".
+   THE DEFENCE, which is the part worth carrying: plant the defect, and then check the plant
+   ACTUALLY FIRED AND ACTUALLY APPLIED. A plant that produces no failure means one of two
+   things — the instrument is blind, or the edit never landed — and both are findings. An
+   instrument reporting no problems must also say how much it examined.
+   The original three: The 320pt layout sweep
    was scoped to `#root` and therefore examined **zero** elements on every sheet in the app,
    reporting clean (R217). The same sweep then counted the screen *behind* a stacked route as
    51 failures (R220). The screen-capture snippet took leaf text only and dropped the Now
@@ -138,6 +152,9 @@ test suite and obvious in a picture.
    `[...document.body.children]` and inspecting the LAST sibling div directly is more precise
    and does not depend on innerText's own quirks. **Always separate "dispatch the event" from
    "read the result" into two steps, or bridge them with a delay**, before concluding a control
+   RE-MEASURED R533 and it holds exactly: dispatching `click` on LOG SET and reading
+   `document.body.innerText` in the SAME execution reports 0 sets; reading it after a delay
+   reports 1. The press landed both times — only the read was early.
    is unresponsive.
 
 13. **A hand-maintained list of "things that must all do X" drifts, every time.** Twice: every
