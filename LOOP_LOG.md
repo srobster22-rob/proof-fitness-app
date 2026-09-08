@@ -1474,3 +1474,42 @@ DIFFERENT surface than the one I changed. That is worth more than the fix: the
 rule is to re-walk the screens a change can reach, not just the one it was aimed
 at. Four owner questions remain, and the tab bar has been the top item since
 R523.
+
+R563 — PICK (logged first): re-walk the surfaces R548-R550's weight work can
+REACH, not the ones it was aimed at. Shortlist was (a) that, (b) the exercise
+search/add path, (c) the skip-reasons filing. Picked (a) on this session's own
+evidence: two of my fixes each caused a defect two rounds later — R548's grid
+work made Settings' copy false, R550's snap broke the custom plate jump — and
+BOTH were found by walking a different screen than the one I changed, by
+accident rather than by method. The grid change touched a constant that four
+surfaces read. Contract: enumerate what consumes WEIGHT_STEP and the plate jump,
+check each one still says something true, and turn the sweep into a gate so the
+next weight change has to answer for its blast radius rather than be caught by
+luck two rounds on.
+
+R563 — BUILD/REVIEW/SHIP on the pick logged above. Re-walked what R548-R550's
+weight work can REACH rather than what it was aimed at, and the first thing the
+sweep found was a DUPLICATE `grid:` key in the coach call — my R548 edit ran
+twice, so the option was passed twice with the same value, and the second
+occurrence also pushed R541's comment away from the line it describes, leaving
+the `base` explanation sitting above `grid`. Behaviour identical, which is
+exactly why it survived two rounds and every test. Nothing detects a change that
+changes nothing. THE PROMISE IS THE THING WORTH GATING. The plate button is
+labelled with the jump and its accessible name says "Add 7 lb", and for two
+rounds it moved 5 — §16 asks that every number be checkable, and a control that
+states its own effect is the easiest number in the app to check, because the
+user presses it and watches. So the gate pairs the LABEL with the MOVEMENT
+across seven jump values in both units: what the button prints, what VoiceOver
+reads, and what the weight actually does, asserted together. Plus the one case
+where they deliberately differ — an off-grid start, where landing on plates
+beats honouring the jump exactly — stated rather than left as an exception
+somebody has to rediscover. REVIEW: suite 2099 pass / 0 fail (real count, up 9).
+Two plants: restore R550's snap-everything and the button's own label is caught
+lying in both units; reintroduce the duplicate key and the call-site check
+names it. Product verified — the button promising 45 moves 175 to 220 and back,
+and the Now screen renders correctly after the key fix. SHIP: `--check` current,
+`link/build.cjs` dist/ ready. | next: three rounds have now each found a defect
+in my OWN recent work (R559's six seeds, R562's regression, R563's duplicate),
+and none was found by the surface I was changing. If there is a rule here it is
+that a change should be checked from where it is CONSUMED, not from where it is
+written. The four owner questions still stand, tab bar first since R523.
