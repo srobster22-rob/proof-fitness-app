@@ -665,6 +665,27 @@ export function NowScreen({
       </View>
 
       {/* The hero. Steppers, never a keyboard. */}
+      {/*
+        The logging controls get a surface, drawn BEHIND them rather than
+        around them.
+
+        The screen was one flat field with everything floating on it, which is
+        most of what OWNER.md means by 'too together' and 'not app-appropriate'
+        — nothing grouped the three rows that are one control into one thing.
+        The app already owns the vocabulary for this (#111417 on #2A323A at
+        radius 12-14, on the plan chooser); it had simply never been applied to
+        the control the screen exists for.
+
+        A normal card would pad its contents and that is exactly what this
+        column cannot afford: R512 measured the 568px phone at 624px of
+        unshrinkable content against 568 of screen, so eight pixels of top
+        padding was enough to put LOG SET below the fold. So the panel is an
+        ABSOLUTE child with negative insets — it reaches out past the rows to
+        look like padding, and contributes no height at all. Same trick as
+        R514's rail fade, pointed the other way.
+      */}
+      <View style={s.logPanel}>
+        <View style={s.logPanelSurface} pointerEvents="none" />
       <View style={[s.heroRow, { gap: L.rowGap }]}>
         <Stepper label="−" what="weight" onPress={() => bump(() => model.bumpWeight(-1))} />
         <View style={s.heroNumbers}>
@@ -808,6 +829,7 @@ export function NowScreen({
           />
         </View>
         <Stepper label="+" small what="reps" onPress={() => bump(() => model.bumpReps(1))} />
+      </View>
       </View>
 
       {/* THE tap. One press logs the set exactly as shown. */}
@@ -2441,6 +2463,19 @@ const s = StyleSheet.create({
   // A plain wrapper so the fade has something to be absolute inside. It sets
   // no size of its own, so the band is still exactly as tall as its content —
   // the property the railBand comment insists on.
+  // Positioning context only. No size of its own, so the rows inside stack
+  // exactly as they did and `fixedHeight`'s arithmetic is untouched.
+  logPanel: { position: 'relative' },
+  /*
+   * Negative insets, so it reads as padding and costs none. `bottom` is short
+   * of `top` because LOG SET sits directly beneath with its own `logGap`, and
+   * a panel that reached all the way down would crowd it.
+   */
+  logPanelSurface: {
+    position: 'absolute', left: -10, right: -10, top: -14, bottom: -10,
+    borderRadius: 18, backgroundColor: '#0D1014',
+    borderWidth: 1, borderColor: '#181D23'
+  },
   railScroller: { position: 'relative' },
   railFade: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 32, flexDirection: 'row' },
   railFadeSlice: { flex: 1, backgroundColor: BG },
