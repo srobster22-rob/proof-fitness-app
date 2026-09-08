@@ -178,6 +178,23 @@ export function coachSuggestion(
    */
   const grid = opts.grid ?? 0;
   const snap = (w: number) => (grid > 0 ? roundTo(w, grid) : w);
+  /*
+   * A snapped weight that is still an INCREASE (R549).
+   *
+   * `roundTo` goes to the nearest multiple, which can round DOWN past the
+   * weight being climbed from — 191 plus a 1 lb step is 192, and 192 on a 5 lb
+   * grid is 190. The line would then read "climbing, try 190" to somebody who
+   * just lifted 191, which is the advice inverted rather than rounded.
+   *
+   * Reachable exactly when the current weight is off-grid, and that is not an
+   * odd case: a converted history is off-grid by construction, because 86 kg is
+   * 189.5 lb. So every branch that says "go up" goes through here.
+   */
+  const raise = (from: number, target: number): number => {
+    const at = snap(target);
+    if (grid <= 0 || at > from) return at;
+    return roundTo(from + grid, grid) > from ? roundTo(from + grid, grid) : from + grid;
+  };
   const target = TARGET_REPS[goal];
   const latest = sets[0];
 
@@ -262,7 +279,7 @@ export function coachSuggestion(
    * immediately.
    */
   if (atSameWeight >= PLATEAU_SESSIONS && sets[0].reps <= sets[atSameWeight - 1].reps) {
-    const up = snap(latest.weight + step);
+    const up = raise(latest.weight, latest.weight + step);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachPlateau',
@@ -275,7 +292,7 @@ export function coachSuggestion(
    * the rep target, so the weight is no longer the limiting thing.
    */
   if (atSameWeight >= MIN_SESSIONS && latest.reps >= target) {
-    const up = snap(latest.weight + step);
+    const up = raise(latest.weight, latest.weight + step);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachIncrease',
@@ -340,7 +357,21 @@ export function coachSuggestion(
     }
     if (rising) {
       const theirStep = sets[0].weight - sets[1].weight;
-      const up = latest.weight + theirStep;
+      /*
+       * Their own increment, landed on plates (R549).
+       *
+       * R518 established that a working increment outranks the goal table, and
+       * that still holds — this changes where the number lands, not which
+       * number it comes from. But "their own increment" is not always something
+       * they loaded: with one session logged in kilos, 86 kg reads as 189.5 lb
+       * and the step reads as 4.5, so the app said "189.5 and climbing — TRY
+       * 194". They never lifted 4.5 lb of anything; the conversion did.
+       *
+       * `recentWeight` stays exact on purpose. 189.5 is what they actually
+       * lifted and §16 wants that reported honestly; it is only the SUGGESTION
+       * that has to exist in a rack.
+       */
+      const up = raise(latest.weight, latest.weight + theirStep);
       return {
         kind: 'increase', weight: up, recentWeight: latest.weight,
         sessions: sets.length, key: 'coachClimbing',

@@ -117,3 +117,95 @@ describe('every weight the coach names can actually be loaded (R548)', () => {
     }
   });
 });
+
+/*
+ * R549. R548 put the plateau and progress branches on the grid and deliberately
+ * left CLIMBING alone, on R518's rule that a lifter's own working increment
+ * outranks the goal table. That rule is right and the exemption was not: their
+ * "own increment" is only theirs when they loaded it.
+ *
+ * With one session logged in kilos, 86 kg reads as 189.5 lb and the step reads
+ * as 4.5, so the app said "189.5 and climbing, 4 sessions — TRY 194". Nobody
+ * ever put 4.5 lb on a bar; the unit conversion did. The number came from the
+ * lifter's history in form only.
+ *
+ * The reported weight stays exact — 189.5 is what they lifted — and only the
+ * suggestion is moved onto plates, which is the same split §16 asks for
+ * everywhere: report the real number, suggest a reachable one.
+ */
+describe('a climb suggested from converted history is still loadable (R549)', () => {
+  function switchedUnits(): Repo {
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    let n = 0;
+    for (const [d, w] of [[11, 175], [8, 180], [5, 185]] as [number, number][]) {
+      const id = `lb${d}`;
+      repo.startSession(id, 'lb');
+      repo.logSet({ id: `s${n++}`, sessionId: id, exerciseId: 'bench', weight: w, reps: 5, at: T0 - d * DAY });
+      repo.endSession(id, T0 - d * DAY + 3600_000);
+    }
+    repo.startSession('kg2', 'kg');
+    repo.logSet({ id: `s${n++}`, sessionId: 'kg2', exerciseId: 'bench', weight: 86, reps: 5, at: T0 - 2 * DAY });
+    repo.endSession('kg2', T0 - 2 * DAY + 3600_000);
+    return repo;
+  }
+
+  test('the climb lands on the grid', () => {
+    const line = said(switchedUnits());
+    assert.match(line, /climbing/, `the fixture stopped being a climb: "${line}"`);
+    assert.match(line, /try 195/, `expected a loadable next weight. It said: "${line}"`);
+    assert.doesNotMatch(line, /try 194\b/, `still suggesting 194, which is not on the 5 lb grid: "${line}"`);
+  });
+
+  test('but the weight they actually lifted is reported exactly', () => {
+    /*
+     * The half that must NOT be rounded. 189.5 is 86 kg told truthfully; a
+     * lifter who sees "190 and climbing" cannot check it against anything they
+     * did, which is the §16 failure in the opposite direction.
+     */
+    assert.match(said(switchedUnits()), /189\.5 and climbing/,
+      'the reported weight was rounded too, so it no longer matches the session');
+  });
+
+  test('snapping never turns an increase into a decrease', () => {
+    /*
+     * `roundTo` goes to the NEAREST multiple, so an off-grid current weight can
+     * round the suggestion below itself: 191 plus a 1 lb step is 192, and 192
+     * on a 5 lb grid is 190. That is not a rounding error, it is the advice
+     * inverted — "climbing, try 190" said to somebody who just lifted 191.
+     */
+    /*
+     * The first version of this looped over plateau fixtures and PASSED against
+     * a planted defect — the size step is 2.5 on a 5 grid, so the target is
+     * always far enough above to round up and the down-round case never arose.
+     * A test that cannot reach the case it names is the blind instrument this
+     * session keeps finding.
+     *
+     * It takes a CLIMBING history to get there, because that branch uses the
+     * lifter's own step, which can be small: rising 189 -> 190 -> 191 gives a
+     * step of 1, and 191 + 1 = 192 rounds to 190 — below what they just lifted.
+     */
+    const climbingBy = (step: number, top: number): Repo => {
+      const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+      let n = 0;
+      const weights = [top - 2 * step, top - step, top];
+      weights.forEach((w, i) => {
+        const id = `c${i}`;
+        repo.startSession(id, 'lb');
+        repo.logSet({ id: `q${n++}`, sessionId: id, exerciseId: 'bench', weight: w, reps: 5,
+          at: T0 - (9 - i * 3) * DAY });
+        repo.endSession(id, T0 - (9 - i * 3) * DAY + 3600_000);
+      });
+      return repo;
+    };
+
+    for (const [step, top] of [[1, 191], [1, 196], [0.5, 191], [2, 192]] as [number, number][]) {
+      const s = coachSuggestion(climbingBy(step, top).allSets(), 'bench', T0,
+        { unit: 'lb', goal: 'size', grid: 5 });
+      assert.ok(s, `no advice climbing by ${step} to ${top}`);
+      assert.ok(s!.weight > top,
+        `climbing by ${step} from ${top}, the app suggested ${s!.weight} — not an increase`);
+      assert.equal(s!.weight % 5, 0,
+        `climbing by ${step} from ${top}, it suggested ${s!.weight}, off the grid`);
+    }
+  });
+});
