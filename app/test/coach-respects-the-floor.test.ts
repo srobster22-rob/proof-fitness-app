@@ -1,12 +1,17 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { coachSuggestion } from '../src/domain/coach.ts';
 import { EQUIPMENT_BASE } from '../src/domain/coldstart.ts';
 import { t } from '../src/domain/i18n.ts';
+import { around } from './helpers/source.ts';
 
+const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DAY = 86_400_000;
 const T0 = Date.UTC(2026, 8, 9, 12);
 
@@ -115,5 +120,63 @@ describe('a deload cannot suggest a weight the rack does not have (R541)', () =>
     }
     assert.notEqual(t('en', 'coachDeloadFloor'), t('es', 'coachDeloadFloor'),
       'the Spanish line is the English one, so it was never translated');
+  });
+});
+
+/*
+ * R573. The floor this whole file guards was silently WRONG for every
+ * equipment except barbell, since the round that added it. `now-model.ts`
+ * looked up the base as `exercises.get(this.exerciseId)?.equipment` -- but
+ * `Exercise` has no `equipment` field; it lives on `LoggedSet`, per SET, not
+ * per exercise. That is a type error `tsc --noEmit` catches immediately, and
+ * nothing in this suite's own `test` script check ran it where a failure
+ * would be seen: `npm test` chains `tsc --noEmit` at the very end, but a
+ * session filtering its output for the test-runner's own pass/fail lines
+ * (exactly what this session did, repeatedly) sees a clean "0 fail" and never
+ * reaches the unmatched tsc error text below it.
+ *
+ * The expression type-checked as `any` and silently evaluated to `undefined`
+ * on every call, so `?? 'barbell'` always won -- the floor was always 45/20
+ * regardless of what the lift actually was. Right for a barbell lift by
+ * coincidence, wrong and unnoticed for anything else. Measured: a lifter
+ * grinding at 40 lb on a weighted (bodyweight-equipment) pull-up, reps
+ * falling, was told "hold here" when the correct floor (0, not 45) allows a
+ * real deload to 35.
+ *
+ * `this.equipment` -- the model's own tracked field for what the CURRENT lift
+ * is being done on -- is what the line needed, and always could have used.
+ */
+describe('the deload floor uses the actual equipment, not a type error (R573)', () => {
+  function pullupsOn(weight: number): Repo {
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    let n = 0;
+    for (const [d, reps] of [[10, 8], [7, 6], [4, 5]] as [number, number][]) {
+      const id = `s${d}`;
+      repo.startSession(id, 'lb', undefined, T0 - d * DAY);
+      repo.logSet({ id: `x${n++}`, sessionId: id, exerciseId: 'pullup', weight, reps, at: T0 - d * DAY });
+      repo.endSession(id, T0 - d * DAY + 3600_000);
+    }
+    return repo;
+  }
+
+  test('a bodyweight lift can deload below the barbell floor', () => {
+    const repo = pullupsOn(40);
+    const m = new NowModel(repo, () => T0, 'en-US');
+    m.selectExercise('pullup');
+    m.setEquipment('bodyweight');
+    const said = m.state().lastTime.head;
+    assert.match(said, /back off to 35/,
+      `a weighted pull-up should deload freely down to 0, not the barbell floor of 45: "${said}"`);
+    assert.doesNotMatch(said, /hold here/,
+      `the floor blocked a real deload it had no business blocking: "${said}"`);
+  });
+
+  test('the lookup reads the CURRENT equipment, not a field Exercise never had', () => {
+    const src = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-model.ts'), 'utf8');
+    const call = around(src, 'base: EQUIPMENT_BASE[', 0, 120);
+    assert.match(call, /this\.equipment/,
+      'the deload floor no longer reads this.equipment');
+    assert.doesNotMatch(call, /exercises\.get\(this\.exerciseId\)\?\.equipment/,
+      'the floor is reading equipment off Exercise again, which has never had that field');
   });
 });

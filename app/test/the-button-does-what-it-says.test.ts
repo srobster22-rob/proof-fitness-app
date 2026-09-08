@@ -80,7 +80,12 @@ describe('the plate button moves what its label promises (R563)', () => {
      * for `base` ended up sitting above `grid`. Invisible in every test and in
      * the product, which is exactly why it survived two rounds.
      */
-    const call = around(MODEL_SRC, 'coach: coachSuggestion(', 0, 700);
+    // 1400, not 700: R573's fix for the equipment-lookup bug (base:
+    // EQUIPMENT_BASE[...]) added a longer explanatory comment ahead of it,
+    // which pushed `base:` past the old window and made this test stop
+    // seeing it at all -- silently checking three keys instead of four and
+    // still reporting green. Widened to the real distance plus headroom.
+    const call = around(MODEL_SRC, 'coach: coachSuggestion(', 0, 1400);
     for (const key of ['unit:', 'goal:', 'grid:', 'base:']) {
       const times = call.split(key).length - 1;
       assert.equal(times, 1, `the coach call passes ${key} ${times} times`);

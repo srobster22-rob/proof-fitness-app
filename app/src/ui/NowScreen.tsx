@@ -705,15 +705,6 @@ export function NowScreen({
           {typing !== null ? (
             <TextInput
               style={[s.weight, s.weightInput, { fontSize: L.hero }]}
-              /*
-               * R569: the sibling of the R339 fix a few lines below, missed
-               * when this typed-weight field was added. L.hero is the same
-               * already-fitted value the resting <Text> exempts at line 737 —
-               * Dynamic Type multiplies on top of a fontSize regardless of
-               * which element carries it, and this is not paragraph text, it
-               * is the same dial in its editable form.
-               */
-              allowFontScaling={false}
               value={typing}
               onChangeText={typeWeight}
               onBlur={() => setTyping(null)}
@@ -723,6 +714,18 @@ export function NowScreen({
               selectTextOnFocus
               autoFocus
               accessibilityLabel={T('weight')}
+              /*
+               * R569 found this ALREADY HAD the exemption below and, not
+               * having checked, added a second one above — a JSX element with
+               * the same attribute twice, which `tsc --noEmit` flags but
+               * nothing in this suite runs it, so it shipped. The Dynamic
+               * Type reasoning R569 wrote is still correct and belongs on the
+               * prop that was already here: L.hero is the same already-fitted
+               * value the resting <Text> exempts a few lines below — Dynamic
+               * Type multiplies on top of a fontSize regardless of which
+               * element carries it, and this is not paragraph text, it is the
+               * same dial in its editable form.
+               */
               allowFontScaling={false}
             />
           ) : (

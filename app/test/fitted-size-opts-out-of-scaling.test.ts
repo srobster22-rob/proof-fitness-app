@@ -58,8 +58,20 @@ describe('a font size fitted to the screen never gets fitted twice (R569)', () =
         // inside an explanatory /* */ comment right above the prop, and a `>`
         // inside PROSE closed the scan before it reached the real prop,
         // reporting the very element it had just been fixed on.
-        const aheadRaw = lines.slice(i, i + 12).join('\n');
-        const ahead = aheadRaw.replace(/\/\*[\s\S]*?\*\//g, '');
+        // 30, not 12 (R573): the R569 fix this file itself found (a real
+        // exemption already sat 22 lines below the fontSize line, past a long
+        // explanatory comment) needed a wider window than the original one
+        // this test shipped with -- the same "the fix pushed the anchor past
+        // the scan" shape as the coach-call test R573 also had to widen.
+        // Third bug this one gate has had (R573): arrow-function props
+        // (`onBlur={() => ...}`) contain a bare `>`, which closed the scan
+        // before it ever reached the real JSX tag end -- found because the
+        // widened window above now reaches past `onBlur`/`onSubmitEditing`
+        // props that the original 12-line window never had to cross. `=>` is
+        // blanked out before the closing-`>` search, same idea as stripping
+        // comments: remove the false positives before looking for the real one.
+        const aheadRaw = lines.slice(i, i + 30).join('\n');
+        const ahead = aheadRaw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/=>/g, '  ');
         const closesAt = ahead.indexOf('>');
         const scanned = closesAt >= 0 ? ahead.slice(0, closesAt + 1) : ahead;
         if (!/allowFontScaling=\{false\}/.test(scanned)) {
@@ -74,8 +86,17 @@ describe('a font size fitted to the screen never gets fitted twice (R569)', () =
   });
 
   test('the R339 fix this round found a sibling of is still in place', () => {
+    /*
+     * R573 corrected the original fix: it had ADDED a second
+     * allowFontScaling next to the fontSize line rather than noticing the
+     * TextInput already had one lower down, so tsc's duplicate-attribute
+     * error caught it. The exemption itself (the actual product behaviour)
+     * survived the fix intact; only the explanatory comment's wording and
+     * position changed, so this now checks for what R573 left rather than
+     * the exact string R569 originally wrote.
+     */
     const src = fs.readFileSync(path.join(APP, 'src', 'ui', 'NowScreen.tsx'), 'utf8');
-    assert.match(src, /R569: the sibling of the R339 fix/,
-      'the note explaining why the typed-weight field needs this is gone');
+    assert.match(src, /R569 found this ALREADY HAD the exemption/,
+      'the note explaining the typed-weight field\'s exemption is gone');
   });
 });

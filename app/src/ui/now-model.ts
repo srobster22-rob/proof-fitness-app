@@ -1311,12 +1311,21 @@ export class NowModel {
             // The stepper's own increment, so a suggested weight is one the +
             // and - buttons can reach and a bar can be loaded to (R548).
             grid: WEIGHT_STEP[this.session.unit],
-            // The empty implement, so a deload cannot suggest a weight the
-            // rack does not have (R541). The engine defaults this to 0, so
-            // it is this line that makes the floor real.
-            base: EQUIPMENT_BASE[
-              exercises.get(this.exerciseId)?.equipment ?? 'barbell'
-            ][this.session.unit]
+            /*
+             * The empty implement, so a deload cannot suggest a weight the
+             * rack does not have (R541). The engine defaults this to 0, so
+             * it is this line that makes the floor real.
+             *
+             * `this.equipment`, not `exercises.get(id)?.equipment` — that
+             * read a field `Exercise` has never had (equipment lives on
+             * `LoggedSet`, per-set, not per-exercise) and `tsc --noEmit` was
+             * never run to catch it. It type-checked as `any` and silently
+             * fell through to the `?? 'barbell'` default on every call, so
+             * the floor was always 45/20 regardless of what the lift was
+             * actually logged on — right for a barbell lift by coincidence,
+             * wrong and unnoticed for a dumbbell or bodyweight one.
+             */
+            base: EQUIPMENT_BASE[this.equipment ?? 'barbell'][this.session.unit]
           }
         )
       }, this.lang()),
