@@ -36,9 +36,17 @@ function sources(): Array<[string, string]> {
  * the claim lived in prose, and prose does not fail.
  *
  * This is the same shape as `SettingsSheet.tsx` (R232, a second drifting copy
- * of the Settings screen) and as the Swift port that HANDOFF still lists as
- * four changes behind `recap.js`. Two of those three were found by a person
- * noticing. This one gets a test instead.
+ * of the Settings screen) and as the Swift port, which HANDOFF lists as five
+ * changes behind `recap.js` — this said FOUR until R528, because the count
+ * moved when R476 extended it and prose citing another document's number has
+ * no way to notice. Two of those three were found by a person noticing. This
+ * one gets a test instead, and so now does the count itself.
+ *
+ * All three are since accounted for: the sparkline by the tests below,
+ * `SettingsSheet.tsx` by being deleted, and the Swift port by
+ * `swift-parity.test.ts`'s acknowledged list — checked in R528 rather than
+ * assumed, because a comment naming three siblings is worth exactly as much
+ * as whether anybody followed it up.
  */
 describe('the sparkline is one component, not a shape each screen redraws', () => {
   test('exactly one file declares it', () => {

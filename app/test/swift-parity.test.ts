@@ -26,6 +26,40 @@ const swift = readFileSync(path.join(ROOT, 'spike', 'ios-module', 'RecapRenderer
  * The same shape as `orphan-scan`'s acknowledged list, and for the same reason:
  * a report that always looks identical is a report nobody reads.
  */
+/*
+ * R528. `KNOWN_DRIFT` is the list; HANDOFF.md and other comments quote its
+ * SIZE as a sentence — "the Swift port is five changes behind".
+ *
+ * A number quoted in prose cannot notice when the list it describes changes.
+ * It already had not: R476 extended the list and `spark-is-shared.test.ts`
+ * still said four, so two files in this repo disagreed about the same count
+ * and both read as authoritative. Nobody was going to catch that by reading,
+ * because each is right on its own page.
+ */
+describe('the divergence count in prose matches the list (R528)', () => {
+  const HANDOFF = readFileSync(path.join(HERE, '..', '..', 'HANDOFF.md'), 'utf8');
+  const WORDS: Record<string, number> = {
+    one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10
+  };
+
+  test('HANDOFF still states a count, in a form this can read', () => {
+    // Guard on the instrument: if the sentence is rewritten, this test must
+    // fail loudly rather than quietly stop checking anything.
+    assert.match(HANDOFF, /Swift port is (\w+) changes behind/,
+      'HANDOFF no longer states how far behind the Swift port is, so nothing ' +
+      'pins the number this list defines');
+  });
+
+  test('and the number it states is the length of KNOWN_DRIFT', () => {
+    const stated = /Swift port is (\w+) changes behind/.exec(HANDOFF)![1];
+    const n = WORDS[stated.toLowerCase()] ?? Number(stated);
+    assert.ok(Number.isFinite(n), `cannot read "${stated}" as a number`);
+    assert.equal(n, KNOWN_DRIFT.length,
+      `HANDOFF says the Swift port is ${stated} changes behind and KNOWN_DRIFT ` +
+      `has ${KNOWN_DRIFT.length} entries — one of them moved without the other`);
+  });
+});
+
 describe('the Swift port and the JS source of truth agree on geometry', () => {
   const num = (src: string, re: RegExp, what: string) => {
     const m = src.match(re);
