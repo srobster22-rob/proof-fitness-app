@@ -126,9 +126,25 @@ describe('Now screen — layout invariants', () => {
   });
 
   test('the hero number is still the hero', () => {
-    // A guard on the fix above: stretching the name must not have made it
-    // compete with the number §4 puts at the centre of the screen.
-    assert.match(style('exercise'), /fontSize:\s*22\b/);
+    /*
+     * A guard on the fix above: stretching the name must not have made it
+     * compete with the number §4 puts at the centre of the screen.
+     *
+     * R511 asks this as the RELATIONSHIP rather than as the literal 22 it used
+     * to pin. The bound is not a preference, it is `layoutFor`'s own floor --
+     * `hero: Math.max(24, ...)` -- so a name at 24 or more outgrows the weight
+     * on the smallest viewport the app supports. Pinning 22 said nothing about
+     * WHY, and a restyle that read it as a stale constant would have shipped
+     * exactly that bug -- this one did, and was caught here. Stating the reason
+     * tells the next person what the size has to stay under.
+     */
+    const size = Number(/fontSize:\s*(\d+)/.exec(style('exercise'))?.[1]);
+    const heroFloor = Number(/hero: Math\.max\((\d+),/.exec(
+      fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-model.ts'), 'utf8'))?.[1]);
+    assert.ok(heroFloor > 0, 'layoutFor no longer floors the hero; this guard has no bound');
+    assert.ok(size < heroFloor,
+      `the exercise name is ${size}px and the hero floors at ${heroFloor}px, so on ` +
+      'the smallest screen the name is as large as the weight or larger');
     assert.match(SOURCE, /fontSize:\s*L\.hero/,
       'the weight is sized by layoutFor and dwarfs everything else');
   });

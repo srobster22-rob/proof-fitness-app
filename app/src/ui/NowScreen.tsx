@@ -2046,7 +2046,7 @@ function Stepper({ label, onPress, small, what }: {
 const s = StyleSheet.create({
   root: {                                                 // maxWidth from layoutFor
     flex: 1, width: '100%', alignSelf: 'center',
-    backgroundColor: BG, paddingHorizontal: 20, paddingTop: 8
+    backgroundColor: BG, paddingHorizontal: 20, paddingTop: 16
   },
   /*
    * R339: found at 2.35x Dynamic Type (iOS's largest accessibility size) —
@@ -2065,7 +2065,7 @@ const s = StyleSheet.create({
   // their 11px at #7C8792, so the least important control in the row was
   // the most prominent thing in it.
   topGear: { color: '#7C8792', fontSize: 15, fontWeight: '600' },
-  topLink: { color: '#7C8792', fontSize: 11, fontWeight: '800', letterSpacing: 1.6, paddingVertical: 8 },
+  topLink: { color: '#7C8792', fontSize: 12, fontWeight: '800', letterSpacing: 1.2, paddingVertical: 10 },
   /*
    * `flex-start`, not `center`.
    *
@@ -2107,8 +2107,26 @@ const s = StyleSheet.create({
   // Sized off the name rather than the label scale: it belongs to the
   // heading it marks, not to the chrome around it.
   exerciseCaret: { color: '#7C8792', fontSize: 15, fontWeight: '700', marginTop: 2 },
+  /*
+   * R511, on the owner's note that the screen 'looks a little sloppy and
+   * AI-generated'. This was 22px with letterSpacing 2 -- the exact treatment
+   * used by `topLink`, `railLabel` and every other CHROME label on the screen,
+   * only bigger. Wide tracking on a short all-caps string reads as a category
+   * heading, so the one thing the screen is actually about was dressed as
+   * furniture, and nothing on the page claimed the top of the hierarchy.
+   *
+   * A name, now: tracked at 0.6 rather than 2, which is where a title sits in
+   * every fitness app worth comparing against. The labels around it keep their
+   * wide tracking, so 'this is the thing' and 'this is a label' are told apart
+   * by the TYPE rather than by size.
+   *
+   * The size deliberately does not move. 26 was tried and is wrong: `L.hero`
+   * floors at 24, so on the smallest viewport a 26px name would outgrow the
+   * weight itself and take the top of the hierarchy from the number §4 puts at
+   * the centre of the screen. Anything at or above 24 is the same bug.
+   */
   exercise: {
-    color: '#fff', fontSize: 22, fontWeight: '800', letterSpacing: 2,
+    color: '#fff', fontSize: 22, fontWeight: '800', letterSpacing: 0.6,
     textAlign: 'center'
   , flexShrink: 1},
   // `alignSelf: 'stretch'` for the same reason `exerciseTap` needs it:

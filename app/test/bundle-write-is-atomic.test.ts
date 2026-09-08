@@ -96,7 +96,17 @@ describe('rewriting a file that other processes read (R501)', () => {
     // the slower path: enough writes to guarantee overlap, not a throughput bar.
     assert.ok(writes > 30, `only ${writes} writes — nothing to race against`);
     const seen = JSON.parse(out.trim()) as { reads: number; short: number };
-    assert.ok(seen.reads >= 200, `only ${seen.reads} reads — the probe measured nothing`);
+    /*
+     * A floor, not a quota. R510's failure log caught this firing as a FALSE
+     * failure: under the load of a full suite the reader child is starved and
+     * completed 100 reads rather than 200, so a healthy run was reported as
+     * broken. The guard is right to exist -- it is what stops a probe that
+     * measured nothing from passing -- but its number described an idle
+     * machine, and the condition it must survive is a busy one. Tearing shows
+     * up within tens of reads when it is there at all, so 50 still catches a
+     * dead probe without inventing failures on a loaded box.
+     */
+    assert.ok(seen.reads >= 50, `only ${seen.reads} reads — the probe measured nothing`);
     return { ...seen, writes };
   }
 
