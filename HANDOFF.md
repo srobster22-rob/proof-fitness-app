@@ -593,7 +593,10 @@ or `src/ui/`.
 answer given and not yet logged survives switching lifts. `null` means never answered and `''`
 means answered "none" — collapsing them made CLEAR fail to stick.
 
-**Goals: the cap is 12, not 3.** §5 called three a hard cap; the product owner overruled it. One
+**Goals: the cap is 100, not 3.** §5 called three a hard cap; the product owner overruled it.
+(This line said 12 until R536 — a second, contradictory number for the same cap, in this same
+file, 287 lines from the one that says 100. R529's gate read only the FIRST match and passed.)
+One
 goal per exercise is still enforced and is the constraint that was doing the real work. Untrained
 goals collapse to a compact row, and at the cap the screen says what would free a slot instead of
 hiding the button.
@@ -624,6 +627,28 @@ declared and unused since the start.
    The failure reads as "the style was removed", never "your test is broken". Use the Write
    tool for anything containing a backslash, and `cat -A` the file when an assertion fails on
    input that looks correct.
+   BROADENED R536: the heredoc is one door of at least THREE, and naming only that one makes a
+   session feel safe the moment it switches to python or writes the regex in JS. Hit six times
+   in R500-R535 by three distinct mechanisms.
+   (a) The Bash heredoc, as above.
+   (b) A JavaScript TEMPLATE LITERAL, which eats them before the RegExp constructor ever sees
+   them: a template literal holding a single-backslash dot and word-boundary compiles to a
+   pattern whose final character is codepoint 8 — a real BACKSPACE — so it matches nothing,
+   while the DOUBLED forms give the intended byte sequence 92 46 ... 92 98. Measured both ways
+   in R536. This is what produced R526's guard, which passed while structurally incapable of
+   failing.
+   (c) A doubled carriage-return escape arriving as an actual CR inside a regex literal, which
+   at least fails loudly — "Unterminated regexp literal" (R534).
+   THIS ENTRY IS DELIBERATELY WRITTEN WITHOUT LITERAL ESCAPES. The first version was composed
+   through a heredoc and every example in it was eaten: the word-boundary vanished, the doubled
+   forms collapsed to single ones, and the carriage-return escape became nothing at all. An
+   entry about backslashes being eaten cannot survive being written through the thing that eats
+   them, so it names them in words and leaves the runnable proof in R536's log.
+   THE DEFENCE THAT ACTUALLY WORKS is not to escape more carefully but to REMOVE A LAYER: build
+   the string with `chr(92)`, or write the file with the Write tool, or edit the single line
+   with Edit. Every attempt to out-escape these has eventually failed; every removal of a layer
+   has worked first time. Demonstrating (b) needed exactly that — the `node -e` version of the
+   demonstration was itself mangled by Bash, which is the trap appearing inside its own proof.
 8. **Check `innerWidth` before believing any geometry.** A preview tab opened in the background
    can render at **0×0**: the DOM is complete and every text assertion passes, while every
    `getBoundingClientRect` is zero and `elementFromPoint` finds nothing — so a working screen

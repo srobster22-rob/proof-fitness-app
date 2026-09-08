@@ -44,7 +44,20 @@ describe('the numbers in HANDOFF are ones that can stay true (R529)', () => {
   });
 
   test('the goals cap it states is the cap the code enforces', () => {
-    const stated = /Goals are capped at (\d+)/.exec(HANDOFF);
+    /*
+     * EVERY mention, not the first. R536 found HANDOFF stating the cap twice —
+     * 100 in one place and 12 in another, 287 lines apart — and this gate
+     * passed, because `.exec` returns the first match and the first one was
+     * right. A document can contradict itself and still satisfy a check that
+     * stops reading at the first agreement.
+     */
+    const all = [...HANDOFF.matchAll(/(?:Goals are capped at|Goals: the cap is) (\d+)/g)];
+    assert.ok(all.length > 0, 'HANDOFF no longer states the goals cap; this guard reads nothing');
+    for (const m of all) {
+      assert.equal(Number(m[1]), MAX_GOALS,
+        `HANDOFF says the goals cap is ${m[1]} somewhere and MAX_GOALS is ${MAX_GOALS}`);
+    }
+    const stated = all[0];
     assert.ok(stated, 'HANDOFF no longer states the goals cap; this guard reads nothing');
     assert.equal(Number(stated[1]), MAX_GOALS,
       `HANDOFF says goals are capped at ${stated[1]} and MAX_GOALS is ${MAX_GOALS}`);

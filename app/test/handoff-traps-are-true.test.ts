@@ -93,7 +93,12 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
       // Gated like trap 10s, for the same reason and for consistency: both are
       // frequency claims whose force IS the number. Two-versus-eight is the
       // difference between a curiosity and the thing to expect.
-      ['the drifting-list count (trap 13)', /Eight times now/]
+      ['the drifting-list count (trap 13)', /Eight times now/],
+      // Trap 7 was scoped to the Bash heredoc while two of the six hits came
+      // through a template literal and a raw CR. The defence is the part that
+      // has actually worked every time: remove a layer rather than escape harder.
+      ['trap 7 covers more than the heredoc', /three distinct mechanisms/],
+      ['trap 7 keeps the defence that works', /REMOVE A LAYER/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +
