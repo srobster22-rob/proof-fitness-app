@@ -149,7 +149,7 @@ export function coachSuggestion(
   history: LoggedSet[],
   exerciseId: string,
   now: number,
-  opts: { goal?: TrainingGoal; unit: Unit }
+  opts: { goal?: TrainingGoal; unit: Unit; base?: number }
 ): Suggestion | null {
   const goal = opts.goal ?? 'size';
   const sets = topSets(history, exerciseId, now);
@@ -178,7 +178,38 @@ export function coachSuggestion(
   const declining = atSameWeight >= PLATEAU_SESSIONS &&
     sets[0].reps < sets[atSameWeight - 1].reps;
   if (declining) {
-    const back = roundTo(latest.weight * 0.9, MIN_INCREMENT[opts.unit]);
+    /*
+     * FLOORED AT THE EMPTY IMPLEMENT (R541).
+     *
+     * Ten percent off is right until the lifter is already at the bottom.
+     * `coldstart.ts` states the floor — "the empty version of each thing: a bar
+     * with no plates, the lightest dumbbell, the first pin on a stack. The
+     * floor a suggestion can never go below" — and this engine, added later,
+     * had never heard of it. Measured: three sessions of bench at 45 with reps
+     * falling produced "45 is grinding — back off to 41", and there is no way
+     * to load a barbell to 41. §16 asks every number to be checkable against a
+     * rack; this one could not be.
+     *
+     * `base` is optional and defaults to 0, so a caller that does not know the
+     * equipment gets exactly the old arithmetic rather than a wrong floor.
+     */
+    const base = opts.base ?? 0;
+    const back = Math.max(base, roundTo(latest.weight * 0.9, MIN_INCREMENT[opts.unit]));
+    /*
+     * At the floor there is nothing to back off TO, and the branches below
+     * must not get the question: with reps falling and three sessions at one
+     * weight, PLATEAU fires and says "try 46" — telling somebody grinding out
+     * a bad week to add weight, which is the exact thing this branch exists to
+     * prevent. So the protection stays and only the ACTION changes: hold, and
+     * say why, because "back off to 45" said at 45 is not advice.
+     */
+    if (back >= latest.weight) {
+      return {
+        kind: 'hold', weight: latest.weight, recentWeight: latest.weight,
+        sessions: atSameWeight, key: 'coachDeloadFloor',
+        params: { weight: latest.weight, n: atSameWeight }
+      };
+    }
     return {
       kind: 'deload', weight: back, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachDeload',

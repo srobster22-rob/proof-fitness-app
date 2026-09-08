@@ -1,6 +1,6 @@
 import type { LoggedSet, Session, Exercise, Unit, Equipment } from '../domain/types.ts';
 import { Repo } from '../data/repo.ts';
-import { prefillFor, pickerFor, unitForNewSession, type Prefill } from '../domain/coldstart.ts';
+import { prefillFor, pickerFor, unitForNewSession, EQUIPMENT_BASE, type Prefill } from '../domain/coldstart.ts';
 import { nextCandidates, openingLift } from '../domain/predict.ts';
 import { autoEnd, isStale, lastSetAt, sessionStats } from '../domain/session.ts';
 import { findPRs } from '../domain/pr.ts';
@@ -1306,7 +1306,15 @@ export class NowModel {
         goal: this.goalHint(),
         coach: coachSuggestion(
           this.historyInSessionUnit(), this.exerciseId, this.now(),
-          { unit: this.session.unit, goal: trainingGoal(this.repo) }
+          {
+            unit: this.session.unit, goal: trainingGoal(this.repo),
+            // The empty implement, so a deload cannot suggest a weight the
+            // rack does not have (R541). The engine defaults this to 0, so
+            // it is this line that makes the floor real.
+            base: EQUIPMENT_BASE[
+              exercises.get(this.exerciseId)?.equipment ?? 'barbell'
+            ][this.session.unit]
+          }
         )
       }, this.lang()),
       /*
