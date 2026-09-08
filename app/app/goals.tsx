@@ -90,11 +90,25 @@ export default function Goals() {
    * arrival rather than trust it survived whatever happened while this
    * screen was not the one on screen. Same idea, scoped to what this screen
    * actually holds.
+   *
+   * R583 found the sibling of this bug ONE ROUND LATER: `goals` itself
+   * (`useMemo(() => listGoals(repo, now), [repo, tick])`) only recomputes
+   * when `tick` changes, which only happens through this screen's OWN
+   * actions — nothing here ever refreshed on arrival. The exact defect
+   * `NowScreen.resume()`'s own comment names for a different screen ("a
+   * restore — or an erase — on Progress left this screen showing numbers for
+   * sets that no longer existed... this screen does not own that data, so it
+   * cannot assume it is still what it was") had never been fixed here,
+   * because until R581 nothing on Goals ran on focus at all. `setTick`
+   * directly, not `refresh` — declared further down this function, after
+   * this hook, and reordering unrelated code to reach it is a bigger change
+   * than the fix itself.
    */
   useFocusEffect(useCallback(() => {
     setEditing(null);
     setWiping(null);
     setUndo(null);
+    setTick(t => t + 1);
   }, []));
 
   const wipe = useCallback((ids: string[], label: string) => {

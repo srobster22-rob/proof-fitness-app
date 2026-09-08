@@ -2060,3 +2060,15 @@ same latent risk. Contract: find confirm/undo-style local state on each (the
 category R581 fixed), check whether the underlying write is an unconditional
 upsert or resurrect like restoreGoals was, and fix only what is real and
 specifically tied to the pop-reliance shape — not a general audit.
+
+R583 — PICK (logged first): check whether Goals refreshes its own DATA (not
+just the sheet state R581 cleared) on return from another screen. `goals` is
+`useMemo(() => listGoals(repo, now), [repo, tick])` — `repo` is a stable
+singleton, so it only recomputes when `tick` changes via an explicit local
+`refresh()` call. If an erase or restore happens on Progress while Goals is
+mounted-but-blurred (exactly what a tab bar would allow), does Goals show
+stale goals on return? This is NowScreen's own documented defect
+("`resume()`... this screen does not own that data, so it cannot assume it is
+still what it was") in a screen that has never had the equivalent fix.
+Contract: verify live whether the list is actually stale, and if so, extend
+R581's `useFocusEffect` to also call `refresh()`.

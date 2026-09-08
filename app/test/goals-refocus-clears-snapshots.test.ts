@@ -43,4 +43,23 @@ describe('Goals clears its snapshot state on refocus, not just on its own action
         'trip away from this screen again');
     }
   });
+
+  /*
+   * R583, one round after R581. `goals` is
+   * `useMemo(() => listGoals(repo, now), [repo, tick])` and `tick` only ever
+   * changed through this screen's OWN actions -- nothing refreshed the LIST
+   * itself on arrival, only the sheet state R581 fixed. The exact defect
+   * `NowScreen.resume()`'s comment names for a different screen -- "a
+   * restore -- or an erase -- on Progress left this screen showing numbers
+   * for sets that no longer existed" -- had never been fixed here, because
+   * nothing on Goals ran on focus at all until R581 gave it something to run.
+   */
+  test('the same useFocusEffect also refreshes the goal list itself', () => {
+    const at = SRC.indexOf('useFocusEffect(useCallback(');
+    assert.ok(at >= 0, 'the refocus guard is gone from app/goals.tsx');
+    const body = SRC.slice(at, at + 300);
+    assert.ok(body.includes('setTick(t => t + 1)'),
+      'the refocus guard clears the sheet state but no longer refreshes `tick` -- ' +
+      'the goal LIST can still show stale data after a restore or erase elsewhere');
+  });
 });
