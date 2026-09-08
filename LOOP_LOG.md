@@ -1728,3 +1728,14 @@ NowScreen.tsx — goals.tsx and recap.tsx carry the other 31 exemptions from the
 same fix pattern and are worth the same structural check rather than trusting
 their hand-placed set is complete either. Four owner questions remain, tab bar
 first since R523.
+
+R570 — PICK (logged first): extend R569's Dynamic Type gate to goals.tsx and
+recap.tsx, the other two files carrying the 31 remaining hand-placed
+allowFontScaling exemptions. Shortlist was (a) that, (b) wait idle, (c) sweep
+for a THIRD file with fitted-size text that has never been fixed at all.
+Picked (a): it is the natural completion of R569 rather than a new hunt, and
+"the population is currently just NowScreen.tsx" was my own stated gap. Method
+as before: extend FILES, run the scan cold, and only keep what it finds real —
+if it comes back clean, that is coverage gained and still worth pinning; if it
+finds something, that is R569 happening a second time for a real reason rather
+than by luck.
