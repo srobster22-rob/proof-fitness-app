@@ -21,8 +21,6 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
-- Personalization: goals, units, split, jump amounts and history should
-  visibly shape what the app shows, not just what it stores.
 - Attention-span pass: every core flow (open → log a set → done) measured in
   taps and seconds; cut anything that isn't earning its place. Fun and
   easy-to-look-at, not more features.
@@ -37,6 +35,26 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Personalization** — R520. I audited this rather than assuming, and the
+  answer is that it is ALREADY TRUE: all seven stored preferences change
+  something you can see. Units, language, split, plate jump, rep jump and
+  coaching each visibly change a screen; the seventh (skip machine name) only
+  affects the equipment sheet.
+  - So there was nothing to fix, and what I built instead is the gate that
+    keeps it true: each preference must be DEMONSTRATED — flip it, show a
+    screen renders differently — and the list of preferences is read out of
+    the code, so a new one either gets a demonstration or fails the build.
+  - Worth doing because this app has had exactly your suspicion before: the
+    language setting once "translated nothing but itself" (Settings in Spanish,
+    the logging screen still saying LOG SET), and the unit setting was honoured
+    on Now and ignored on Progress for months. Both are now planted as tests
+    and caught.
+  - The audit itself was wrong four times before it was right — a fixture where
+    the coach was silent, one with no machine, one where a display preference
+    cannot change an in-progress session, and a machine name silently dropped.
+    Every one looked like "the app is broken". That is why each check now
+    proves the path is live before it is allowed to conclude anything.
+
 - **AI coach** — R517-R519. Working; the line is under the lift name on Now.
   - Local rule engine over the last two weeks: progressive overload, plateau,
     deload, plus "you are climbing, keep going" and "this weight is new,
