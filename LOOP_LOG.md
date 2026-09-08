@@ -2072,3 +2072,39 @@ stale goals on return? This is NowScreen's own documented defect
 still what it was") in a screen that has never had the equivalent fix.
 Contract: verify live whether the list is actually stale, and if so, extend
 R581's `useFocusEffect` to also call `refresh()`.
+
+R583 — BUILD/REVIEW/SHIP on the pick logged above. Auditing my own R581 fix
+one round later found its own sibling. \`goals\` on the Goals screen is
+\`useMemo(() => listGoals(repo, now), [repo, tick])\`, and \`tick\` only ever
+changes through this screen's OWN actions — wipe, edit, restore. Nothing ever
+refreshed it on ARRIVAL, which is the exact defect \`NowScreen.resume()\`'s own
+comment names for a different screen: "a restore — or an erase — on Progress
+left this screen showing numbers for sets that no longer existed... this
+screen does not own that data, so it cannot assume it is still what it was."
+Goals had never had the equivalent fix, because until R581 nothing on Goals
+ran on focus at all — R581 gave it its first \`useFocusEffect\`, and this round
+found that effect was doing half the job its own comment already described
+NowScreen doing. SAME REACHABILITY STORY AS R581, verified the same way:
+currently safe, because \`leave\` always pops Goals and a pop destroys the
+component, so a fresh mount always calls \`listGoals\` from scratch regardless
+of this bug. Becomes real the moment anything keeps Goals mounted while
+blurred — the tab bar sitting in OWNER.md's own queue. Fixed by extending the
+SAME \`useFocusEffect\` R581 added, rather than a second one — \`setTick(t => t
++ 1)\` alongside the three snapshot clears, using \`setTick\` directly since
+\`refresh\` is declared further down the function and reordering to reach it
+would have been a bigger change than the fix. REVIEW: suite 2134 pass / 0
+fail (real count, up 1); planted removal of the new line and the extended
+test catches it by name, the two original R581 assertions untouched.
+Verified in the PRODUCT to the extent the current build allows: the
+stale-vs-fresh distinction cannot be demonstrated live today for the same
+reason R581's couldn't — the current stack makes both bugs unreachable by
+construction — so verification is that Goals still renders correctly and
+picks up its data on a normal fresh mount, no regression. \`--check\` current;
+no share code moved so link/build.cjs was not needed. Committed as 29395a5
+inside fitness-app; diff is the one line plus its comment. | next: the
+practice worth naming is auditing a fix ONE ROUND LATER for a sibling the
+first pass missed, rather than treating "shipped and tested" as "done
+thinking about it" — this is the second time this session a fix (R538→R539,
+now R581→R583) had a real second half found only by coming back to it fresh.
+Four owner questions remain the only work with real product value, tab bar
+first since R523, now 58 rounds waiting.
