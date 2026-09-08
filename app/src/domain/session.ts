@@ -593,9 +593,21 @@ export function buildRecap(opts: {
     firstSession: !allSets.some(x => x.at < session.startedAt),
     /*
      * Beat everything before it, on the same movement, at the same reps or
-     * more — the same comparison `findPRs` makes, so the two can never
-     * disagree about whether something was beaten. What differs is only
-     * whether the app is allowed to call it a RECORD yet.
+     * more. What differs from `findPRs` is only whether the app is allowed to
+     * call it a RECORD yet.
+     *
+     * This used to say the two "can never disagree", and R540 measured them
+     * disagreeing. `findPRs` holds a pull-up to BOTH scales — more total load
+     * AND more added weight than ever — because on a bodyweight movement the
+     * one way real load can rise without the lifter doing anything is the
+     * lifter getting heavier, and `pr.ts` calls that "the purest cry-wolf in
+     * the app: a badge for eating". `bestYet` compared load alone.
+     *
+     * Measured: three sessions of 25 x 5 pull-ups at 180 lb bodyweight, then
+     * the same 25 x 5 at 192. `findPRs` correctly awards nothing. The recap
+     * card said BEST YET, prev 205 — and precisely because there was no
+     * record, the `headline` suppression below could not catch it. The guard
+     * that exists one file over was the whole defence, and it was not here.
      *
      * Scoped to `bestSet`'s own lift rather than the whole history: "heaviest
      * ever" across every movement would be true of a deadlift session for
@@ -607,17 +619,22 @@ export function buildRecap(opts: {
      */
     bestYet: (() => {
       if (headline || !bestSet) return undefined;
-      const priorBest = allSets.reduce((m, x) =>
+      const prior = allSets.filter(x =>
         x.exerciseId === bestSet.exerciseId
-          && x.at < session.startedAt
-          && x.reps >= bestSet.reps
-          ? Math.max(m, load(x)) : m, 0);
+        && x.at < session.startedAt
+        && x.reps >= bestSet.reps);
+      const priorBest = prior.reduce((m, x) => Math.max(m, load(x)), 0);
+      // The added weight on the same set of prior sets — what the lifter
+      // actually put on the belt, which is what `findPRs` calls `previousAdded`.
+      const priorAdded = prior.reduce((m, x) => Math.max(m, x.weight), 0);
       // `priorBest > 0` is what keeps a first-ever session out of this branch:
       // with nothing behind it there is nothing to have beaten, and
       // `firstSession` is the claim that fits that case.
-      return priorBest > 0 && load(bestSet) > priorBest
-        ? { prev: priorBest }
-        : undefined;
+      if (priorBest <= 0 || load(bestSet) <= priorBest) return undefined;
+      // `findPRs`' rule, and for its reason: at an unchanged bodyweight the two
+      // scales agree exactly, so this costs a real lifter nothing.
+      if (CARRIES_BODYWEIGHT.has(bestSet.exerciseId) && bestSet.weight <= priorAdded) return undefined;
+      return { prev: priorBest };
     })(),
     best: bestSet && {
       lift: exercises.get(bestSet.exerciseId)?.name ?? bestSet.exerciseId,
