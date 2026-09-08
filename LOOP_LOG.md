@@ -1247,3 +1247,46 @@ owner questions are filed, all measured. The honest next move is what the app
 LACKS rather than what it gets wrong — and that is mostly owner territory, so
 the first job is proposing options rather than building one. Tab bar remains the
 top item.
+
+R558 — PICK (logged first): the RECAP screen's own claim ladder, the one copy of
+it R552 could not reach. Shortlist was (a) that, (b) propose "what the app
+lacks" options for the owner, (c) the exercise search/add path. Ruled out (b) as
+a BUILD target — it is owner territory and I already have four questions waiting,
+so adding a fifth unanswered one is not work, it is queueing. Picked (a) because
+R552 proved the card and the message agree and explicitly could NOT include the
+third surface: recap.tsx is JSX, so its ladder was checked by reading, not by
+running. R435's defect was two surfaces disagreeing, and the third one is the
+one a lifter actually looks at before deciding whether to share. Contract: the
+screen's slab must make the same claim as the card and the message, on the same
+payloads, and be checked by rendering rather than by reading.
+
+R558 — BUILD/REVIEW/SHIP on the pick logged above. R552 proved the shared CARD
+and the share MESSAGE make the same claim, and said outright that it could not
+include the third surface: `recap.tsx` is JSX, the suite has no test renderer,
+and §12 forbids adding a dependency to get one. So two surfaces were EXECUTED
+and one was DESCRIBED — and the described one is the screen a lifter actually
+looks at before deciding whether to share. Closed it without a renderer and
+without a dependency: the slab guards are pure predicates over the payload, so
+the real expressions are lifted out of the file and evaluated. That distinction
+is the round. A test that MATCHES a guard's text passes on any edit keeping the
+words; this one runs whatever the file now says, so editing a guard edits what
+the test executes. Seven payloads through all three surfaces in both languages,
+plus the precedence cases where two claims are true and one is right. THE PLANT
+PROVES THE DIFFERENCE: reorder the screen's ladder so `bestYet` outranks
+`firstSession` — leaving the card and the message untouched — and two cases fail
+naming the SCREEN, in English and Spanish. That is R435's defect shape (two
+surfaces disagreeing about one workout) on the one surface that had no runnable
+check. A second plant removes `payload.best` from the `bestYet` guard, which
+would draw a slab that reads a lift name off undefined on the screen shown after
+every workout, and the data-guard test catches it. Also pinned the instrument
+itself: a missing guard THROWS rather than yielding a predicate that answers
+false for everything, which is trap 16 applied to an extraction rather than a
+matcher. REVIEW: suite 2072 pass / 0 fail (real count, up 9). Product verified
+by finishing a real workout and reading the recap; `git status` clean on
+`app/app` and `app/src`, so both planted edits to `recap.tsx` are gone; app
+reseeded. | next: all three claim surfaces now agree by execution rather than by
+reading, and every screen has been walked. What remains is genuinely owner
+territory — four questions are filed and measured, and the tab bar has been the
+top item since R523. The useful next rounds are the kind R551 and R554 were:
+turning things this session learned the hard way into rules that hold, rather
+than hunting defects that increasingly are not there.

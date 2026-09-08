@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { shareText } from '../src/ui/recap-model.ts';
 import { pack } from '../src/domain/share-url.ts';
+import { screenClaim } from './helpers/recap-guards.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..', '..');
@@ -208,12 +209,24 @@ describe('the card and the message make the same claim (R552)', () => {
    */
   for (const lang of ['en', 'es'] as const) {
     for (const [name, data, expected] of CASES) {
-      test(`${lang} — ${name}: card and message both say "${expected}"`, () => {
+      test(`${lang} — ${name}: card, message and screen all say "${expected}"`, () => {
         const payload = lang === 'es' ? { ...data, lang: 'es' } : data;
         const card = cardClaim(payload);
         const message = messageClaim(payload, lang);
+        /*
+         * The third surface, added in R558. This file could only reach two of
+         * them when it was written — `recap.tsx` is JSX with no renderer in
+         * the suite — so the screen's ladder was checked by reading while the
+         * other two were checked by running. `screenClaim` lifts the real
+         * guards out of the file and evaluates them, so an edit to a guard is
+         * an edit this test runs. The screen is the one a lifter looks at
+         * before deciding whether to share, which makes it the worst of the
+         * three to have disagreeing.
+         */
+        const screen = screenClaim(payload);
         assert.equal(card, expected, `the ${lang} CARD called it "${card}"`);
         assert.equal(message, expected, `the ${lang} MESSAGE called it "${message}"`);
+        assert.equal(screen, expected, `the ${lang} SCREEN called it "${screen}"`);
       });
     }
   }
