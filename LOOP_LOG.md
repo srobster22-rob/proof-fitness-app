@@ -1385,3 +1385,48 @@ backup is damaged. That is a product judgement against the owner's "if it needs
 explaining, it's wrong", so it is a fifth filing rather than a fix, and I would
 rather not add one before the four outstanding are answered. Tab bar remains the
 top item.
+
+R561 — PICK (logged first): ERASE EVERYTHING. Shortlist was (a) erase, (b) the
+Settings screen end to end, (c) the skip-reasons filing. Picked (a): R560 chose
+restore over it and it is now the last unexercised path, it is the only
+IRREVERSIBLE action in the app, and §11 makes the export file the only backup —
+so the sentence a user reads before tapping it is load-bearing in a way no other
+copy is. Two things to check and both are checkable: the sentence must name
+everything that will actually go, and the erase must leave nothing behind that
+would make the app look like it still has data. Everything runs against an
+in-memory Repo; nothing destructive touches the live app.
+
+R561 — BUILD/REVIEW/SHIP on the pick logged above. Exercised ERASE EVERYTHING
+against a device holding one of every erasable thing. It is correct: the
+sentence names all six categories including the two R446 added, and afterwards
+sets, sessions, goals, measurements, measure-goals, custom exercises and prefs
+are all zero, the starting twelve are back, and the single surviving row is the
+schema version — deliberately kept, and the only thing that should be. Also
+caught my own probe lying: `repo.addCustomExercise?.()` does not exist on Repo,
+so optional chaining silently skipped the one category R446 was ABOUT, and the
+first run reported a clean erase of something that was never there. THE GAP IS
+THE GUARD, NOT THE CODE. This defect has recurred twice — R480 (English
+literals, so a Spanish lifter read "Se eliminará 700 workouts, 14,000 sets and 3
+measurements") and R446 (four things named while a custom exercise and every
+changed setting went silently, both verified live) — and the existing test
+guards it by HAND-LISTING the six categories that exist today. That cannot catch
+a third occurrence, because the failure mode IS a new thing being deleted
+without being named. So the population now comes from `eraseAll`'s own SQL:
+every table it empties must be spoken for by a counted category, with a reason
+per row, and the two that are not one-to-one (measure-goals folded into
+measurements, exercises counted only as CUSTOM because seedBuiltins puts the
+twelve straight back) say why. Verified the difference rather than assuming it:
+under a planted seventh table the existing test fails with "no such table:
+notes" while the new one fails with "erase destroys these and the warning never
+names them — the R446 defect, a third time: notes". One fails because SQLite
+complained; the other explains the defect. REVIEW: suite 2083 pass / 0 fail
+(real count, up 4). Second plant: make erase empty the whole `meta` table and it
+is caught taking the schema version with it. Product verified by opening the
+real confirmation on the seeded device — "36 workouts, 288 sets and 1 goal will
+be deleted from this device. There is no backup but the one you export yourself,
+and this cannot be undone" — with measurements, custom exercises and settings
+correctly ABSENT rather than listed as zero, then CANCELLED. Nothing was erased;
+the data is intact. SHIP: `--check` current, `link/build.cjs` dist/ ready, plants
+reverted, `git status` clean on `app/src`. | next: every destructive and
+data-losing path is now exercised and derived rather than listed. What is left
+is the four owner questions and a fifth I am holding back deliberately.
