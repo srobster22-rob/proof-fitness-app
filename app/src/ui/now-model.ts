@@ -432,6 +432,15 @@ function fixedHeight(l: NowLayout): number {
    * real thing a periodic job, not a one-off — STEP_HINT was 12 against a real
    * 40 until R81.
    */
+  /*
+   * R512: ROOT_PAD was 8 against a real 16 — for one round, and by my own
+   * hand. R511 raised `root.paddingTop` to give the screen air and did not
+   * update this copy of it, which is the third time this exact thing has
+   * happened here and the second sentence of the comment above predicts it.
+   * `no-drift.test.ts` now reads these out of the stylesheet, so the fourth
+   * time fails the suite instead of quietly promising 8px the column does not
+   * have.
+   */
   const ROOT_PAD = 8, TOP_BAR = 31, HEADER_TEXT = 79, STEP_HINT = 40;
   const REPS_ROW = 53, REST_ROW = 20, FOOTER = 40;
   /*

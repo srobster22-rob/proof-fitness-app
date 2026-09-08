@@ -2046,7 +2046,13 @@ function Stepper({ label, onPress, small, what }: {
 const s = StyleSheet.create({
   root: {                                                 // maxWidth from layoutFor
     flex: 1, width: '100%', alignSelf: 'center',
-    backgroundColor: BG, paddingHorizontal: 20, paddingTop: 16
+    // 8, not more. R511 raised this to 16 for the breathing room OWNER.md asks
+    // for, and R512 found what that cost: the shortest shipping phone (568px)
+    // has no 8px to give — the unshrinkable column came to 624 against 568 and
+    // LOG SET went below the fold. Air at the top has to come from layoutFor's
+    // scaled gaps, which shrink on a short screen, not from a fixed padding
+    // that does not.
+    backgroundColor: BG, paddingHorizontal: 20, paddingTop: 8
   },
   /*
    * R339: found at 2.35x Dynamic Type (iOS's largest accessibility size) —
