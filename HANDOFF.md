@@ -225,6 +225,25 @@ test suite and obvious in a picture.
    painting one chip and announcing another. **The class list is authoritative**; a reload
    settles any disagreement.
 
+   RE-MEASURED R545/R546, and BOTH halves hold. The dependency is still react-native-web
+   0.21.0, and a probe put `accessibilityState={{ selected: true, disabled: false, busy: true }}`
+   on LOG SET and reloaded: the rendered node carried `aria-label`, `role`, `tabindex`, `type`,
+   `class` and `style` and NOT ONE of `aria-selected`, `aria-disabled` or `aria-busy`. The prop
+   is dropped whole, so anything relying on it announces nothing. `data-*` attributes are
+   dropped the same way, which is worth knowing before reaching for one as a test hook.
+
+   The `getComputedStyle` half reproduced too, and more strongly than written: selecting a rail
+   lift left `className` carrying the new background class within 1ms while
+   `getComputedStyle(el).backgroundColor` still read the OLD `rgb(16, 19, 22)` at 1, 30, 80,
+   150 and 300ms — long past the 90ms colour transition — and only agreed on a later read. So
+   the class list is authoritative by a wide margin, not a narrow one.
+
+   CAVEAT, because the mechanism is not established: every one of those readings was taken with
+   `document.visibilityState === "hidden"`, which stayed hidden even after fronting the tab, and
+   a hidden page defers style recalculation (it is the same condition that stops `rAF` firing —
+   see trap 12). The ADVICE is right either way and that is what matters here. Whether a visible
+   pane behaves differently is untested, so do not repeat the mechanism as though it were.
+
 ## Architecture in one paragraph
 
 Every rule with teeth lives in a **pure model** that runs under `node --test` with no

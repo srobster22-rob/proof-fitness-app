@@ -107,7 +107,22 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
        * the next reader concluding the trap does not apply to their case.
        */
       ['trap 14 was re-measured with real probes', /RE-MEASURED R545/],
-      ['trap 14 says it is not specific to react-native-web', /loses name-from-content the moment its text sits inside a child/]
+      ['trap 14 says it is not specific to react-native-web', /loses name-from-content the moment its text sits inside a child/],
+      /*
+       * Trap 15 is a claim about a DEPENDENCY VERSION, which is the kind that
+       * rots without anybody touching the repo. R546 re-probed it against the
+       * installed react-native-web and both halves held — so the entry now
+       * carries the version it was verified against, and the check below pins
+       * that the version named is the version installed.
+       */
+      ['trap 15 was re-probed', /NOT ONE of `aria-selected`, `aria-disabled` or `aria-busy`/],
+      /*
+       * And the caveat, which is the part most likely to be tidied away: every
+       * getComputedStyle reading was taken on a HIDDEN page, so the advice is
+       * verified but the mechanism is not. Dropping that sentence would turn a
+       * measurement into a folk explanation.
+       */
+      ['trap 15 keeps its caveat', /do not repeat the mechanism as though it were/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +
@@ -154,6 +169,23 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
     }
     assert.deepEqual(bad, [],
       'a measurement note interrupts an unfinished sentence: ' + bad.join(' | '));
+  });
+
+  test('the react-native-web version trap 15 names is the one installed', () => {
+    /*
+     * The whole point of trap 15 is that a named version behaved a certain
+     * way. If the installed version moves, the measurement is about a
+     * dependency the repo no longer has, and the next session should re-probe
+     * rather than inherit it — which they can only know if something checks.
+     */
+    const handoff = DOCS.find(([n]) => n === 'HANDOFF.md')![1];
+    const claimed = /react-native-web\s+(\d+\.\d+(?:\.\d+)?)/.exec(handoff);
+    assert.ok(claimed, 'trap 15 no longer names a react-native-web version');
+    const installed = JSON.parse(fs.readFileSync(
+      path.join(ROOT, 'app', 'node_modules', 'react-native-web', 'package.json'), 'utf8')).version;
+    assert.ok(installed.startsWith(claimed[1]),
+      `HANDOFF measured react-native-web ${claimed[1]} and ${installed} is installed — ` +
+      're-probe trap 15 rather than trusting it');
   });
 
   test('and the geometry tool is kept for the reason it is actually good for', () => {
