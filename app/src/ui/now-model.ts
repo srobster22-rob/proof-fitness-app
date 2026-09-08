@@ -1299,6 +1299,22 @@ export class NowModel {
        * `historyInSessionUnit`, not `allSets`: a LoggedSet carries no unit
        * (HANDOFF trap 9), so raw history would compare kilos against pounds
        * and suggest a jump in the wrong currency.
+       *
+       * `grid` below is the FINER of WEIGHT_STEP and `this.plateJump()`
+       * (R592, continuing R548). WEIGHT_STEP alone is "reachable by the fine
+       * +/-5 stepper and loadable on a standard bar" — right until somebody
+       * tells the app they load something finer, which `jump.<unit>`'s own
+       * docstring in settings.tsx names directly ("someone running
+       * microplates"). Measured: a plateau at 60 kg with a 1.25 kg custom
+       * jump got "try 62.5" — the exact 2x jump that preference exists to
+       * avoid — while the + button one row down would have gone to 61.25.
+       * Only the FINER direction is handled: a jump COARSER than WEIGHT_STEP
+       * (fixed-increment dumbbells, e.g. jump.lb = 7) can still land history
+       * off the WEIGHT_STEP grid, and nothing here re-derives a grid from
+       * that — filed in OWNER.md rather than guessed at, since fixing it
+       * needs the same "only snap when actually off-grid" care `bumpPlate`
+       * took in R562, applied to a function with many more branches than
+       * that one had.
        */
       lastTime: lastTimeParts({
         previous: this.lastTime(),
@@ -1308,9 +1324,9 @@ export class NowModel {
           this.historyInSessionUnit(), this.exerciseId, this.now(),
           {
             unit: this.session.unit, goal: trainingGoal(this.repo),
-            // The stepper's own increment, so a suggested weight is one the +
-            // and - buttons can reach and a bar can be loaded to (R548).
-            grid: WEIGHT_STEP[this.session.unit],
+            // The finer of the fixed stepper and the lifter's own plate jump
+            // — see the comment above this call for why (R592).
+            grid: Math.min(WEIGHT_STEP[this.session.unit], this.plateJump()),
             /*
              * The empty implement, so a deload cannot suggest a weight the
              * rack does not have (R541). The engine defaults this to 0, so
