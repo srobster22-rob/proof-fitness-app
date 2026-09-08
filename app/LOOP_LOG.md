@@ -94,3 +94,33 @@ question. With that done, every self-directed thread from this session —
 including the ones opened by earlier self-directed threads — is genuinely
 exhausted. The four owner questions are the only work left with real product
 value, tab bar first since R523, now 49 rounds waiting.
+
+R577 — Stage 0: OWNER.md still four blocked decisions. Generated a specific,
+plausible-sounding hypothesis from reading source rather than trusting the
+comments: a half-typed weight (\`typing\`, component-local state) is never
+explicitly cleared when switching lifts via the rail or the exercise picker —
+grepped every \`setTyping\` call site exhaustively and confirmed neither
+\`selectExercise\` path resets it. The worry: type "999" for Bench, switch to
+Overhead Press without submitting, and either the stale field stays open over
+the wrong lift, or a later Return applies 999 to whichever exercise is now
+selected. TESTED LIVE RATHER THAN FILED FROM READING, because this repo has no
+test renderer (§12) and a claim about React focus/render behavior is exactly
+the shape this session has repeatedly found reading-only conclusions wrong
+about. Drove it for real: opened the typed field on Bench, typed "999"
+unsubmitted, opened the exercise picker (needed the real pointerdown/mousedown/
+pointerup/mouseup/click sequence — a bare \`.click()\` did not register on the
+Pressable, HANDOFF trap 4 again), picked Overhead Press. THE FIELD CLOSED
+CLEANLY. Not a bug: tapping a picker list item blurs the previously-focused
+TextInput first, ordinary DOM/RN focus behavior, and \`onBlur={() =>
+setTyping(null)}\` — already in place for the unrelated tap-away-to-close
+interaction — clears it as a side effect nobody designed for THIS case but
+that covers it completely. A genuinely disciplined outcome: the hypothesis was
+worth generating and worth checking, and checking it falsified it rather than
+confirming a bug I could have filed on the strength of the missing explicit
+reset alone. REVIEW: suite 2129 pass / 0 fail, unchanged; \`git status\` on
+src/test/tools confirms nothing was touched. No SHIP step — nothing shipped.
+Session restored to the seeded state and confirmed clean. | next: the
+crash-recovery, typechecking, and now this UI-interaction-hypothesis lines are
+all closed with either a real fix or a verified-clean result. Four owner
+questions remain the only work with real product value, tab bar first since
+R523, now 52 rounds waiting.
