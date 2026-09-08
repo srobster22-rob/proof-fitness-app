@@ -3,19 +3,28 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fnSource } from './helpers/fn-source.ts';
+import { fnSource, enclosingBody } from './helpers/fn-source.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(HERE, '..', 'src');
-const MODEL = fs.readFileSync(path.join(SRC, 'ui', 'now-model.ts'), 'utf8');
+/*
+ * All three screen models, not just `now-model` (R543).
+ *
+ * The gate was written for the file where the seam kept biting, which made it
+ * a gate against the defect that already happened. `recap-model` and
+ * `progress-model` consume history the same way and were unwatched.
+ */
+const MODELS = ['now-model', 'recap-model', 'progress-model'].map(name =>
+  [name, fs.readFileSync(path.join(SRC, 'ui', `${name}.ts`), 'utf8')] as const);
+const MODEL = MODELS[0][1];
 
 /**
  * Where an imported name comes from, read from the import statements rather
  * than guessed — so moving a function between modules cannot quietly make this
  * gate stop looking.
  */
-function moduleOf(name: string): string | null {
-  for (const m of MODEL.matchAll(/import\s+(?:type\s+)?\{([^}]+)\}\s+from\s+'([^']+)'/g)) {
+function moduleOf(src: string, name: string): string | null {
+  for (const m of src.matchAll(/import\s+(?:type\s+)?\{([^}]+)\}\s+from\s+'([^']+)'/g)) {
     const names = m[1].split(',').map(s => s.trim().replace(/^type\s+/, '').split(/\s+as\s+/)[0].trim());
     if (names.includes(name)) return m[2];
   }
@@ -101,13 +110,23 @@ describe('every raw-history consumer is unit-safe (R542)', () => {
    * the exemption cannot outlive it (R526: a stated reason is necessary and is
    * not sufficient; the reason has to be true).
    */
+  /*
+   * Built with String.raw and `new RegExp`, not written as literals carrying
+   * a word-boundary escape. Composing these through anything that re-escapes
+   * turns that escape into a real BACKSPACE byte, and the pattern becomes one
+   * that can never match — so the gate scans nothing and passes. That is what
+   * happened here, in the file that carries the warning about it, and the only
+   * thing that noticed was the "the scan finds the call sites it is supposed
+   * to" test below. That test exists for exactly this, and it is the whole
+   * difference between a detour and a shipped no-op.
+   */
   const RAW = [
-    /this\.repo\.allSets\(\)/g,
-    /this\.repo\.historyBefore\(/g,
-    /this\.setsFor\(/g
+    new RegExp(String.raw`\brepo\.allSets\(\)`, 'g'),
+    new RegExp(String.raw`\brepo\.historyBefore\(`, 'g'),
+    new RegExp(String.raw`\bthis\.setsFor\(`, 'g')
   ];
 
-  function rawConsumers(): string[] {
+  function rawConsumers(MODEL: string): string[] {
     const names = new Set<string>();
     for (const pattern of RAW) {
       for (const m of MODEL.matchAll(pattern)) {
@@ -117,15 +136,21 @@ describe('every raw-history consumer is unit-safe (R542)', () => {
     }
     // Locals assigned straight from allSets(), then passed on — `openingExercise`
     // does this, and matching only the inline form would miss it.
-    for (const a of MODEL.matchAll(/const (\w+) = this\.repo\.allSets\(\);/g)) {
+    for (const a of MODEL.matchAll(/const (\w+) = (?:this\.)?repo\.allSets\(\);/g)) {
+      // Only inside the method that made the binding (R543). `now-model` has
+      // two methods each opening `const all = ...`, one raw and one converted,
+      // so a file-wide name match reported `prefillFor` — which is handed the
+      // converted form — as a raw consumer.
+      const [from, to] = enclosingBody(MODEL, a.index!);
+      const scope = MODEL.slice(from, to);
       // Built with String.raw, not a plain template: a `\w` in an ordinary
       // template literal survives the file but a `\b` becomes a real backspace
       // (HANDOFF trap 7), and the pattern then matches nothing while looking
       // exactly right — a gate that reads zero call sites and passes.
       const call = new RegExp(String.raw`(\w+)\(\s*` + a[1] + String.raw`\b`, 'g');
-      for (const m of MODEL.matchAll(call)) names.add(m[1]);
+      for (const m of scope.matchAll(call)) names.add(m[1]);
     }
-    for (const own of ['allSets', 'historyBefore', 'setsFor', 'filter', 'if']) {
+    for (const own of ['allSets', 'historyBefore', 'setsFor', 'filter', 'if', 'for', 'map', 'some']) {
       names.delete(own);
     }
     return [...names];
@@ -133,7 +158,7 @@ describe('every raw-history consumer is unit-safe (R542)', () => {
 
   test('the scan finds the call sites it is supposed to', () => {
     // A gate that reads nothing passes for ever. R529 and R536 both shipped one.
-    const found = rawConsumers();
+    const found = rawConsumers(MODEL);
     assert.ok(found.length >= 4, `only ${found.length} raw-history consumers found: ${found.join(', ')}`);
     for (const expected of ['findPRs', 'weekStreak', 'pickerFor']) {
       assert.ok(found.includes(expected), `the scan missed ${expected}; its pattern has drifted`);
@@ -162,8 +187,8 @@ describe('every raw-history consumer is unit-safe (R542)', () => {
 
   test('each one either ignores weights or takes sessionUnits', () => {
     const bad: string[] = [];
-    for (const name of rawConsumers()) {
-      const mod = moduleOf(name);
+    for (const [model, src] of MODELS) for (const name of rawConsumers(src)) {
+      const mod = moduleOf(src, name);
       if (!mod || !mod.startsWith('.')) continue;   // a method on this class, or a builtin
       const file = path.join(SRC, 'ui', mod).replace(/\.ts$/, '.ts');
       if (!fs.existsSync(file)) continue;
@@ -172,7 +197,7 @@ describe('every raw-history consumer is unit-safe (R542)', () => {
       const readsWeight = /\.weight\b/.test(body);
       const unitAware = /sessionUnits/.test(body);
       if (readsWeight && !unitAware) {
-        bad.push(`${name} (${mod}) compares weights from raw history without sessionUnits`);
+        bad.push(`${model}: ${name} (${mod}) compares weights from raw history without sessionUnits`);
       }
     }
     assert.deepEqual(bad, [],
