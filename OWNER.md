@@ -21,12 +21,39 @@ app-appropriate. We want this to be a professional app, and right now it looks
 a little sloppy and AI-generated.
 
 ## Next
-- OWNER DECISION (2026-09-08): the bottom tab bar — BUILD BOTH and show me.
-  Make a real tab-bar version and keep the current one, screenshot each at a
-  true short-phone size (568px tall, the one you measured at 624px of content)
-  AND at 375x812, and put the two side by side with what came off the screen to
-  pay for the bar. I will pick from the pictures. Do not ship either as the
-  default until I have chosen.
+- OWNER DECISION, WAITING ON YOU (built R523): the bottom tab bar. Both
+  versions exist. Neither ships — the flag is off, there is no Settings
+  control for it, and a test fails the build if it ever defaults on.
+
+  TO SEE THEM: run the app, then in the browser console
+    fetch('/tabbar.b64').then(r=>r.text()).then(t=>{localStorage.setItem('proof.db.v1',t);location.reload()})
+  and `/seed.b64` the same way to go back. Same data, one preference apart.
+
+  WHAT CAME OFF TO PAY FOR THE BAR:
+  | | current | tab bar |
+  | --- | --- | --- |
+  | top row (PROGRESS / GOALS / gear) | 36px | removed — the bar replaces it |
+  | bottom bar | none | 56px |
+  | net change to the column | — | **+20px** |
+  | the 14 WK streak | shown, beside the gear | **gone** — the bar has no room |
+  | at 375x812 | fits | fits |
+  | at 375x568 | fits | fits |
+
+  So the bar is NOT the 50px disaster I filed in R516. It costs 20px net, not
+  50, because it takes the top row with it — and both still fit at 568.
+
+  THE REAL PRICE IS THE STREAK, not the pixels. §10 asks for a streak visible
+  on launch, and it rode with the gear in the row the bar deletes. A tab bar
+  has four slots and none of them is a status. Your options, if you want the
+  bar: put the streak on the exercise line, drop it from Now and leave it to
+  the recap, or accept a fifth non-tappable slot (which §15 warns about —
+  something that looks tappable and is not).
+
+  MY READ, for what it is worth: at 812 the bar looks more like a real fitness
+  app and costs nothing you notice. At 568 it is tighter and the streak loss
+  is real. I would take the bar and move the streak, but this is a taste call
+  about your product and the pictures are the point.
+
 
 ## Never
 - Don't trade simplicity for features. If it needs explaining, it's wrong.

@@ -20,6 +20,7 @@ import {
 import { ConfirmSheet } from './ConfirmSheet.tsx';
 import type { Repo } from '../data/repo.ts';
 import { COLUMN } from './column.ts';
+import { TAB_BAR_HEIGHT, tabBarOn } from './tab-bar.ts';
 import { ScreenModal, useExitOnce } from './ScreenModal.tsx';
 import { useDragScroll } from './drag-scroll.ts';
 import { Arrive } from './Arrive.tsx';
@@ -173,6 +174,8 @@ export function NowScreen({
   const [addingTo, setAddingTo] = useState<string | null>(null);
   // Honour the system's reduced-motion setting — see `useReducedMotion`.
   const still = useReducedMotion();
+  // OWNER.md 2026-09-08: off by default; neither variant ships until chosen.
+  const tabBar = tabBarOn(repo);
   /* The day rail drags with a held mouse button, not just a wheel — see
      `useDragScroll`. On a phone this changes nothing; touch already worked. */
   const railDrag = useDragScroll<any>();
@@ -510,6 +513,15 @@ export function NowScreen({
         The pair still reads as a pair: that distinction is carried by two WORDS
         against one glyph, not by how tightly they were bunched.
       */}
+      {/*
+        The top link row is what a bottom tab bar REPLACES, so the variant
+        removes it rather than keeping both. Keeping both would be the easy
+        version of this comparison and a dishonest one: it would make the bar
+        look like pure cost, when in reality it buys back the 31px this row
+        occupies. The owner asked what came off the screen to pay for the bar,
+        and this row is the answer's first line.
+      */}
+      {!tabBar && (
       <View style={s.topBar}>
         <Pressable onPress={onOpenProgress} hitSlop={14} disabled={!onOpenProgress}
           style={pressStyle(null, 'quiet', still)}
@@ -555,6 +567,7 @@ export function NowScreen({
           </Pressable>
         </View>
       </View>
+      )}
 
       {/*
         A fixed column on a phone, a scrolling one on a window too short to hold
@@ -1231,6 +1244,36 @@ export function NowScreen({
           </Pressable>
         )}
       </View>
+
+      {/*
+        The bar. The same three destinations the top row had, plus NOW as the
+        one you are ON — which is what a tab bar gives that a link row cannot:
+        a visible answer to "where am I".
+      */}
+      {tabBar && (
+        <View style={s.tabBar}>
+          {([
+            ['now', T('nowWord'), undefined],
+            ['progress', T('progress'), onOpenProgress],
+            ['goals', T('goals'), onOpenGoals],
+            ['settings', T('settings'), onOpenSettings]
+          ] as Array<[string, string, (() => void) | undefined]>).map(([id, label, go]) => (
+            <Pressable
+              key={id}
+              accessibilityRole="link"
+              accessibilityLabel={label}
+              disabled={!go}
+              onPress={go}
+              style={pressStyle(s.tabItem, 'quiet', still)}
+            >
+              <Text style={[s.tabGlyph, id === 'now' && s.tabGlyphOn]}>
+                {id === 'now' ? '◆' : id === 'progress' ? '↗' : id === 'goals' ? '◎' : '⚙'}
+              </Text>
+              <Text style={[s.tabLabel, id === 'now' && s.tabLabelOn]} numberOfLines={1}>{label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
       </ColumnWrap>
 
       {/* Rendered conditionally rather than toggled through Modal's `visible`.
@@ -2514,6 +2557,29 @@ const s = StyleSheet.create({
   railTextOn: { color: VOLT },
   railTextDone: { color: '#79838D' },
   railNext: { color: VOLT, fontSize: 10, fontWeight: '900', letterSpacing: 1 },
+  /*
+   * The experimental bottom bar (OWNER.md, 2026-09-08). NOT shipped: off
+   * unless `pref.tabBar` is '1', because the owner asked to see both variants
+   * before choosing either.
+   *
+   * A real bar rather than a mock — 56px, so each destination keeps a 44pt
+   * target with a label under its glyph, which is what makes it a tab bar and
+   * not a row of icons. Measuring the current screen against a fake would
+   * answer nothing.
+   *
+   * `marginHorizontal: -20` cancels the root padding so the bar reaches both
+   * edges, which is what makes it read as chrome rather than as content.
+   */
+  tabBar: {
+    flexDirection: 'row', height: TAB_BAR_HEIGHT,
+    borderTopWidth: 1, borderTopColor: '#161B20', backgroundColor: '#0B0D0F',
+    marginHorizontal: -20
+  },
+  tabItem: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  tabGlyph: { color: '#9AA5AF', fontSize: 15, fontWeight: '700' },
+  tabGlyphOn: { color: VOLT },
+  tabLabel: { color: '#9AA5AF', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
+  tabLabelOn: { color: VOLT },
   finish: { paddingVertical: 12, paddingHorizontal: 16 },
   finishText: { color: MUTED, fontSize: 12, fontWeight: '800', letterSpacing: 1.5 },
 

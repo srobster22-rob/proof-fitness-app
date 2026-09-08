@@ -155,6 +155,7 @@ const EN = {
   coachPlateau: 'Stuck at {weight} for {n} — try {suggest}',
   coachDeload: '{weight} is grinding — back off to {suggest}',
   /* Settings: what the coach line should optimise for. */
+  nowWord: 'NOW',
   trainingGoal: 'COACHING',
   goalStrength: 'STRENGTH',
   goalSize: 'SIZE',
@@ -799,6 +800,7 @@ const ES: Partial<Record<Key, string>> = {
   coachIncrease: '{weight} en {n} sesiones — prueba {suggest}',
   coachPlateau: 'Atascado en {weight} durante {n} — prueba {suggest}',
   coachDeload: '{weight} te cuesta — baja a {suggest}',
+  nowWord: 'AHORA',
   trainingGoal: 'ENTRENAMIENTO',
   goalStrength: 'FUERZA',
   goalSize: 'TAMAÑO',
