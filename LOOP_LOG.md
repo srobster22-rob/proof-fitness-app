@@ -2011,3 +2011,44 @@ none of which have been checked for the same shape. Contract: find each
 screen's own snapshot-holding local state (an edit sheet, a picked item), test
 its save/write path against the underlying data having vanished via
 erase/restore from elsewhere, the same way addSetTo and editSet were tested.
+
+R581 — Stage 0: OWNER.md still four blocked decisions. Checked the two Goals
+candidates I did NOT check in R580 — \`undo: {goals, label} | null\` (a full
+snapshot of removed goals, to put back) and \`chosen\`. \`undo\`'s write/read
+path is \`removeGoals\` -> \`restoreGoals\`, and \`restoreGoals\` is a PLAIN
+UPSERT with no memory of why a goal it is handed no longer exists — it cannot
+tell "wiped a second ago, undo makes sense" from "the device was erased on
+purpose a minute ago, undo must not." Measured directly: wipe a goal, call
+\`eraseAll()\` — the one action in this app that explicitly promises "this
+cannot be undone" — then feed the stale \`undo\` snapshot to \`restoreGoals\`
+anyway. It comes back. THIS IS REAL BUT NOT CURRENTLY REACHABLE, and finding
+out why mattered as much as finding the defect: the only way off Goals is
+\`router.back()\`, a POP, and popping destroys the component's local state —
+so \`undo\` cannot survive a trip to Progress today, because reaching Progress
+requires leaving Goals first. What makes this worth fixing NOW rather than
+filing: it is directly and specifically tied to the open tab-bar decision
+sitting in OWNER.md — a tab bar keeps every tab mounted rather than popping,
+which would make exactly this reachable, landing on nobody's radar because
+the code has looked safe for as long as the stack navigation made it safe.
+Fixed by giving Goals the same shape NowScreen already has: a
+\`useFocusEffect\` that clears \`editing\`, \`wiping\` and \`undo\` on arrival,
+independent of whatever navigation model exists later. REVIEW: suite 2133
+pass / 0 fail (real count, up 4 — one documenting \`restoreGoals\`'s honest
+behavior with a builtin exercise so the test isolates the goal-row question
+from a separate "the exercise itself is gone" question, and one pinning the
+screen-level guard). Planted the fix's removal and the screen-level test
+caught it by name; planted \`restoreGoals\` refusing everything and the
+documentary test (plus three existing ones) caught that too, confirming it
+tracks real behavior rather than a frozen assumption. Verified in the
+PRODUCT: wiped the Squat goal on the real running app, confirmed "Squat goal
+wiped. UNDO" appeared, popped back to Now, returned to Goals, and the undo
+bar was GONE — "GOALS / DONE / Pick the lifts you want to move... / + ADD A
+GOAL," no trace of the wipe. \`--check\` current; no share code moved so
+link/build.cjs was not needed; app reseeded and confirmed clean. Committed as
+a07b6bb inside fitness-app. | next: this closes the Goals side of R580's
+survey with a real fix rather than a clean report, and is the second
+concrete defect this session has found that is directly pre-emptive of the
+pending tab-bar decision (this, and R516/R523's own cost analysis). If the
+owner picks the tab bar, both are already accounted for. Four owner questions
+remain the only work with real product value, tab bar first since R523, now
+56 rounds waiting.
