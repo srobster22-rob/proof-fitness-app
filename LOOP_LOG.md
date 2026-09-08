@@ -1739,3 +1739,36 @@ as before: extend FILES, run the scan cold, and only keep what it finds real —
 if it comes back clean, that is coverage gained and still worth pinning; if it
 finds something, that is R569 happening a second time for a real reason rather
 than by luck.
+
+R570 — Stage 0: OWNER.md still four blocked decisions. Set out to extend R569's
+Dynamic Type gate to goals.tsx and recap.tsx, and the extension I wrote FIRST
+was wrong in exactly the shape R554/R565 already taught this session to watch
+for. Widened R569's \`FILES\` array, ran it, got green — and checked what it had
+actually found before trusting that. ZERO. Neither file has a single
+\`fontSize: L.\w+\` expression despite carrying 31 \`allowFontScaling\` exemptions
+between them; both opt out through a named stylesheet style (\`s.targetValue\`,
+\`s.stepText\`) rather than an inline computed size. R569's pattern would have
+passed on these two files by finding NOTHING TO CHECK — a scan reporting
+success because it looked at the wrong shape, not because anything was
+verified. Reverted the population change rather than ship a gate that LOOKS
+broader and checks nothing new. Built the honest version instead: not a claim
+that every fitted element in these files opts out (unprovable with the pattern
+available), but a FLOOR on the 31 exemptions already measured and fixed round by
+round (R339, R341, R347...) — they must not silently drop, and a companion test
+confirms R569's real scan still finds nothing here, so the day an inline
+\`fontSize: L.x\` DOES appear in either file, that test fails and says to move
+the check into R569's scan rather than this floor. REVIEW: suite 2122 pass / 0
+fail (real count, up 3; the same known R565 timing flake under full-suite load,
+confirmed clean in isolation, not touched this round — out of scope). Two
+plants: remove one exemption from goals.tsx and the count-floor test names the
+file and the drop; add an inline \`fontSize: L.hero\` to goals.tsx and the
+zero-matches test catches it, correctly redirecting to R569's scan instead of
+this one. Verified in the PRODUCT — Goals renders correctly on the seeded
+history, untouched by a test-only change. \`--check\` current; no share code
+moved so link/build.cjs was not needed. Committed as 33ebf04 inside
+fitness-app; diff on goals.tsx/recap.tsx is literally empty, confirming both
+plants were fully reverted and only test files changed. | next: the pattern
+worth carrying forward is the one this round enacted rather than just
+described — before trusting a green extension of an existing gate, check what
+it actually matched, not just whether it passed. Four owner questions remain,
+tab bar first since R523.
