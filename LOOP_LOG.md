@@ -1557,3 +1557,16 @@ next: every flow in the app has now been walked. Three consecutive rounds found
 no defect in the product and two found defects in MY recent work, which is the
 clearest signal yet about where the risk actually is. Four owner questions
 remain, tab bar first since R523.
+
+R565 — PICK (logged first): SPEED on a big history. Shortlist was (a) render/model
+cost at 200+ sessions, (b) Dynamic Type at large font scales, (c) the
+skip-reasons filing. Picked (a): OWNER.md asks for something "catered to a
+TikTok attention span, fun and easy to look at", and nothing is less fun than a
+screen that hitches — a stall is a product defect the owner would feel even
+though it shows up in no assertion. It has never been measured this session, the
+app has real reasons to be at risk (R494 measured 100 goals against 20,000 sets
+at 48ms per render, and several caches added since — R495, R509, R522, R525 —
+exist precisely because things were being recomputed), and unlike the last three
+rounds it is about the product rather than my instruments. Contract: measure the
+model's work at a realistic and an extreme history, in numbers, and gate
+whatever is worth keeping.
