@@ -1964,3 +1964,10 @@ inside fitness-app. | next: this closes the last major untested risk class —
 crash recovery — the way R573-575 closed typechecking. Four owner questions
 remain the only work with real product value, tab bar first since R523, now
 51 rounds waiting.
+
+R579 — PICK (logged first): verify the claim R578 made without testing it —
+that `addingTo` (a bare exercise id, not a snapshot) has no staleness risk.
+Asserting that without checking is exactly the kind of untested conclusion
+R577/R578 exist to catch. Contract: test addSetTo against an exercise id that
+has been removed out from under it while addingTo held it, the same way
+editingSet was tested against a removed set.

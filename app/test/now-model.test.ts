@@ -2336,6 +2336,30 @@ describe('a logged set can be amended and repeated', () => {
     assert.equal(repo.allSets().some(x => x.id === added.id), false);
     assert.equal(repo.allSets().length, 2, 'and only the repeat went');
   });
+
+  /*
+   * R579. `NowScreen`'s `addingTo` holds a bare exercise id — the "+" sheet
+   * for repeating a lift's last set — and nothing clears it on `resume()`.
+   * Now is the root route and is never unmounted, so the id can outlive an
+   * ERASE EVERYTHING done from Progress while it is conceptually still open:
+   * navigate away, erase, come back, and a stale tap would call `addSetTo`
+   * with an id from a session and a set of exercises that no longer exist.
+   *
+   * `editingSet` (R578) is guarded by `updateSet`'s own `WHERE deleted = 0`
+   * re-check. `addSetTo` has no equivalent guard written for it — it derives
+   * safety only from the fact that `mine.length` is empty once the session's
+   * sets are gone, which is true but was never pinned, unlike R578's case.
+   */
+  test('a stale add-set tap after ERASE EVERYTHING adds nothing (R579)', () => {
+    const { repo, m } = session();
+    assert.ok(repo.allSets().length > 0, 'the fixture starts with nothing to lose');
+    repo.eraseAll();
+    assert.equal(repo.session(m.state().session.id), null,
+      'the fixture no longer models a session that has actually vanished');
+    assert.equal(m.addSetTo('bench'), null,
+      'addSetTo invented a set for a session and exercise that no longer exist');
+    assert.equal(repo.allSets().length, 0, 'a stale add-set tap resurrected data after an erase');
+  });
 });
 
 /*
