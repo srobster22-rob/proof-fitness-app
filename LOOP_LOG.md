@@ -2116,3 +2116,35 @@ anywhere in the file, left via `useGuardedLeave` (a pop) exactly like Goals
 was before R583. Contract: add the same refresh-on-focus fix, verified the
 same way — currently safe by construction, real the moment a tab bar removes
 the pop.
+
+R584 — Stage 0: OWNER.md still four blocked decisions. Applied R583's own
+lesson to the one screen not yet checked for it: Measure. Found the identical
+shape cold, before assuming — \`rows = useMemo(() => measureRows(repo, now),
+[repo, tick])\`, zero \`useFocusEffect\` anywhere in the file, left via
+\`useGuardedLeave\` (a pop), exactly Goals' shape before R581/R583. Fixed both
+halves in one round rather than two: the data refresh (R583's half) and the
+sheet-state clear (R581's half) for all five of Measure's own local states —
+\`adding\`, \`open\`, \`removing\`, \`targeting\`, \`clearing\` — none of which were
+ever cleared by simply leaving and returning, only by their own explicit
+action. Same reachability story, verified the same way: currently safe only
+because a pop destroys the component, real the moment a tab bar keeps it
+mounted while blurred instead — a restore or erase on Progress would leave
+Measure showing readings that no longer exist, or a confirm sheet open over
+one of them. One genuine implementation question resolved by testing rather
+than assuming: the five setters are declared textually AFTER the new
+\`useFocusEffect\`, and \`tsc --noEmit\` passed clean, confirming what R583's
+own comment had assumed without checking — a closure referencing a \`const\`
+declared later in the same function is safe as long as the closure runs after
+that render pass completes, which \`useFocusEffect\` guarantees. REVIEW: suite
+2136 pass / 0 fail (real count, up 2). Planted removal of the entire guard
+and the test catches it by name; restored clean. Verified in the PRODUCT —
+Measure renders correctly on the real seeded device ("YOU / BODYWEIGHT / Not
+recorded yet / HEIGHT / Not recorded yet"), no regression. \`--check\` current;
+no share code moved so link/build.cjs was not needed. Committed as 77a9e55
+inside fitness-app; diff is the one guard block plus its import. | next: every
+screen with a tick-gated data memo and a pop-based leave — Goals and Measure —
+now refreshes on focus. Progress and Settings do not have this shape (Progress
+computes live from repo on every render per earlier rounds' findings; Settings
+has no comparable data memo). This closes the "stale-on-return" class for the
+whole app, not just one screen. Four owner questions remain the only work
+with real product value, tab bar first since R523, now 59 rounds waiting.
