@@ -153,3 +153,35 @@ either naturally covered or explicitly guarded. \`addingTo\` holds only a
 string id, not a snapshot, so the same staleness question does not apply to
 it the same way. Four owner questions remain the only work with real product
 value, tab bar first since R523, now 53 rounds waiting.
+
+R580 — Stage 0: OWNER.md still four blocked decisions. Extended R577-579's
+stale-local-state method beyond NowScreen for the first time: surveyed
+Goals and Measure, the only other screens holding a real snapshot (not a bare
+id) in component-local state — \`editing\`/\`wiping: GoalProgress | null\` on
+Goals, \`removing: {id, label} | null\` on Measure. Checked each against the
+same scenario as R579 — the underlying row vanishing (via ERASE EVERYTHING)
+while the sheet still holds a stale snapshot, since none of these screens are
+guaranteed unmounted the way Now never is. ALL THREE checked out clean, and
+two turned out to already be covered by tests my first grep missed. \`removeGoals\`
+skips a vanished id explicitly (\`if (!g) continue\`) and
+\`test/goals-model.test.ts:535\` — "an id that is already gone is skipped, not
+an error" — already proves it via a double-tap, functionally the same
+scenario as an erase. \`editGoal\` returns a real user-facing error
+(\`{ok:false, error:'That goal is no longer there.'}\`, both languages) rather
+than a silent no-op, confirmed live, and \`test/goals-model.test.ts:473\` —
+"editing a goal that is no longer there says so rather than creating one" —
+already covers exactly this using \`removeGoals\` as the vanish mechanism,
+which leaves the same database state an erase would. \`deleteMeasurement\` is a
+bare parameterized \`UPDATE measurements SET deleted = 1 WHERE id = ?\` with no
+branching logic at all — safe by SQL semantics on a non-matching row, the same
+category as testing that \`1 + 1 === 2\`, so no test was added for it. UNLIKE
+R579, this round found no new gap — a genuine negative result, and reported
+as one rather than manufactured into a change. REVIEW: suite 2130 pass / 0
+fail, unchanged; \`git status\` confirms nothing touched. No SHIP step — nothing
+shipped. | next: the stale-local-state method has now been run against every
+screen with meaningful snapshot-holding state — NowScreen (typing, editingSet,
+addingTo — one real gap found and closed in R579) and Goals/Measure (three
+candidates, all already safe). Settings and Progress hold no comparable
+snapshots to check. This line of investigation is exhausted. Four owner
+questions remain the only work with real product value, tab bar first since
+R523, now 55 rounds waiting.

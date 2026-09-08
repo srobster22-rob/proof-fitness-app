@@ -2004,3 +2004,10 @@ already covered), \`addingTo\` (R579, verified safe and NOW covered) — have
 been checked by running the actual scenario rather than reading the code.
 Four owner questions remain the only work with real product value, tab bar
 first since R523, now 54 rounds waiting.
+
+R580 — PICK (logged first): extend the stale-local-state method (R577-579,
+all on NowScreen) to the OTHER screens — Progress, Goals, Settings, Measure —
+none of which have been checked for the same shape. Contract: find each
+screen's own snapshot-holding local state (an edit sheet, a picked item), test
+its save/write path against the underlying data having vanished via
+erase/restore from elsewhere, the same way addSetTo and editSet were tested.
