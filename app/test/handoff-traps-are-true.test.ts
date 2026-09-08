@@ -98,7 +98,16 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
       // through a template literal and a raw CR. The defence is the part that
       // has actually worked every time: remove a layer rather than escape harder.
       ['trap 7 covers more than the heredoc', /three distinct mechanisms/],
-      ['trap 7 keeps the defence that works', /REMOVE A LAYER/]
+      ['trap 7 keeps the defence that works', /REMOVE A LAYER/],
+      /*
+       * Trap 14 was measured in R473 and re-measured in R545 with a sharper
+       * result: the effect is not react-native-web's, and not specific to a
+       * div-role-button. A REAL `<button>` element goes anonymous the moment
+       * its text sits inside any child element. That distinction is what stops
+       * the next reader concluding the trap does not apply to their case.
+       */
+      ['trap 14 was re-measured with real probes', /RE-MEASURED R545/],
+      ['trap 14 says it is not specific to react-native-web', /loses name-from-content the moment its text sits inside a child/]
     ] as Array<[string, RegExp]>) {
       assert.match(handoff, evidence,
         `${what} no longer carries the measurement it was verified with, so the ` +
@@ -128,7 +137,17 @@ describe('the docs do not claim screenshots are impossible (R531)', () => {
     const bad: string[] = [];
     for (let i = 0; i < lines.length; i++) {
       if (!/^\s*(RE-)?MEASURED R\d+/.test(lines[i])) continue;
-      const prev = (lines[i - 1] ?? '').trim();
+      /*
+       * The last NON-BLANK line, not literally the previous one (R545). A blank
+       * line before a note is a paragraph break and finishes nothing, so the
+       * original form rejected a correctly placed note — and the fix has to
+       * keep catching the case this was built for, which is a note landing
+       * inside an unfinished sentence. Skipping blanks does exactly that:
+       * the text it lands after is still the text that has to have ended.
+       */
+      let p = i - 1;
+      while (p >= 0 && lines[p].trim() === '') p--;
+      const prev = (lines[p] ?? '').trim();
       if (!/[.:!?]$/.test(prev)) {
         bad.push(`"${prev.slice(-45)}" is followed by "${lines[i].trim().slice(0, 35)}..."`);
       }

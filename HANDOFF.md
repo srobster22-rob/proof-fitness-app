@@ -203,6 +203,17 @@ test suite and obvious in a picture.
    every non-structural `Pressable`. This is also the actual explanation for R450, which
    hand-fixed nine of them (FINISH included) while the gate stayed green.
 
+   RE-MEASURED R545, and it holds, with one detail the entry did not have. Planted the same
+   four probes into the running app: `<button>PLAINTEXT</button>` came back `button "PLAINTEXT"`,
+   while `<button role="button"><div>DIVCHILD</div></button>`, and the same with a `<span>`, and
+   a `<div role="button">` wrapper, ALL came back with the button anonymous and only the inner
+   node named. So it is not specific to react-native-web or to a div-role-button: a REAL
+   `<button>` element loses name-from-content the moment its text sits inside a child element.
+   Checked the other direction too, which is the half that proves the app is not accidentally
+   fine: every named control on the Now screen — LOG SET, PUSH, PULL, LEGS — carries an explicit
+   `aria-label` AND has a `DIV` child, so each would be silent without it. Removing one label
+   fails `accessibility.test.ts` by name, so the gate is what keeps this invisible.
+
 15. **`accessibilityState` is dead on web, and `getComputedStyle` lies right after a render.**
    react-native-web 0.21 dropped `accessibilityState` from its forwarded props entirely (R474),
    so the three places using it announced nothing in the browser while reading perfectly in the
