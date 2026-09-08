@@ -1149,3 +1149,44 @@ is sound and its owner-facing questions are now three, all measured and all
 waiting. Goals is the last screen with no pass this session. Tab bar remains the
 top item; R548's strength-vs-size and R555's day-one label are filed beside it.
 Also owner-only: the R508 bundle scope (~48 kB) and the two R483 items.
+
+R556 — PICK (logged first): the GOALS screen, walked in the product. Shortlist
+was (a) Goals, (b) the equipment/machine picker, (c) the Progress "YOU" screen.
+Picked (a): it is the last surface with no pass this session, it is one of the
+two links in the top row so every user can reach it in one tap, and it is where
+§16's "every number checkable" is hardest — a goal is a claim about the future
+and the screen has to say how far away it is without inventing progress. Method
+as R555: walk it in the running app on a real history and read what is on
+screen, rather than reading the model and assuming.
+
+R556 — BUILD/REVIEW/SHIP on the pick logged above. Walked Goals in the product
+on a real history and it is sound: one card, the target as the hero, a bar, "30
+lb from a 225 squat", "60 days left · on pace". Checked the two things §16
+actually demands rather than judging the look. The bar is 116px of a 289px track
+and its own aria label says "40 percent there" — picture and words agree, and
+the 40% resolves to a baseline of 175, which is their best when the goal was set
+rather than a percentage of the target, so it measures progress they made rather
+than distance from zero. And "on pace" turned out to be the most carefully
+guarded claim on the screen: it returns null until there is real training to
+judge, after being fixed twice for exactly the cry-wolf §8 forbids. THE GAP WAS
+THE UNIT SEAM, which every other surface was checked against this session and
+this one never. `goals.test.ts` has a kilogram goal, and its history is in
+kilograms too, so nothing ever crossed — and crossing is the case that needs
+`sessionUnits`, because a `LoggedSet` carries no unit and a goal carries its own
+separate one. Built a kg-goal-on-lb-history seed and read the card: "12 kg from
+a 100 squat", 89% on the bar. Correct — 195 lb is 88.45 kg, the gap is 11.55,
+and the goal is stated in ITS unit throughout. Four tests pin that. THE PLANT IS
+WHY THIS ROUND MATTERS. Removing the one conversion and reloading, the product
+does not print a slightly wrong number: the screen reads "1 GOAL ACHIEVED",
+congratulating a lifter who squats 195 lb for hitting 220.5. The whole card is
+gone, replaced by a celebration. That is the §8 failure at its worst on the one
+screen whose entire job is saying how far away something is, and it was one line
+from happening with nothing watching. REVIEW: suite 2060 pass / 0 fail (real
+count, up 4); all four tests fail on the plant. Verified in the PRODUCT both
+ways with the bundle grepped, viewport reset to desktop, app reseeded. | next:
+every screen has now had a pass, and the unit seam is closed on all of them.
+Three owner questions are filed and measured. The honest next move is either the
+equipment/machine picker (the last unwalked surface) or stopping the audit and
+asking what the app still LACKS rather than what it gets wrong. Tab bar remains
+the top item; R548's strength-vs-size and R555's day-one label are filed beside
+it. Also owner-only: the R508 bundle scope (~48 kB) and the two R483 items.
