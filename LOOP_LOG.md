@@ -1617,3 +1617,34 @@ rather than a third time by accident. Contract: find every ACKNOWLEDGED/hand-
 enumerated list a tool or gate relies on, check whether it is derivable from
 something structural instead, and where it cannot be, confirm it at least fails
 loudly when the population moves past it.
+
+R567 — Stage 0: OWNER.md still four blocked decisions. Followed up on my own
+R566 lead — sweep for OTHER hand-kept lists with the same shape of gap. Checked
+the two obvious candidates first and both were clean: `orphan-scan.cjs`'s DIRS
+already includes src/data (fixed independently in R483, before this session);
+field-scan.cjs's `ACKNOWLEDGED` exceptions are legitimately hand-kept by design,
+not a population that should be derived. THE REAL GAP WAS THE SCAN'S OWN
+POPULATION. `field-scan.cjs` targets multi-field shapes a model computes and a
+screen reads, and it only covers 7 of 35 exported interfaces in src/domain and
+src/ui. Most of the 28 are small result types (`{ok, error}`) that do not fit
+the pattern, and `RecapPayload` is correctly absent — it already has three
+dedicated per-consumer completeness tests from R290 onward, stronger than this
+generic scan could give it. `SessionSummary` was the clear match: same file and
+job as `ProgressRow` (one row per item in a list), and had NO dead-field
+protection at all. Ran the scan cold before deciding it belonged — it came back
+CLEAN, every field read, so this is coverage gained rather than a bug found,
+which is the more common and less exciting outcome and still worth locking in
+so it cannot quietly drop back out unnoticed. REVIEW: suite 2111 pass / 0 fail
+(real count, up 1 net — one new population-pin test). Two plants: a genuinely
+dead field on SessionSummary is caught by name ("SessionSummary.weekOfYear");
+removing SessionSummary from the scan's population fails the new pin test by
+name. Verified in the PRODUCT — Progress renders the fields SessionSummary
+carries correctly (title, sets, volume, per-lift bests) on the real seeded
+history. `--check` current; no share code moved so link/build.cjs was not
+needed. Confirmed no plant residue survived into the diff. Committed as 41e6186
+inside fitness-app. | next: the remaining 27 unscanned interfaces are mostly
+result types that do not fit this scan's shape — GoalDraft, Suggestion,
+WeeklyComparison and a few others are worth a second look with the same
+cold-run-first method, but this is now a method rather than a one-off, and the
+marginal value per interface is dropping. Four owner questions remain, tab bar
+first since R523.
