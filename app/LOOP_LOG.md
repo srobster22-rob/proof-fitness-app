@@ -32,3 +32,16 @@ next: performance is now measured and shape-gated rather than untouched. Every
 flow has been walked, the weight seam is closed, the claim surfaces agree, the
 fixtures prove themselves, and now the render cost has a floor under it. Four
 owner questions remain and are the only work with clear product value left.
+
+R566 — PICK (logged first): audit the five DEV-ONLY seed files sitting in
+public/ for whether they belong there. Shortlist was (a) that, (b) sweep for
+orphaned public/ artifacts generally, (c) re-check the fixtures-prove-themselves
+gate against the newest seed (checked at Stage 0 — already covered, directory-
+derived, no gap). Picked (a): eight seed tools now write .b64 files into
+`public/`, which is what `expo export` or any static server serves verbatim.
+seed-web.ts's own comment already flags this risk for itself ("a dev artifact
+and is gitignored; if it ever ships it is a 40KB file nothing reads") but seven
+more seeds have been added since without anyone checking whether that promise
+still holds for all of them, or whether they are actually gitignored at all.
+Contract: nothing under public/ that a seed tool writes should ship in a
+production build, and .gitignore must actually match every file being written.

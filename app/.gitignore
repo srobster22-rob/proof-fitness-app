@@ -8,10 +8,16 @@ out/
 
 expo-env.d.ts
 # @end expo-cli
-# Dev-only fixture written by tools/seed-web.ts — a training history for the
-# web preview, so journeys F and H can be walked. Nothing imports it.
-public/seed.b64
-public/stress.b64
+# Every dev-only fixture any tools/seed-*.ts writes into public/ (R566).
+#
+# The pattern, not a per-file list: seed.b64, stress.b64, tabbar.b64 and
+# mixed.b64 were named here one at a time, and seven more seeds written this
+# session — big565.b64 through pr539.b64, 1.5MB total — were never added and
+# got committed for real, because nothing connected "a seed tool writes into
+# public/" to ".gitignore has to know about it". A wildcard cannot fall behind
+# the thing it is supposed to cover the way a list already did once.
+#
+# `sql-wasm.wasm` is NOT a fixture — it is a real dependency the web build
+# serves sql.js from — so this pattern deliberately does not match it.
+public/*.b64
 test-failures.log
-public/tabbar.b64
-public/mixed.b64
