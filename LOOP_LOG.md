@@ -2764,3 +2764,36 @@ decide what a new set has to beat.
 REVIEW: no code changed; suite unaffected, 2144 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 75 rounds.
+
+R603 - Stage 0: OWNER.md unchanged since R586. IDEATE: continuing the
+domain-function reading audit onto measure.ts's `formatMeasure`, the shared
+imperial-height formatter used by three real surfaces (measure.tsx's reading
+list, measure-goal.ts's target/gap text, measure-model.ts's trend lines) --
+never independently checked this segment.
+BUILD/REVIEW: found and confirmed a real, reproducible rounding-carry bug.
+`formatMeasure` splits an inches value into feet and a remainder, THEN rounds
+the remainder to a tenth -- and a remainder just under a whole foot rounds up
+to 12 itself: `formatMeasure(71.96, 'in')` printed `5'12"`, which is not a
+height anyone has, rather than the correct `6'0"`. Confirmed with a direct
+call before touching anything. Fixed with a carry check right after the
+split: `if (inches >= 12) { feet += 1; inches = 0; }`. Added
+test/format-measure-inches-carry.test.ts (the carry case at two different
+whole-foot boundaries, plus a no-regression case for ordinary remainders
+including the exact `5'11.9"` boundary one tenth below the bug). Planted the
+bug back (removed the carry-check line) and the carry test failed by name
+while the no-regression test kept passing; restored via Edit, confirmed
+clean.
+REVIEW: suite 2144 -> 2146 pass / 0 fail (real count, up 2).
+Verified live in the PRODUCT: opened /measure, recorded a height of 71.96 in
+through the real Settings-style sheet (dispatched PointerEvents, since a bare
+click does not register on react-native-web Pressables -- HANDOFF trap 4),
+and the HEIGHT row showed `6'0"`, not `5'12"`. Reset the demo database back
+to the stock seed afterward so the touched state does not linger.
+SHIP: `build-domain.cjs --check` reports current (measure.ts is domain code,
+already rebuilt by this round's own `npm test` runs); no separate rebuild
+needed.
+| next: a genuine, previously-unknown display bug, found by reading a small
+shared formatter end to end rather than trusting its three call sites
+individually -- worth remembering alongside R592/R596 as this segment's third
+concrete fix from continued unguided reading, even after several rounds that
+came back clean. Five owner decisions still wait, tab bar first, 76 rounds.
