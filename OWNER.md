@@ -192,6 +192,18 @@ a little sloppy and AI-generated.
   unexplained; `RISE` is now ruled out as the cause, which narrows the
   search but does not end it.
 
+  R631, one more data point, deliberately not chased further: only ONE
+  backdrop element exists in the DOM at the time of the overlap -- ruled out
+  a duplicate/stale modal instance as the cause. The 12px transform sits on
+  the Modal portal's own wrapper, outside anything `ScreenModal.tsx` writes,
+  which points at `react-native-web`'s own `Modal` polyfill (a library
+  default, maybe safe-area-related) rather than app code. That is a
+  different, larger question than a bug fix -- possibly not a bug at all,
+  just a fixed inset nothing in this app currently accounts for -- and
+  answering it needs reading react-native-web's Modal source, not more
+  measurement from the app side. Parking it here rather than spending a
+  third round measuring the same two elements.
+
 
 ## Never
 - NEVER run `git checkout`, `restore`, `reset`, `clean`, `stash`, `rebase` or

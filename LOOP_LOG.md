@@ -3363,3 +3363,30 @@ the ancestor chain between the Modal's portal root and the backdrop is
 applying that 12px, unrelated to the entrance animation).
 | next: the LOG SET / day-sheet overlap is still open, still unexplained,
 still narrowed. Five owner decisions still wait, tab bar first.
+
+R631 - Stage 0: OWNER.md unchanged since my own R630 edit. IDEATE: one more
+cheap, bounded check on the LOG SET overlap before setting it aside for a
+round with room to read library source properly -- rule out a duplicate
+modal instance, and check whether the 12px transform is coming from
+react-native-web's own Modal polyfill rather than app code.
+BUILD/REVIEW: confirmed via live DOM query -- only ONE backdrop element
+exists at the time of the overlap, so a stale/duplicate modal instance is
+ruled out. Grepped react-native-web's own ModalAnimation.js for the 12px
+value; found only 0%/100% keyframes (irrelevant since ScreenModal passes
+animationType="none", so RNW's own slide animation never runs) and no fixed
+12px anywhere. Checked NowScreen.tsx for SafeAreaView usage as a candidate
+source for a safe-area-shaped 12px inset -- none; the screen does not use
+it. The transform's real source is still not found. Declined to keep
+digging blind through react-native-web's Modal internals without a
+concrete next lead -- that is exactly the kind of open-ended source dive
+that needs its own round with room, not five more minutes squeezed into
+this one.
+SHIP: nothing shipped -- this round's product is two more ruled-out
+hypotheses (duplicate instance, RNW's own animation/safe-area code), filed
+in OWNER.md alongside R629/R630 so the eventual real fix does not re-walk
+this same ground a third time.
+REVIEW: suite unaffected, 2154 pass / 0 fail.
+| next: this bug is now diagnosed three rounds deep without a fix, which is
+itself a signal -- the next attempt should budget real time for reading
+react-native-web's Modal/View transform pipeline directly rather than
+measuring the app's own DOM again. Five owner decisions still wait.
