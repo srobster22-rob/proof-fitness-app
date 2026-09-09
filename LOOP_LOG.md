@@ -2839,3 +2839,18 @@ handles.
 REVIEW: no code changed; suite unaffected, 2146 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 78 rounds.
+
+R606 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `weeklyCard` in
+weekly.ts, the postable-card builder sitting right next to R605's
+`weeklyComparison`.
+BUILD/REVIEW: clean. Already carries its own historical fix (R221 -- date
+label translated app-side after a Spanish card once read "SUBIO ... 4 WEEKS",
+half-translated) and includes both raw numbers (`then`/`now`) alongside the
+derived gain so the claim is checkable rather than asserted, per §16. The
+`weeks` rounding formula is duplicated once, identically, between
+`weeklyLine` and `weeklyCard` -- harmless since both compute it from the same
+`c.days` the same way and can never disagree, but a candidate for extraction
+if either one ever changes without the other.
+REVIEW: no code changed; suite unaffected, 2146 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 79 rounds.
