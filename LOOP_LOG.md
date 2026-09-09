@@ -3116,3 +3116,21 @@ REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 94 rounds, 6 left in
 the loop's stated budget.
+
+R622 - Stage 0: OWNER.md unchanged since R586. IDEATE: read the exercise and
+session halves of `restore()` in portable.ts, the backup-import counterpart
+to R621's eraseAll -- never read directly this segment.
+BUILD/REVIEW: clean, and even more heavily scarred than eraseAll. Exercise
+restore correctly distinguishes "never seen" from "deliberately removed on
+this device" via `exerciseWasRemoved`, refusing to resurrect a removal an
+older backup predates -- the same undo-outranks-restore rule sets already
+follow, applied consistently to exercises too. Session restore preserves the
+real `startedAt`/`updatedAt` from the file rather than re-stamping at import
+time, on record as fixing a real defect (a 45-minute session from the 15th
+reading as "1 MIN" on the day of the restore) and preserving R333's idle rule
+against a session that had already gone idle before export.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 95 rounds, 5 left in
+the loop's stated budget. The sets/goals/measurements halves of restore()
+remain unread if a future round wants to finish it.
