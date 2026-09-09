@@ -2879,3 +2879,21 @@ product, since there is nothing observably different to click through.
 closes the loop on R606's note the same way R600 closed R596/R597's -- found,
 generalized/fixed, documented, rather than left as an observation nobody
 acts on.
+
+R608 - Stage 0: OWNER.md unchanged since R586. IDEATE: finished reading
+weeklyComparison's remaining lines (the candidate-selection tie-break),
+noticed during R607's extraction but not yet checked.
+BUILD/REVIEW: clean, with one vestigial-but-harmless detail understood rather
+than assumed. `days` is `Math.max(1, Math.round((now - cutoff) / DAY))`,
+which always simplifies to exactly `lookbackDays` (28) since `cutoff = now -
+lookbackDays * DAY` -- confirmed deliberate against its own comment: the
+sentence says "since N weeks ago" meaning the WINDOW size, not the specific
+set's real age, so a constant is correct here, not a bug wearing a
+computed-looking formula. The tie-break's `oldest > 0` guard is effectively
+always true in real use (`oldest` is the earliest epoch ms in a non-empty
+`mine`, always far above zero) -- dead weight rather than a defect, and not
+touched, since a guard that never fires costs nothing and removing it would
+be a change with no observable effect to verify.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 81 rounds.
