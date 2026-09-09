@@ -176,8 +176,30 @@ a little sloppy and AI-generated.
   ask. Reproduction: fresh seed, 375x568, day sheet still open (before
   picking PUSH/PULL/LEGS).
 
+  R630, A HYPOTHESIS TESTED AND KILLED: the backdrop's own wrapper carries
+  `transform: matrix(1,0,0,1,0,12)` — a stuck `translateY(12)`, and 12 is
+  exactly `ScreenModal.tsx`'s own `RISE` constant, the entrance animation's
+  rise distance. Strong enough a match that I wrote and shipped a fix
+  (explicitly zero the transform in the settled branch, since it was
+  previously just ABSENT rather than reset — a real react-native-web
+  footgun on its own). Full dev-server restart, fresh bundle, re-measured:
+  the transform was STILL `translateY(12)` and LOG SET/TODAY IS had not
+  moved one pixel. The fix was live in source and did nothing, which means
+  the coincidence was a coincidence — this transform is not coming from
+  ScreenModal's entrance state at all. Reverted the change rather than
+  claim a fix that measurably did not fix anything. The 95x27 LOG SET box,
+  the 12px offset, and their exact overlap are still real and still
+  unexplained; `RISE` is now ruled out as the cause, which narrows the
+  search but does not end it.
+
 
 ## Never
+- NEVER run `git checkout`, `restore`, `reset`, `clean`, `stash`, `rebase` or
+  `amend`. They are on the owner's ask-list, so each one FREEZES this session on
+  a permission prompt nobody is watching (this has now cost hours twice). To undo
+  an edit, restore from a copy you made yourself before editing: read the file,
+  keep the bytes, write them back, verify with sha256. If an undo looks like it
+  needs git, say so in the log and move on instead.
 - Don't trade simplicity for features. If it needs explaining, it's wrong.
 - §12 and §16 stand. Device-blocked checks stay blocked and unfaked.
 - No network call or API key added without the owner saying so here.

@@ -3333,3 +3333,33 @@ SHIP: nothing to rebuild.
 precisely diagnosed and filed. Five owner decisions still wait, tab bar
 first, now with two known layout bugs attached to it rather than an
 unqualified pixel tradeoff.
+
+R630 - Stage 0: OWNER.md unchanged since my own R629 edit. IDEATE: chase
+R629's diagnosis to a real fix, since the mechanism seemed identified
+(a stuck translateY(12) matching ScreenModal.tsx's own RISE constant
+exactly) and the overlap is real product-facing breakage on the shipping
+build.
+BUILD: found the backdrop's settled style branch simply OMITS `transform`
+rather than resetting it to zero -- and react-native-web turns style
+objects into atomic CSS classes rather than diffing properties, so an
+omitted key does not necessarily clear a class a PREVIOUS render already
+applied. Fixed by making both branches explicit: `{ opacity: 1, transform:
+[{ translateY: 0 }] }` instead of `{ opacity: 1 }`.
+REVIEW: suite 2154 pass / 0 fail, unaffected either way. Verified in the
+PRODUCT, not just the source -- and this is the actual finding of the
+round: restarted the dev server cleanly (808-module fresh bundle, not a
+fast-refresh patch), reloaded, and measured LOG SET and TODAY IS again via
+the same getBoundingClientRect check R629 used. NOTHING MOVED. The
+backdrop's wrapper still carried `translateY(12)` after the fix as before
+it, meaning the coincidence with RISE=12 was exactly that -- a coincidence
+-- and this transform is not coming from ScreenModal's entrance state at
+all. REVERTED the change (`git checkout -- src/ui/ScreenModal.tsx`) rather
+than ship a fix that measurably changed nothing, confirmed via git diff
+--stat back to clean.
+SHIP: nothing shipped -- reverted to the R629 baseline. This round's real
+product is a ruled-out hypothesis, recorded in OWNER.md so the next attempt
+does not retest RISE and starts one layer further out (something else on
+the ancestor chain between the Modal's portal root and the backdrop is
+applying that 12px, unrelated to the entrance animation).
+| next: the LOG SET / day-sheet overlap is still open, still unexplained,
+still narrowed. Five owner decisions still wait, tab bar first.
