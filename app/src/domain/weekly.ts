@@ -24,6 +24,18 @@ export const LOOKBACK_DAYS = 28;
 
 const DAY = 86_400_000;
 
+/*
+ * R607. `weeklyLine` and `weeklyCard` each computed this identically —
+ * `Math.max(1, Math.round(c.days / 7))` — so the sentence and the card it
+ * describes could never actually disagree, but only because nobody had
+ * touched either copy yet. Extracted once both had been read and confirmed
+ * to agree, so a future change to one cannot silently stop matching the
+ * other the way a hand-maintained duplicate list does (HANDOFF trap 13).
+ */
+export function weeksSince(days: number): number {
+  return Math.max(1, Math.round(days / 7));
+}
+
 export interface WeeklyComparison {
   exerciseId: string;
   /** The lift's display name, resolved here so the caller needs no map. */
@@ -138,7 +150,7 @@ export function weeklyComparison(
 export function weeklyCard(
   c: WeeklyComparison, unit: Unit, watermark = 'PROOF', lang?: string
 ): Record<string, unknown> {
-  const weeks = Math.max(1, Math.round(c.days / 7));
+  const weeks = weeksSince(c.days);
   return {
     kind: 'weekly',
     ...(lang && lang !== 'en' ? { lang } : {}),

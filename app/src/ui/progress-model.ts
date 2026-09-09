@@ -7,7 +7,7 @@ import { sessionTitle, sessionStats, topSetPerExercise } from '../domain/session
 import { planOf } from '../domain/split.ts';
 import { realLoad, bodyweightMultiple, CARRIES_BODYWEIGHT, type Measurement } from '../domain/measure.ts';
 import { t, fill, languageOf, number, MONTHS_TREND, type Language } from '../domain/i18n.ts';
-import { weeklyComparison, weeklyCard, type WeeklyComparison } from '../domain/weekly.ts';
+import { weeklyComparison, weeklyCard, weeksSince, type WeeklyComparison } from '../domain/weekly.ts';
 import { shareUrl } from '../domain/share-url.ts';
 import type { RecapPayload } from '../domain/session.ts';
 import { displayUnit } from './display-unit.ts';
@@ -715,7 +715,7 @@ export function weeklyLine(repo: Repo, now: number): string | null {
   );
   if (!c) return null;
   const lang = languageOf(repo);
-  const weeks = Math.max(1, Math.round(c.days / 7));
+  const weeks = weeksSince(c.days);
   return fill(t(lang, weeks === 1 ? 'weeklyUpOneWeek' : 'weeklyUp'), {
     lift: c.lift, gain: loadLabel(c.gain), unit, weeks
   });
