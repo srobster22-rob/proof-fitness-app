@@ -3221,3 +3221,42 @@ the loop's stated 100-round budget. Filed here rather than left unrecorded:
 extend parse()'s shape check to measurements/measureGoals/prefs so a
 corrupted-but-well-typed-elsewhere backup gets the same specific error
 message as the four required fields already do.
+
+R627 - Stage 0: OWNER.md unchanged since R586. IDEATE: closed R626's own
+filed gap -- parse()'s array/shape validation never covered the three
+optional export fields (measurements, measureGoals, prefs).
+BUILD: added validation for all three: `measurements`/`measureGoals` must be
+arrays when present (absent is fine -- older backups predate them, and
+restore() already treats an absent field as empty via `?? []`); `prefs` must
+be a non-array object when present (matching how restore() reads it via
+`Object.entries(file.prefs ?? {})`). Added
+test/parse-validates-optional-fields.test.ts: 6 cases, two per field --
+rejects a malformed value with the same "Missing or malformed" message the
+four required fields already get, and accepts an absent one.
+REVIEW: planted the bug back (removed the new validation block entirely) and
+all three "rejected" cases failed by name while both "absent is accepted"
+cases for each stayed green, confirming the new checks add rejection without
+narrowing what a valid, older-format backup can still contain. Restored,
+reran: suite 2148 -> 2154 pass / 0 fail (real count, up 6).
+Verified in the PRODUCT as far as this pane can reach: `parse` and `restore`
+are pure functions with no rendering surface of their own, and the actual
+RESTORE control on Progress is a native document picker, which this pane
+cannot drive with a real file the way HANDOFF traps 17/18 already name for
+focus events and crash screens -- the plant-and-catch against the exact
+functions `backup-model.ts`'s `applyBackup` imports and calls unchanged is
+the honest ceiling here, not a shortcut around verifying in the browser.
+SHIP: `build-domain.cjs --check` reports current (portable.ts is domain
+code, already rebuilt by this round's own `npm test`).
+| next: this closes R626's filed gap in the very next round rather than
+letting it sit, the pattern this segment has used every time a round filed
+something genuinely quick (R593->never fixed since cross-domain, R606->R607,
+R596->R597->R600). Five owner decisions still wait, tab bar first, 100
+rounds -- this loop's stated budget. Summary of R585-R627 (43 rounds): four
+real product/infra fixes shipped (R584 already covered pre-R585; R592 coach
+grid, R596 test-suite race, R603 formatMeasure carry, R627 parse
+validation), one filed-and-later-fixed gap pair (R593/left open, cross-
+domain scope), one extracted duplication (R607), and a long, thorough,
+mostly-clean read of the entire backup/storage/db-adapter stack end to end.
+The technical queue is genuinely as thin as it has been all segment; the
+five owner decisions in OWNER.md are the load-bearing next step, not further
+unguided audits.
