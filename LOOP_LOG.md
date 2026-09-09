@@ -3155,3 +3155,21 @@ SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 96 rounds, 4 left in
 the loop's stated budget. This closes out the full export/erase/restore
 backup path end to end across R621-R623, all clean.
+
+R624 - Stage 0: OWNER.md unchanged since R586. IDEATE: finished the last of
+`restore()` -- measureGoals and prefs, the tail R623 left unread.
+BUILD/REVIEW: clean. measureGoals follows the same known-ids-including-
+deleted pattern as every other table, and its own one-target-per-kind cap
+error is treated as expected on restore, same as a goal hitting the three-cap.
+Prefs are restored ONLY when nothing is already set (`getPref(key) !== null`
+skips it) -- explicitly documented as the one place restore's own "additive,
+never overwrites" rule matters most, since an old backup silently resetting
+a unit or split changed THIS MORNING would be exactly the kind of surprise
+this app's whole philosophy argues against.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 97 rounds, 3 left in
+the loop's stated 100-round budget. portable.ts's `restore()` is now read
+completely across R622-R624, table by table, all clean and consistently
+reasoned -- likely the single most carefully-defended function read this
+whole R585-R624 stretch.
