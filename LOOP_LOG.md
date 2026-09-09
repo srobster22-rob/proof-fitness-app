@@ -2706,3 +2706,33 @@ or filed. Genuinely reaching the point where further unguided sweeps of
 already-careful code cost more than they are likely to find. Five owner
 decisions still wait, tab bar first, 72 rounds -- that queue, not a further
 supply of undiscovered bugs, is where the next real jump in value sits.
+
+R600 - Stage 0: OWNER.md unchanged since R586. IDEATE: R596's fix was
+substantial enough to be worth generalizing into the HANDOFF.md trap list --
+the same document already carries 18 hard-won environment/tooling gotchas
+specifically so a future round does not have to rediscover them from scratch.
+This one (a shared build artifact racing across concurrently-run test files)
+is exactly that shape: general, not tied to one screen or feature, and likely
+to bite again the next time a new subprocess-spawning test writes a file.
+BUILD: added trap 19 to HANDOFF.md, matching the established format --
+what was found, how it was found (a flake that reran clean, not assumed a
+fluke), the fix, and the one line of guidance that generalizes it ("before
+adding a new subprocess-spawning test that writes ANY file: check whether
+another test reads that same path"). Also recorded that bundle-parity.test.ts
+had independently already hit and fixed the identical root cause for a
+different file, with a different valid technique (atomic swap vs. path
+isolation) -- worth keeping both examples since they show two legitimate
+fixes for the same class, not just one right answer.
+REVIEW: doc-only change; ran the full suite as a sanity floor since
+HANDOFF.md's own claims are checked by handoff-traps-are-true.test.ts and
+handoff-numbers.test.ts elsewhere in the suite -- 2144 pass / 0 fail,
+unchanged, confirming the new entry did not break either gate.
+SHIP: nothing to rebuild.
+| next: this closes the loop on R596-R597's work -- found, fixed, swept for
+siblings, now documented for reuse. Five owner decisions still wait, tab bar
+first, 73 rounds. R600 is a round-number milestone worth noting only as
+that: 62 committed rounds into this segment (R538 baseline), the technical
+ledger stands at several real product fixes (R584 measure refocus, R585's
+structural gate, R592 coach grid, R596 test race) plus a long tail of
+verified-clean audits, and the owner's queue is the load-bearing constraint
+on what comes next, not a shortage of things left to check.
