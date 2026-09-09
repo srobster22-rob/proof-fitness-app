@@ -3066,3 +3066,18 @@ REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 91 rounds, 9 left in
 the loop's stated budget.
+
+R619 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `saveMeasureGoal`
+in repo.ts, the measurement-goal sibling of R618's `saveGoal`.
+BUILD/REVIEW: clean. The one-target-per-kind clash check correctly excludes
+the goal's own id (so editing a target does not clash with itself) and
+correctly reads only LIVE goals (`measureGoals()` filters `deleted = 0`), so
+a soft-deleted bodyweight target does not block creating a new one. Same
+upsert-can-resurrect-by-id shape as `saveGoal` (R618) exists here too, in
+theory, but needs a fresh save to reuse a deleted goal's exact id, which
+nothing in the goal-creation path does -- same class as R618's finding, not
+a new one, and not worth a separate test for a shape already documented once.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 92 rounds, 8 left in
+the loop's stated budget.
