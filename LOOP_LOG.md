@@ -3134,3 +3134,24 @@ SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 95 rounds, 5 left in
 the loop's stated budget. The sets/goals/measurements halves of restore()
 remain unread if a future round wants to finish it.
+
+R623 - Stage 0: OWNER.md unchanged since R586. IDEATE: finished the sets,
+goals and measurements halves of `restore()` per R622's own note.
+BUILD/REVIEW: clean, and the pattern is applied with real consistency rather
+than fixed once and forgotten. Sets, goals and measurements all check
+against `known*Ids()` (soft-deleted included) rather than the filtered
+getters (`allSets()`/`goals()`/`measurements()`) before ever writing, so a
+backup that predates a deliberate deletion is skipped as "already on this
+device" instead of silently resurrecting it -- the exact rule the sets
+comment states explicitly, carried through to two more tables by the same
+discipline. A goal hitting the three-goal cap mid-restore is treated as
+expected and skipped, not reported as corruption. This restore path is
+narrower and safer than `restoreGoals` (R581's "upsert cannot tell an erase
+from a gap" documentary test), which exists for a DIFFERENT, deliberately
+resurrecting use case -- undoing an erase on the same device -- so the two
+having different behavior toward a deleted id is correct, not a drift.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 96 rounds, 4 left in
+the loop's stated budget. This closes out the full export/erase/restore
+backup path end to end across R621-R623, all clean.
