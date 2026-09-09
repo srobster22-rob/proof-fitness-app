@@ -2954,3 +2954,22 @@ to happen twice with no app restart between.
 REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 85 rounds.
+
+R613 - Stage 0: OWNER.md unchanged since R586. IDEATE: read the db-open state
+machine in db.ts (initRepo/repoStatus/resetRepo/getRepo) that RepoGate.tsx
+depends on, confirming the wiring rather than assuming it from the caller
+side.
+BUILD/REVIEW: clean. `initRepo()` short-circuits on both 'open' AND 'failed'
+without retrying -- which looks like a trap (calling it again after a failure
+does nothing) until checked against its one caller: RepoGate's `retry()`
+calls `resetRepo()` (failed -> idle) BEFORE bumping `attempt`, and only the
+`attempt` bump re-fires the effect that calls `initRepo()` again. The two
+functions are correct only together, and they are wired together correctly.
+`getRepo()` throws a specific, actionable message ("must render inside
+RepoGate") rather than a generic null-access error for the one misuse this
+API cannot prevent at the type level.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 86 rounds. This
+closes out the storage-open error path end to end across R612-R613 -- the
+screen and the state machine underneath it both read clean.
