@@ -2908,3 +2908,17 @@ SHIP: nothing to rebuild.
 weekly-comparison area (weekly.ts, its progress-model.ts callers, and its
 i18n strings) is now fully read end to end across R605-R609 with one real
 improvement (R607) and everything else confirmed correct.
+
+R610 - Stage 0: OWNER.md unchanged since R586. IDEATE: read the schema
+migrations (schema.ts's MIGRATIONS array), fresh ground -- infra rather than
+feature logic, never checked this segment.
+BUILD/REVIEW: clean. Every table and index creation uses `IF NOT EXISTS`, so
+the migration list is safely re-run on every startup rather than tracked by
+version number -- idempotent by construction rather than by discipline.
+`measure_goals`'s `kind` uniqueness is deliberately enforced in application
+code (`saveMeasureGoal`) rather than a SQL constraint, documented as the
+right call given the soft-delete tombstone pattern the rest of the schema
+already uses.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 83 rounds.
