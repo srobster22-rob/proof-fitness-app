@@ -3051,3 +3051,18 @@ SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 90 rounds, 10 left in
 the loop's stated budget. This closes out the data-layer's two platform
 adapters (expo-db.ts, web-db.ts) back to back, both clean.
+
+R618 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `Repo.saveGoal`
+in repo.ts, the write-time enforcement of §5's three-goal cap.
+BUILD/REVIEW: clean. The cap check only fires for genuinely NEW goals
+(`isNew`), correctly letting an edit to an existing goal through regardless
+of the current active count -- editing does not claim a new slot. The upsert
+sets `deleted = 0` on conflict, meaning a save can resurrect a soft-deleted
+goal by id; this is the exact, already-known and already-tested limitation
+from R581's "an upsert cannot tell an erase from an ordinary gap" documentary
+test (goals-model.test.ts), not a fresh find, and re-confirmed rather than
+re-litigated.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 91 rounds, 9 left in
+the loop's stated budget.
