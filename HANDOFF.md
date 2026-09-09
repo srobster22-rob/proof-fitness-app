@@ -315,6 +315,25 @@ test suite and obvious in a picture.
    — the same shape as trap 17, a real behaviour this pane's dev mode structurally cannot show.
    Do not "verify" a crash screen from here; the source-level confirmation above is the ceiling.
 
+19. **`node --test` runs test FILES concurrently by default, so any test that writes to a**
+   **real, shared path on disk can race any other test that reads that same path.** Found R596,
+   live: `test/landing-page.test.ts` reads `link/dist/index.html`, and
+   `test/link-build-is-self-contained.test.ts` rebuilds that exact real, shared file three times
+   per run via `spawnSync(['link/build.cjs'])` — one of the three deliberately leaving it BROKEN,
+   to prove the build fails loudly on a real defect. `link/build.cjs` itself does
+   `fs.rmSync(DIST, {recursive:true})` before writing it back, so the window where a concurrent
+   reader hits the directory outright missing, or holding the deliberately-broken build, is real,
+   not theoretical — `npm test` came back red with zero source changes, then clean on every
+   rerun, which is exactly the signature of this class of bug and exactly why a flake should
+   never be shrugged off as a fluke without checking. Fixed with an env-var override
+   (`PROOF_LINK_DIST`, mirroring `PROOF_BUNDLE_OUT`'s already-existing pattern for the domain
+   bundle) so the test that rebuilds can write to a private `mkdtempSync` directory instead of
+   the shared one. `test/bundle-parity.test.ts` had already hit this exact class once before,
+   independently, for `dist/proof-domain.js` — hardened with an atomic temp-file-plus-rename
+   swap rather than full path isolation, a different valid fix for the same root cause. Before
+   adding a new subprocess-spawning test that writes ANY file: check whether another test reads
+   that same path, and if so, redirect the write rather than trusting it will never race.
+
 
 ## Architecture in one paragraph
 
