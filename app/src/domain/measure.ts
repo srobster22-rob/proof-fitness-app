@@ -203,12 +203,22 @@ export function formatMeasure(value: number, unit: MeasureUnit): string {
      * R603. Rounding to a tenth AFTER splitting off the feet can round the
      * remainder up to 12 itself — 71.96 splits into 5 feet and an 11.96
      * remainder, which rounds to "12.0", and printed as `5'12"` a lifter
-     * would read as either a typo or a made-up unit. Reachable from more
-     * than a hand-typed decimal: `measure-goal.ts`'s `remaining` is a plain
-     * subtraction between a goal and a converted reading, and a cm-based
-     * goal against an inches-based reading (or vice versa) lands on an
-     * arbitrary fraction, not a round tenth, same as any two floats
-     * subtracted from independent sources.
+     * would read as either a typo or a made-up unit.
+     *
+     * CORRECTION, R604: the round-trip through this app's OWN pre-rounding
+     * (`convertMeasure` and `measure-goal.ts`'s `remaining` both already do
+     * `Math.round(x * 10) / 10` before this function ever sees the value)
+     * cannot land on a fraction like .96 — a value already snapped to a
+     * tenth splits into a remainder that is also already at that same
+     * resolution, so it is either comfortably under 12 or already exactly
+     * the next whole foot. Checked directly by walking every hundredth from
+     * 71.90 to 72.04 through that same rounding: none produced anything but
+     * a clean `.9` or `.0`. The one real path in is a value nothing here has
+     * rounded first — a raw stored `Measurement.value` read straight off
+     * `app/measure.tsx`'s own decimal-pad input, which does not restrict
+     * entry to one decimal place. Confirmed live in R603 exactly that way:
+     * typing "71.96" directly into the height field, not via any computed
+     * gap or conversion.
      */
     if (inches >= 12) { feet += 1; inches = 0; }
     // Under a foot is not a height; it is somebody typing inches they meant as
