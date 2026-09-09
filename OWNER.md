@@ -158,6 +158,24 @@ a little sloppy and AI-generated.
   overlap will read as broken in the tab-bar shots, and it is a bug, not the
   tradeoff being asked about.
 
+  DIAGNOSED, NOT FIXED (R629): went looking for the CURRENT build's overlap
+  before touching anything. `LOG SET`'s own box measures 95x27px at y=369-396
+  in the live DOM at 375x568 — the button's real footprint, not the giant
+  green rectangle it paints as, meaning the visible button is being drawn
+  well outside the box that's supposed to contain it. The day sheet's own
+  `TODAY IS` label sits at y=386-401, directly inside that same range. Both
+  are real elements at their real measured positions, not a screenshot
+  artifact — this is an actual layout collapse between the sheet's Modal
+  portal and the main screen's own flex layout at this specific height, not
+  a simple z-index fix. I did not chase it further: this needs careful,
+  non-blind changes to layout code three sheets deep (ScreenModal's backdrop,
+  NowScreen's flex column, and whatever is compressing LOG SET's box), and a
+  wrong fix here risks the logging path itself, which every §4 rule in this
+  app treats as the one thing that must never break. Better done as its own
+  round with room to verify thoroughly than squeezed in behind the tab-bar
+  ask. Reproduction: fresh seed, 375x568, day sheet still open (before
+  picking PUSH/PULL/LEGS).
+
 
 ## Never
 - Don't trade simplicity for features. If it needs explaining, it's wrong.

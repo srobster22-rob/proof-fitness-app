@@ -3302,3 +3302,34 @@ which is filed back to OWNER.md, not fixed blind.
 | next: waiting on the owner's pick from the four pictures, same as before --
 but now with the tab-bar overlap bug in view, which the owner did not have
 visibility into last time this decision was framed.
+
+R629 - Stage 0: OWNER.md unchanged since R628 (my own edit). IDEATE: chase
+the CURRENT build's day-sheet/LOG SET overlap R628 found, since it affects
+the shipping default regardless of the tab-bar decision -- picked over the
+tab-bar's own SKIP-overlap since fixing the shipping build first is lower
+risk than fixing an unshipped comparison build.
+BUILD/REVIEW (diagnosis, not a fix): inspected the live DOM directly at
+375x568 with the day sheet open, rather than guessing from source. LOG SET's
+real measured box is 95x27px at y=369-396 -- the button's actual layout
+footprint, nowhere near the size it visually paints at -- while the sheet's
+own "TODAY IS" label sits at y=386-401, squarely inside that same range.
+Confirmed via getBoundingClientRect on the live elements, not inferred from
+a screenshot. This is a genuine flex/portal layout collapse between
+ScreenModal's Modal-backed backdrop and NowScreen's own column at this
+specific height, not a simple z-index fix -- the button's box itself is
+wrong, not just its paint order.
+DECIDED NOT TO FIX BLIND: three files are involved (ScreenModal.tsx,
+NowScreen.tsx's flex column, and whatever is compressing the button's own
+box), and the logging path is the one surface every §4 rule in this app
+protects most. A wrong fix attempted under time pressure risks the thing
+that must never break, for a bug that is real but narrow (first launch,
+short phone, day sheet still open). Documented the exact repro and
+measurements in OWNER.md rather than leaving R628's one-line mention as the
+only record, so a future round with room to verify thoroughly can start from
+measurements instead of re-diagnosing.
+REVIEW: no code changed; suite unaffected, 2154 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: this bug and the tab-bar's own SKIP-overlap (R628) are now both
+precisely diagnosed and filed. Five owner decisions still wait, tab bar
+first, now with two known layout bugs attached to it rather than an
+unqualified pixel tradeoff.
