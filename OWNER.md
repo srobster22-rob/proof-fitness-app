@@ -140,6 +140,24 @@ a little sloppy and AI-generated.
   is real. I would take the bar and move the streak, but this is a taste call
   about your product and the pictures are the point.
 
+  UPDATE, R628: built the side-by-side you asked for -- four screenshots,
+  current and tab-bar at both 568 and 812, handed to you directly rather than
+  described. Found a real bug while doing it, not a taste question: the tab-
+  bar build's day-plan sheet ("TODAY IS... SKIP — WORK IT OUT AS I GO") prints
+  its SKIP line straight through the new bottom bar's own labels
+  (NOW/PROGRESS/GOALS/SETTINGS) — confirmed at BOTH 568 and 812, so it is not
+  the short-phone squeeze this entry already covers, it is a genuine layout
+  collision nobody had looked for because nobody had put both builds next to
+  each other at a real size until this round. Separately, and on the CURRENT
+  build too: at 568 with the day sheet still showing, LOG SET overlaps the
+  plan-chooser row beneath it — gone once a day is picked, but real on a
+  first launch on the short phone, tab bar or not. Neither is fixed yet —
+  filed here rather than patched blind, since the tab-bar one especially
+  should get fixed on whichever build you actually pick, not both, and I do
+  not know that yet. Look at the four pictures with this in mind: the SKIP
+  overlap will read as broken in the tab-bar shots, and it is a bug, not the
+  tradeoff being asked about.
+
 
 ## Never
 - Don't trade simplicity for features. If it needs explaining, it's wrong.
