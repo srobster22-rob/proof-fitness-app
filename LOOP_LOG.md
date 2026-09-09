@@ -2934,3 +2934,23 @@ optional for an iOS-first build) rather than a silent skip.
 REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 84 rounds.
+
+R612 - Stage 0: OWNER.md unchanged since R586. IDEATE: read RepoGate.tsx in
+full -- the database-open error screen HANDOFF trap 18 already covers at the
+architecture level but had never been read line by line this segment.
+BUILD/REVIEW: clean, and unusually well-scarred already. Three past bugs are
+visible in its own comments and already fixed: advice that stayed wrong after
+repeated failures (now escalates past two attempts), an unreachable "send the
+diagnostic" instruction with no actual destination (now a real share sheet,
+wrapped against Share.share's own rejection), and a "never seen on native"
+claim about the loading spinner that overclaimed and was corrected in place.
+Deliberately does not offer to delete-and-recreate the database, on record as
+a choice (destroying the only copy of a local-first app's history) rather
+than a missing feature. `attempt` lives in the persistent RepoGate wrapper
+rather than the StorageError child, so it would not reset if a real corruption
+were fixed, cleared, and then recurred in the same session -- theoretically
+imprecise, not touched, since that exact sequence needs an already-rare event
+to happen twice with no app restart between.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 85 rounds.
