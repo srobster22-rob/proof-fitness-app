@@ -3081,3 +3081,19 @@ REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 92 rounds, 8 left in
 the loop's stated budget.
+
+R620 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `removeExercise`
+in repo.ts, the undo path behind now-model.ts's "undo a custom exercise added
+by mistake" comment seen earlier in this segment but never traced to its
+actual implementation.
+BUILD/REVIEW: clean. Three separate guards, each correct: refuses a builtin
+(the library ships with these, deleting one would be data loss for every
+user), refuses one already used in a logged set (removing it would orphan
+the foreign key `sets.exercise_id` points at), and refuses one already
+deleted (via the `deleted = 0` filter in the lookup). Only a custom exercise
+nobody has logged against yet can actually be removed -- exactly what
+"undo a mistake" should mean, not a general delete.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 93 rounds, 7 left in
+the loop's stated budget.
