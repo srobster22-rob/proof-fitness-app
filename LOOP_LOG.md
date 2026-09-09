@@ -2823,3 +2823,19 @@ building on a false "this is also reachable via X" the way this document has
 warned about elsewhere (R565-R571's plant-verification lesson, applied here
 to prose instead of a test). Five owner decisions still wait, tab bar first,
 77 rounds.
+
+R605 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `weeklyComparison`
+in src/domain/weekly.ts (S10's rest-day surface), never checked this segment.
+BUILD/REVIEW: clean. `gain` is documented and structurally guaranteed
+positive -- the loop only keeps a candidate when `nowBest > thenBest`, so a
+message template that only ever says "up" can never be handed a decrease. A
+zero/absent baseline is explicitly excluded too, for the same cry-wolf reason
+PR detection excludes a cold start. Also confirmed measure.tsx's height input
+has no decimal-place restriction beyond `plausible()`'s range check (the
+actual reachable path for R603's bug, per R604's correction) -- not a further
+gap, since the display-side fix now handles any precision correctly and
+constraining input further would add a rule for a case the display already
+handles.
+REVIEW: no code changed; suite unaffected, 2146 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 78 rounds.
