@@ -2623,3 +2623,35 @@ runs never happened to lose it. Worth remembering as its own category: a
 suite that is USUALLY deterministic is a different, more dangerous thing than
 one that IS deterministic, because it passes review right up until the one
 run that matters. Five owner decisions still wait, tab bar first, 69 rounds.
+
+R597 - Stage 0: OWNER.md unchanged since R586. IDEATE: R596 fixed one real
+concurrent-test-file race on a shared build artifact; the obvious next
+question is whether it was the ONLY one, not whether it was fixed correctly.
+Swept every other test file that spawns a subprocess to check for the same
+shape -- a shared, non-isolated path written by one test and read by another,
+under node --test's default file-level concurrency.
+FINDINGS, all verified rather than assumed clean:
+  - test/bundle-parity.test.ts mutates the REAL `dist/proof-domain.js` (the
+    shared domain bundle multiple other processes load) and was ALREADY
+    hardened against exactly this class -- its own comment documents
+    measuring "39 of 50" truncated reads under a plain writeFileSync and
+    fixing it with a temp-file-plus-rename swap, atomic in both the test and
+    in build-domain.cjs itself. Predates this segment; nothing to do.
+  - test/card-sheet.test.ts writes `out/card-sheet.png` -- grepped every other
+    test file for that filename and found no second consumer, so there is no
+    concurrent reader to race with. Safe by having no rival, not by design.
+  - test/dev-fixtures-are-not-tracked.test.ts, field-scan.test.ts,
+    orphan-scan.test.ts, typecheck-fails-loudly.test.ts all spawn subprocesses
+    but never write a file anywhere -- pure read/scan/typecheck, no shared
+    mutable state to race over.
+No second instance of R596's bug class exists in the current suite.
+REVIEW: no code changed; full suite unaffected, 2144 pass / 0 fail, matching
+R596's post-fix count.
+SHIP: nothing to rebuild.
+| next: the sweep closes out R596's finding rather than opening a new thread
+-- worth doing once after a real infrastructure fix, not routinely, since
+most rounds will not turn up a second instance and repeating this specific
+sweep every round would be low-value busywork. Five owner decisions still
+wait, tab bar first, 70 rounds. Technical queue thinning again after two
+substantial rounds (R592, R596); next self-directed pick should look at
+fresh ground rather than another pass over test-suite mechanics.
