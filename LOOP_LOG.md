@@ -2750,3 +2750,17 @@ SHIP: nothing to rebuild; no net change.
 to alternate between light re-verification passes like this one and deeper
 audits of unexamined code, since both have paid off this segment and neither
 costs much when they come back clean.
+
+R602 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `e1rm` and
+`bestWeightAtReps` in pr.ts, both load-bearing for every PR claim in the app
+and never independently checked this segment.
+BUILD/REVIEW: both clean. `e1rm(weight, reps) = weight * (1 + reps/30)`
+(Epley) is monotonic and safe at every real rep count, no division or
+boundary risk. `bestWeightAtReps` deliberately counts a set with MORE reps
+than asked toward a lower rep target (`s.reps < reps` is the only exclusion)
+-- correct by its own logic (a 5-rep set is also evidence of at least a
+3-rep-capable weight) and consistent with how findPRs already uses it to
+decide what a new set has to beat.
+REVIEW: no code changed; suite unaffected, 2144 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 75 rounds.
