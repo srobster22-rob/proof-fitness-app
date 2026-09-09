@@ -2571,3 +2571,55 @@ still wait, tab bar first, 68 rounds. Four straight rounds (R592-R595) on the
 "trace a stated promise to every place it is made" method: one real fix, one
 filed gap, one verified-safe inconsistency, one fully clean. Diminishing but
 not yet zero -- worth one more subject before rotating method again.
+
+R596 - Stage 0: OWNER.md unchanged since R586. IDEATE: while auditing streak
+display gating (a clean result -- NowScreen.tsx correctly calls the shared
+`streakWorthShowing`, no drift), the routine `npm test` sanity run before
+logging came back RED for the first time all segment with zero source changes
+of mine: "the empty stage is hidden..." and "an ordinary card is unaffected"
+in test/landing-page.test.ts failed, then passed clean on every rerun after.
+A suite that can go red for no code reason undermines every "N pass / 0 fail"
+claim this entire log has made -- treated as the round's real subject rather
+than dismissed as a fluke.
+BUILD/REVIEW: `test/landing-page.test.ts` reads `link/dist/index.html`
+directly. `test/link-build-is-self-contained.test.ts` REBUILDS that same real,
+shared file three times per run via `spawnSync(['link/build.cjs'])` --
+including once with source deliberately broken, to prove the build fails
+loudly -- and `link/build.cjs` itself does `fs.rmSync(DIST, {recursive:true})`
+before writing it back. `node --test` runs test FILES concurrently by
+default, so a reader hitting that file during the delete-then-rewrite window,
+or during the deliberately-broken build, is not a hypothetical race -- it is
+exactly what happened once, live, in this very run. `test/share-card.test.ts`
+reads the same shared dist/ too, a third file with no stake in this but
+exposed to the same window.
+Root-cause traced, then fixed at the source rather than papered over:
+`link/build.cjs` now reads `PROOF_LINK_DIST` and writes there instead of the
+real dist/ when set (mirrors `PROOF_BUNDLE_OUT`, the exact same pattern
+`bundle-rejects-unknown-exports.test.ts` already uses for the domain bundle).
+`link-build-is-self-contained.test.ts` now builds into a per-run `mkdtempSync`
+directory via that env var, so its three rebuilds -- broken one included --
+can never again be the file another test happens to read mid-write. Added
+test/link-build-does-not-race-the-shared-dist.test.ts (2 cases: the env var
+actually redirects output; the real dist/'s mtime is provably unchanged by a
+redirected build).
+Planted the bug back (reverted just the `PROOF_LINK_DIST` env-var line) and
+both new cases failed by name. The plant itself ran a real, unredirected
+build against the REAL dist/ as a side effect of proving the absence of the
+guard -- caught before treating the round as done, repaired by restoring
+build.cjs and running `node link/build.cjs` once more; `git status` on
+link/dist/ confirms it after that came back byte-identical to before the
+plant. Restored, reran: both new cases pass, and the two pre-existing test
+files (5 tests total) still pass with the redirected build.
+REVIEW, the number that actually matters this round: ran the FULL suite four
+times in a row rather than once, since the whole point was a flake that hid
+behind a single green run before. All four: 2144 pass / 0 fail (2142 + 2 new).
+SHIP: `build-domain.cjs --check` current; `git status` on link/dist/ shows no
+diff, confirming the isolated test path never touches the shared build output
+any more. No app rebuild needed -- this is test/build tooling, not product code.
+| next: this is the single highest-leverage finding of the whole R585-R596
+run of self-directed rounds -- every prior "N pass / 0 fail" claim in this
+log was subject to a real, now-fixed race, even though the vast majority of
+runs never happened to lose it. Worth remembering as its own category: a
+suite that is USUALLY deterministic is a different, more dangerous thing than
+one that IS deterministic, because it passes review right up until the one
+run that matters. Five owner decisions still wait, tab bar first, 69 rounds.
