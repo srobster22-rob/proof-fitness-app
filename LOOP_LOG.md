@@ -3017,3 +3017,20 @@ SHIP: nothing to rebuild.
 closes out the full storage-open/migration path end to end across
 R612-R615 -- RepoGate, the db-open state machine, and the shared-container
 migration logic all read clean.
+
+R616 - Stage 0: OWNER.md unchanged since R586. IDEATE: read expo-db.ts, the
+expo-sqlite adapter -- the one file in the data layer its own docstring says
+"cannot be tested on a laptop", never checked this segment for exactly that
+reason (easy to skip, which is the argument for reading it once).
+BUILD/REVIEW: clean. Every prepared statement is finalised in a `finally`
+block, matching the file's own stated reason for existing this way: expo-
+sqlite leaks a native handle per unfinalised statement, and the logging path
+prepares one per set. Deliberately "dumb" mapping with no logic that would
+only run on device, which is the stated design constraint (CI cannot exercise
+this file at all). Nothing here to verify further from this pane -- reading
+carefully against its own documented reasoning is the ceiling, the same
+limit HANDOFF traps 17/18 already name for a different reason.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 89 rounds, 11 rounds
+left in this loop's stated 100-round budget.
