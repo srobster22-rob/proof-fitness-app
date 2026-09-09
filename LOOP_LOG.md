@@ -2688,3 +2688,21 @@ naming -- two real fixes (R592, R596), one filed gap (R593), the rest clean
 or cosmetic. Five owner decisions still wait, tab bar first, 71 rounds -- the
 plurality of remaining HIGH-value work in this project is now on the owner's
 side of the line, not a further supply of undiscovered technical defects.
+
+R599 - Stage 0: OWNER.md unchanged since R586. IDEATE: continued the goal-
+creation form audit onto its horizon (deadline) field -- `horizonDays(raw,
+unit)` and its `MAX_GOAL_DAYS`/`DAYS_PER` constants, the sibling of
+`customReps` checked last round.
+BUILD/REVIEW: clean. Integer + positive + ceiling checks are all present and
+consistent across units (days/weeks/months all route through the same
+`DAYS_PER[unit]` table before the same `MAX_GOAL_DAYS` cap, so a "2 years" in
+months and "730 days" in days agree exactly rather than drifting by rounding).
+No gap found.
+REVIEW: no code changed; suite unaffected, 2144 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: eight straight rounds (R592-R599) auditing form validation, coach
+math, and test infrastructure with two real fixes and everything else clean
+or filed. Genuinely reaching the point where further unguided sweeps of
+already-careful code cost more than they are likely to find. Five owner
+decisions still wait, tab bar first, 72 rounds -- that queue, not a further
+supply of undiscovered bugs, is where the next real jump in value sits.
