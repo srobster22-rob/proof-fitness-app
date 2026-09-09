@@ -2854,3 +2854,28 @@ if either one ever changes without the other.
 REVIEW: no code changed; suite unaffected, 2146 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 79 rounds.
+
+R607 - Stage 0: OWNER.md unchanged since R586. IDEATE: acted on R606's own
+note -- the `weeks = Math.max(1, Math.round(c.days / 7))` formula duplicated
+identically between `weeklyLine` and `weeklyCard`, safe today only because
+neither has been touched since the other. Extracted per HANDOFF trap 13's
+own rule: a hand-maintained "these must agree" pair drifts the day someone
+edits one and not the other.
+BUILD: added `weeksSince(days)` to weekly.ts, wired both call sites to it.
+Added test/weeks-since-shared.test.ts (rounding behavior at the floor and at
+a genuine round-up boundary; both real call sites verified to call the
+shared function BY NAME, not by matching the formula text again -- an
+earlier draft of this same test matched the formula string itself and got a
+false positive from an unrelated `days` computation elsewhere in the file,
+caught before it shipped, the exact blind-instrument shape HANDOFF trap 16
+warns about).
+REVIEW: planted the bug back (reverted `weeklyLine`'s call to its own copy of
+the formula) and the new test failed by name; restored, reran. Suite
+2146 -> 2148 pass / 0 fail (real count, up 2).
+SHIP: `build-domain.cjs --check` reports current (weekly.ts is domain code).
+Pure refactor, no behaviour change -- verified by the suite rather than the
+product, since there is nothing observably different to click through.
+| next: five owner decisions still wait, tab bar first, 80 rounds. This
+closes the loop on R606's note the same way R600 closed R596/R597's -- found,
+generalized/fixed, documented, rather than left as an observation nobody
+acts on.
