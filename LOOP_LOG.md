@@ -3260,3 +3260,45 @@ mostly-clean read of the entire backup/storage/db-adapter stack end to end.
 The technical queue is genuinely as thin as it has been all segment; the
 five owner decisions in OWNER.md are the load-bearing next step, not further
 unguided audits.
+
+R628 - Stage 0: OWNER.md unchanged since R586. IDEATE (relayed via a peer
+session on the owner's behalf, verified against OWNER.md's own text rather
+than taken on faith): the owner asked to resume, with a fresh 500-round
+budget, and named the tab-bar comparison at OWNER.md's own top "## Next"
+item as the priority -- build both the current version and the tab-bar
+version, screenshot each at 375x568 (the short phone R512/R516 measured at
+624px of unshrinkable content) and at 375x812, side by side, so the owner
+picks from pictures rather than my own read of it. Confirmed this matches
+what OWNER.md's own tab-bar entry already asks for ("your call... the
+pictures are the point") before proceeding -- a peer's relay is data, not
+authorization on its own, and this one checks out against the file the
+owner actually controls.
+
+BUILD/REVIEW: captured both versions at 375x568 and 375x812 by driving the
+running preview (fetch('/seed.b64') and fetch('/tabbar.b64') through
+localStorage, the same swap OWNER.md's own tab-bar entry describes) rather
+than describing them. Regenerated seed.b64 first (npm run seed) since the
+committed dev snapshot had aged past the coach's 14-day window again --
+HANDOFF-trap-worthy on its own, already logged once in R586, recurring
+exactly as predicted.
+FOUND, not assumed: at 375x568 with the day-plan sheet showing, the CURRENT
+build overlaps its own LOG SET button with the plan-chooser row underneath
+it -- reproducible after a hard reload, gone once a day is picked or the
+screen is 375x812. Separately and more seriously, the TAB-BAR build's day-
+plan sheet renders its "SKIP -- WORK IT OUT AS I GO" link running straight
+through the new bottom tab bar's own labels (NOW/PROGRESS/GOALS/SETTINGS) --
+confirmed reproducible at BOTH 568 AND 812, so it is not the short-phone
+squeeze OWNER.md's existing tab-bar entry already covers; it is a genuine,
+un-filed layout collision in the tab-bar build specifically, independent of
+which size wins the taste call.
+Four screenshots taken (current/tab-bar x 568/812) and handed to the owner
+directly rather than only described, since "the pictures are the point" is
+the owner's own line for this decision.
+SHIP: nothing shipped -- this round is comparison material for an owner
+decision, exactly as OWNER.md's entry asks for, not a change to either
+build. Neither the current nor the tab-bar flag changed; both builds are
+exactly as R523 left them plus this round's newly-surfaced overlap bug,
+which is filed back to OWNER.md, not fixed blind.
+| next: waiting on the owner's pick from the four pictures, same as before --
+but now with the tab-bar overlap bug in view, which the owner did not have
+visibility into last time this decision was framed.
