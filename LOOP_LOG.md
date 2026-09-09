@@ -2995,3 +2995,25 @@ SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 87 rounds. Read
 roughly half of db-location.ts this round (planDbOpen and describeDbLocation
 remain); a natural next-round target if nothing else takes priority.
+
+R615 - Stage 0: OWNER.md unchanged since R586. IDEATE: finished db-location.ts
+-- planDbOpen and describeDbLocation, the two functions R614 left unread.
+BUILD/REVIEW: clean, with one wiring question chased down rather than left
+as a suspicion. `planDbOpen` branches on `migration.status === 'failed'`, but
+`planDbMigration` itself never returns that status -- only
+'not-needed'/'fresh-install'/'both-present'/'move'. Traced it to db.ts's
+`migrateIntoSharedContainer`, the executor that actually attempts a planned
+'move' and, on a thrown filesystem error, spreads the plan with `status:
+'failed'` before handing it to `planDbOpen`. Two-step plan-then-execute, and
+the type correctly reflects a state only the SECOND step can produce.
+`describeDbLocation` returns `null` on the happy path rather than a "nominal"
+message, deliberately -- "a diagnostic that always says something is a
+diagnostic nobody reads," which is the exact discipline `RepoGate` already
+relies on to keep this diagnostic meaningful only on the one screen it
+matters.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 88 rounds. This
+closes out the full storage-open/migration path end to end across
+R612-R615 -- RepoGate, the db-open state machine, and the shared-container
+migration logic all read clean.
