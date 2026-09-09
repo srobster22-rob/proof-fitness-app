@@ -3097,3 +3097,22 @@ REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 93 rounds, 7 left in
 the loop's stated budget.
+
+R621 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `eraseAll` in
+repo.ts, the one action the app promises is irreversible -- never read
+directly this segment, only observed through its effects in other rounds'
+tests.
+BUILD/REVIEW: clean, with one apparent gap ruled out by checking the actual
+storage layer rather than the caller's argument names. `eraseAll` clears
+prefs via `DELETE FROM meta WHERE key LIKE 'pref.%'`, and callers set jump
+amounts through `setPref('jump.lb', ...)` -- which LOOKS like it would store
+under a bare `jump.lb` key, missing the `pref.` prefix the DELETE matches on.
+Checked `getPref`/`setPref`/`clearPref` directly: all three prepend `pref.`
+internally before touching `meta`, so the real stored key is `pref.jump.lb`
+and the erase DOES catch it, matching the comment's own claim ("their chosen
+jump amounts are theirs too"). A caller's own key name is not the schema's
+key name, and confirming that before flagging a gap avoided a false report.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 94 rounds, 6 left in
+the loop's stated budget.
