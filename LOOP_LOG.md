@@ -3173,3 +3173,22 @@ the loop's stated 100-round budget. portable.ts's `restore()` is now read
 completely across R622-R624, table by table, all clean and consistently
 reasoned -- likely the single most carefully-defended function read this
 whole R585-R624 stretch.
+
+R625 - Stage 0: OWNER.md unchanged since R586. IDEATE: read `exportAll`, the
+write side of the backup path R621-R624 already confirmed clean on the
+restore side.
+BUILD/REVIEW: clean. Sessions are derived from the sets that reference them
+rather than enumerated directly, on the stated rule "a session with no sets
+carries no information worth moving" -- checked rather than accepted as
+written: every session-level metric this app computes (streaks, session
+counts, sessionStats) keys off `sets`, never off a raw session row on its
+own, and a session's own day-choice preference is stored separately under
+`pref.split.*` and already exported through `allPrefs()`. So an empty,
+abandoned session genuinely carries nothing an export needs to preserve --
+the simplification is correct, not a data-loss risk hiding behind a
+plausible-sounding comment.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 98 rounds, 2 left in
+the loop's stated 100-round budget. This closes the full backup path --
+export and restore both -- end to end across R621-R625, all clean.
