@@ -2897,3 +2897,14 @@ be a change with no observable effect to verify.
 REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 81 rounds.
+
+R609 - Stage 0: OWNER.md unchanged since R586. IDEATE: verified i18n
+completeness for the weekly-comparison strings touched across R605-R607
+(weeklyUp, weeklyUpOneWeek, cardWeeks, cardWeekOne) -- all present and
+translated in both English and Spanish. No gap.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 82 rounds. The
+weekly-comparison area (weekly.ts, its progress-model.ts callers, and its
+i18n strings) is now fully read end to end across R605-R609 with one real
+improvement (R607) and everything else confirmed correct.
