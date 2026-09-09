@@ -2797,3 +2797,29 @@ shared formatter end to end rather than trusting its three call sites
 individually -- worth remembering alongside R592/R596 as this segment's third
 concrete fix from continued unguided reading, even after several rounds that
 came back clean. Five owner decisions still wait, tab bar first, 76 rounds.
+
+R604 - Stage 0: OWNER.md unchanged since R586. IDEATE: re-checked R603's own
+claim rather than moving to new ground -- the fix comment asserted
+`measure-goal.ts`'s `remaining` was a second reachable path into the carry
+bug, and that claim was never actually tested, only asserted by analogy.
+BUILD/REVIEW: WRONG, caught by testing it. `remaining` computes through
+`Math.round(x * 10) / 10` (same as `convertMeasure`) BEFORE formatMeasure
+ever sees it, and walked every hundredth from 71.90 to 72.04 through that
+exact rounding directly: every result lands cleanly on a `.9` or a `.0`,
+never a `.96`-style fraction, because a value already snapped to a tenth
+splits into a remainder at that same resolution. The bug is real and the fix
+is right (R603's live repro used a raw, hand-typed 71.96, not a computed
+gap), but the comment's SECOND claimed path does not exist. Corrected the
+comment in measure.ts to state what was actually verified: the only real
+route in is `app/measure.tsx`'s own decimal-pad height input, which does not
+restrict entry to one decimal place, feeding a raw `Measurement.value`
+straight to `formatMeasure` with no rounding pass in between.
+REVIEW: comment-only change; suite unaffected, 2146 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: worth its own line -- a just-shipped fix's OWN commentary is not
+automatically trustworthy just because the fix itself is right, and checking
+a comment's factual claims costs one script and prevents a future round from
+building on a false "this is also reachable via X" the way this document has
+warned about elsewhere (R565-R571's plant-verification lesson, applied here
+to prose instead of a test). Five owner decisions still wait, tab bar first,
+77 rounds.
