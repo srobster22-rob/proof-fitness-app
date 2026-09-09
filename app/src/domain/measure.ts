@@ -197,8 +197,20 @@ export function readingAt(
 /** "82.5 kg", "5'11\"" — the number as a person would say it. */
 export function formatMeasure(value: number, unit: MeasureUnit): string {
   if (unit === 'in') {
-    const feet = Math.floor(value / 12);
-    const inches = Math.round((value - feet * 12) * 10) / 10;
+    let feet = Math.floor(value / 12);
+    let inches = Math.round((value - feet * 12) * 10) / 10;
+    /*
+     * R603. Rounding to a tenth AFTER splitting off the feet can round the
+     * remainder up to 12 itself — 71.96 splits into 5 feet and an 11.96
+     * remainder, which rounds to "12.0", and printed as `5'12"` a lifter
+     * would read as either a typo or a made-up unit. Reachable from more
+     * than a hand-typed decimal: `measure-goal.ts`'s `remaining` is a plain
+     * subtraction between a goal and a converted reading, and a cm-based
+     * goal against an inches-based reading (or vice versa) lands on an
+     * arbitrary fraction, not a round tenth, same as any two floats
+     * subtracted from independent sources.
+     */
+    if (inches >= 12) { feet += 1; inches = 0; }
     // Under a foot is not a height; it is somebody typing inches they meant as
     // centimetres, and printing 0'9" would dress that up as an answer.
     if (feet > 0) return `${feet}'${inches}"`;
