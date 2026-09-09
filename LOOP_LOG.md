@@ -2736,3 +2736,17 @@ ledger stands at several real product fixes (R584 measure refocus, R585's
 structural gate, R592 coach grid, R596 test race) plus a long tail of
 verified-clean audits, and the owner's queue is the load-bearing constraint
 on what comes next, not a shortage of things left to check.
+
+R601 - Stage 0: OWNER.md unchanged since R586. IDEATE: re-verified R592's
+own gate is still live, same discipline as R587/R588 applied to this
+session's newest fix rather than assuming a fix stays fixed forever.
+REVIEW: reverted the `Math.min(WEIGHT_STEP, plateJump())` line back to the
+old fixed grid; test/coach-respects-a-finer-jump.test.ts failed by name on
+both cases it should (the 1.25 kg and 1 lb custom-jump cases), passed on the
+no-regression case as expected. Restored via `git checkout --`, reran: clean
+2144 pass / 0 fail.
+SHIP: nothing to rebuild; no net change.
+| next: five owner decisions still wait, tab bar first, 74 rounds. Continuing
+to alternate between light re-verification passes like this one and deeper
+audits of unexamined code, since both have paid off this segment and neither
+costs much when they come back clean.
