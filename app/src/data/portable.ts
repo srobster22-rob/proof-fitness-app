@@ -134,6 +134,25 @@ export function parse(text: string): { file: ExportFile; error: null } | { file:
   for (const key of ['exercises', 'sessions', 'sets', 'goals']) {
     if (!Array.isArray(raw[key])) return { file: null, error: `Missing or malformed "${key}".` };
   }
+  /*
+   * R627, filed R626. These three are OPTIONAL — older backups predate
+   * measurements/targets, and `restore()` already treats an absent one as
+   * empty (`file.measurements ?? []`, `file.prefs ?? {}`). Absent is fine;
+   * present-but-wrong-shape is not, and until this round nothing caught it.
+   * A hand-corrupted `"measurements": {}` passed straight through to
+   * `restore()`'s `for (const m of file.measurements ?? [])`, which throws
+   * on a non-iterable — caught by `applyBackup`'s try/catch so the app never
+   * crashed, but the user got a raw `TypeError: ... is not iterable` instead
+   * of the same clean "Missing or malformed" message every other field gets.
+   */
+  for (const key of ['measurements', 'measureGoals']) {
+    if (raw[key] !== undefined && !Array.isArray(raw[key])) {
+      return { file: null, error: `Missing or malformed "${key}".` };
+    }
+  }
+  if (raw.prefs !== undefined && (typeof raw.prefs !== 'object' || raw.prefs === null || Array.isArray(raw.prefs))) {
+    return { file: null, error: 'Missing or malformed "prefs".' };
+  }
   return { file: raw as ExportFile, error: null };
 }
 
