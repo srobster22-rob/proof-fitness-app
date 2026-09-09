@@ -1,6 +1,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -9,7 +10,21 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..', '..');
 const LINK = path.join(ROOT, 'link');
 const SRC = path.join(LINK, 'index.html');
-const OUT = path.join(LINK, 'dist', 'index.html');
+/*
+ * R596. Was `path.join(LINK, 'dist', 'index.html')` — the REAL, shared
+ * dist/, which `build.cjs` deletes and rewrites on every call this file
+ * makes (three per run, one deliberately broken). `node --test` runs test
+ * files concurrently, and two other files read that same real dist/ as the
+ * shipped page (landing-page.test.ts, share-card.test.ts) — a live, once-
+ * reproduced flake in this project's own suite, not a theoretical one.
+ * `PROOF_LINK_DIST` (added alongside this fix) redirects the build to a
+ * private temp directory instead, so this file's rebuilds — including the
+ * one that leaves a build artifact deliberately broken — can never be the
+ * thing another test happens to read mid-write.
+ */
+const TMP_DIST = fs.mkdtempSync(path.join(os.tmpdir(), 'proof-link-dist-'));
+const OUT = path.join(TMP_DIST, 'index.html');
+const BUILD_ENV = { ...process.env, PROOF_LINK_DIST: TMP_DIST };
 
 /*
  * R504. The share landing page is copied into a self-contained dist/, and one
@@ -35,14 +50,16 @@ describe('the built landing page never points outside dist/ (R504)', () => {
 
   before(() => { original = fs.readFileSync(SRC, 'utf8'); });
   after(() => {
-    // Restore first, then rebuild, so a failure here cannot leave either the
-    // source page or the deployable folder holding the planted markup.
+    // Restore the source page regardless of how the tests above left it.
+    // No rebuild of the REAL dist/ needed any more — this file never wrote
+    // to it in the first place, see TMP_DIST above — so there is nothing
+    // left to put back there.
     fs.writeFileSync(SRC, original);
-    spawnSync(process.execPath, ['link/build.cjs'], { cwd: ROOT, encoding: 'utf8' });
+    fs.rmSync(TMP_DIST, { recursive: true, force: true });
   });
 
   function build(): { code: number; out: string } {
-    const r = spawnSync(process.execPath, ['link/build.cjs'], { cwd: ROOT, encoding: 'utf8' });
+    const r = spawnSync(process.execPath, ['link/build.cjs'], { cwd: ROOT, encoding: 'utf8', env: BUILD_ENV });
     return { code: r.status ?? -1, out: (r.stdout ?? '') + (r.stderr ?? '') };
   }
 

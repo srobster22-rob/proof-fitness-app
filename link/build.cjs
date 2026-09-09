@@ -10,7 +10,21 @@ const fs = require('fs');
 const path = require('path');
 
 const HERE = __dirname;
-const DIST = path.join(HERE, 'dist');
+/*
+ * R596. Overridable so a test can rebuild the page without racing the real
+ * dist/ — three different test files touch it (landing-page.test.ts and
+ * share-card.test.ts read it as the shipped page, link-build-is-self-
+ * contained.test.ts rebuilds it, including a deliberately BROKEN build to
+ * prove failures are caught), and `node --test` runs files concurrently by
+ * default. This function deletes dist/ before writing it (see below), so the
+ * window where a concurrent reader finds the directory outright missing is
+ * real, not theoretical — it happened once live in this project's own suite.
+ * `PROOF_BUNDLE_OUT` next door already redirects the domain bundle the same
+ * way for the same reason.
+ */
+const DIST = process.env.PROOF_LINK_DIST
+  ? path.resolve(process.env.PROOF_LINK_DIST)
+  : path.join(HERE, 'dist');
 const WELL_KNOWN = path.join(DIST, '.well-known');
 
 fs.rmSync(DIST, { recursive: true, force: true });
