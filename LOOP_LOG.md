@@ -2973,3 +2973,25 @@ SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 86 rounds. This
 closes out the storage-open error path end to end across R612-R613 -- the
 screen and the state machine underneath it both read clean.
+
+R614 - Stage 0: OWNER.md unchanged since R586. IDEATE: read the front half of
+db-location.ts (toFsPath, joinPath, resolveDbLocation, and planDbMigration's
+own extensive rationale) -- the shared-container migration logic behind §11,
+never checked this segment.
+BUILD/REVIEW: clean, and among the most carefully reasoned code in the repo.
+`resolveDbLocation` never throws and degrades to the app's own container
+rather than failing the launch when an entitlement is missing -- a stated
+design principle, not an oversight. `planDbMigration`'s three rules (move
+sidecars before the main file so a crash leaves a truthful completion marker;
+key completion on the OLD file's absence, not the new file's presence; refuse
+outright when both locations hold a database rather than guess which one is
+real) are exactly the kind of crash-safety reasoning a quick read could
+easily approve without noticing if it were wrong. `joinPath` handles a
+leading empty segment by producing a leading slash -- correct for the actual
+call shape (`toFsPath` never returns empty for a real URI) and not a defect
+worth a guard against an input that cannot occur.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 87 rounds. Read
+roughly half of db-location.ts this round (planDbOpen and describeDbLocation
+remain); a natural next-round target if nothing else takes priority.
