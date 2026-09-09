@@ -2922,3 +2922,15 @@ already uses.
 REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 83 rounds.
+
+R611 - Stage 0: OWNER.md unchanged since R586. IDEATE: read check-deps.cjs,
+the dependency-drift guard that runs first in every `npm test` invocation --
+tooling rather than product code, never checked this segment.
+BUILD/REVIEW: clean. `satisfies()` correctly handles `~`/`^`/exact version
+specs against Expo's own bundledNativeModules.json, and the transitive-
+completeness sweep over expo/react-native/expo-router's own dependencies has
+one documented, deliberate exemption (`@radix-ui/react-tabs`, web-only and
+optional for an iOS-first build) rather than a silent skip.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 84 rounds.
