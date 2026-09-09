@@ -3034,3 +3034,20 @@ REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
 SHIP: nothing to rebuild.
 | next: five owner decisions still wait, tab bar first, 89 rounds, 11 rounds
 left in this loop's stated 100-round budget.
+
+R617 - Stage 0: OWNER.md unchanged since R586. IDEATE: read web-db.ts, the
+dev-only sql.js counterpart to R616's expo-sqlite adapter -- the file that
+makes every seed/reseed step this whole segment has used possible.
+BUILD/REVIEW: clean. Reads (`all`/`get`) never trigger the debounced
+localStorage persist; only `run`/`exec` (writes/schema changes) do -- correct
+separation, and the 250ms debounce is an accepted, explicitly-documented
+dev-only tradeoff ("losing the dev snapshot is acceptable; taking down the
+screen mid-workout is not") rather than an oversight. `resetWebDb` being
+unused in production code is already the orphan-scan's own known, kept-on-
+purpose entry (confirmed against R585's finding, not re-litigated) -- it is a
+dev-tool entry point called from tools/, exactly the shape that scan exempts.
+REVIEW: no code changed; suite unaffected, 2148 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: five owner decisions still wait, tab bar first, 90 rounds, 10 left in
+the loop's stated budget. This closes out the data-layer's two platform
+adapters (expo-db.ts, web-db.ts) back to back, both clean.
