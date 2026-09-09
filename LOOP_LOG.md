@@ -2655,3 +2655,36 @@ sweep every round would be low-value busywork. Five owner decisions still
 wait, tab bar first, 70 rounds. Technical queue thinning again after two
 substantial rounds (R592, R596); next self-directed pick should look at
 fresh ground rather than another pass over test-suite mechanics.
+
+R598 - Stage 0: OWNER.md unchanged since R586. IDEATE: moved to fresh ground
+per R597's own note -- the custom-exercise add path (§7, `addCustomExercise`/
+`freeSlug`/`slugify` in now-model.ts), never examined this segment.
+BUILD/REVIEW (a reading audit): the dedup logic is sound and already
+documents its own hard case -- "Hack-Squat" and "Hack Squat" both slugify to
+`hack_squat`, and `freeSlug` exists specifically so the second one gets a
+suffixed id instead of silently renaming the first via an upsert collision,
+with a name-based case-insensitive check ahead of that to avoid creating a
+near-duplicate in the first place. Collision handling degrades sanely past 99
+suffixes to a timestamp-based id.
+One real, minor gap found and weighed rather than fixed: `slugify` strips
+everything outside `[a-z0-9]`, so a name typed in a non-Latin script (e.g. a
+Japanese or Cyrillic movement name) reduces to an empty base and falls back to
+an anonymous `ex_<timestamp>` id. Not a functional bug -- the app displays and
+searches by NAME everywhere, never by id, and ids stay unique either way, so
+nothing breaks or misbehaves. It is a readability-of-internal-ids issue only
+(a Latin name gets `bulgarian_split_squat`; a non-Latin one gets `ex_m1a2b3`),
+invisible to the user and only ever seen by someone reading the database
+directly. Not filed as an owner decision -- there is no product-visible
+consequence to rule on -- and not fixed, since the plausible fix (transliterate
+or hash the actual name into the slug) is cosmetic effort for zero observable
+benefit, exactly the kind of unrequested complexity §12's spirit warns against.
+Noted here rather than silently dropped, in case it ever becomes visible
+through some future feature (data export, debugging tools) that surfaces ids.
+REVIEW: no code changed; suite unaffected, 2144 pass / 0 fail, unchanged.
+SHIP: nothing to rebuild.
+| next: genuinely thin ground again after seven rounds (R592-R598) covering
+coach math, coldstart, pr.ts, volume gating, test-suite races, and exercise
+naming -- two real fixes (R592, R596), one filed gap (R593), the rest clean
+or cosmetic. Five owner decisions still wait, tab bar first, 71 rounds -- the
+plurality of remaining HIGH-value work in this project is now on the owner's
+side of the line, not a further supply of undiscovered technical defects.
