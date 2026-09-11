@@ -361,10 +361,14 @@ describe('every accessibility label on the logging screen is translated', () => 
     assert.deepEqual(bad, [], `still hardcoded: ${bad.join(' | ')}`);
   });
 
-  test('the nav row reuses the same keys the visible PROGRESS/GOALS/SETTINGS labels use', () => {
-    assert.match(src, /accessibilityLabel=\{T\('progress'\)\}/);
-    assert.match(src, /accessibilityLabel=\{T\('goals'\)\}/);
-    assert.match(src, /accessibilityLabel=\{T\('settings'\)\}/);
+  // R640: the destinations moved into the tab bar, which builds each tab's
+  // visible label and its accessibility label from the SAME entry.
+  test('the tab bar reuses the same keys the visible PROGRESS/GOALS/SETTINGS labels use', () => {
+    assert.match(src, /\['progress', T\('progress'\), onOpenProgress\]/);
+    assert.match(src, /\['goals', T\('goals'\), onOpenGoals\]/);
+    assert.match(src, /\['settings', T\('settings'\), onOpenSettings\]/);
+    assert.match(src, /accessibilityLabel=\{label\}/,
+      'the tab spoken aloud is not the tab drawn');
   });
 
   test('the steppers, the hero and the edit sheet all route through the table', () => {

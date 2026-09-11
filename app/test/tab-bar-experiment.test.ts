@@ -3,60 +3,43 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DatabaseSync } from 'node:sqlite';
-import { Repo } from '../src/data/repo.ts';
-import { tabBarOn, PREF_TAB_BAR, TAB_BAR_HEIGHT } from '../src/ui/tab-bar.ts';
+import { TAB_BAR_HEIGHT } from '../src/ui/tab-bar.ts';
 import { region } from './helpers/source.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SCREEN = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
 
 /*
- * R523. OWNER.md, 2026-09-08: "the bottom tab bar — BUILD BOTH and show me...
- * Do not ship either as the default until I have chosen."
- *
- * So the one property that matters about this code is that it reaches nobody.
- * An experiment that quietly becomes the default is worse than not building it,
- * because the owner would be choosing from pictures of something the app is
- * already doing.
+ * R523 built the bar as an experiment that shipped to nobody. R640 shipped it:
+ * owner, 2026-09-10, "ship the tab bar, move the streak to the exercise line".
+ * What matters now is that it stays ONE design -- no flag quietly bringing the
+ * old top row back -- and that the streak §10 wants visible on launch survived
+ * the move.
  */
-describe('the tab bar is built, and shipped to nobody (R523)', () => {
-  test('it is off unless explicitly turned on', () => {
-    const repo = new Repo(new DatabaseSync(':memory:') as never, () => Date.now());
-    assert.equal(tabBarOn(repo), false, 'a fresh install gets the experiment');
-    repo.setPref(PREF_TAB_BAR, '0');
-    assert.equal(tabBarOn(repo), false);
-    repo.setPref(PREF_TAB_BAR, 'yes');
-    assert.equal(tabBarOn(repo), false, 'anything but "1" must read as off');
-    repo.setPref(PREF_TAB_BAR, '1');
-    assert.equal(tabBarOn(repo), true, 'it cannot be turned on, so it cannot be compared');
+describe('the tab bar is the layout, and the streak moved with it (R640)', () => {
+  test('there is no flag left: the bar always renders', () => {
+    assert.doesNotMatch(SCREEN, /tabBarOn|PREF_TAB_BAR|\{tabBar && \(/,
+      'the bar is behind a condition again -- a lifter can land on the old layout');
+    assert.match(SCREEN, /<View style=\{s\.tabBar\}>/);
   });
 
-  test('there is no way to switch it on from inside the app', () => {
-    /*
-     * Deliberately not a Settings control. Adding one would ship the choice to
-     * every user as a half-answered question, which is the opposite of what the
-     * owner asked for. The screenshots were taken by writing the preference
-     * into a copy of the seed database.
-     */
-    const settings = fs.readFileSync(path.join(HERE, '..', 'app', 'settings.tsx'), 'utf8');
-    assert.doesNotMatch(settings, /PREF_TAB_BAR|tabBar/,
-      'the experiment has grown a Settings control, so it is now shipped');
+  test('the top link row it replaced is gone', () => {
+    // Keeping both would put PROGRESS / GOALS / settings on screen twice.
+    assert.doesNotMatch(SCREEN, /style=\{s\.topBar\}|style=\{s\.topLink\}|style=\{s\.topGear\}/,
+      'the old top row is back alongside the bar');
   });
 
-  test('the variant removes the row it replaces', () => {
-    /*
-     * The honest version of the comparison. Keeping the top links AND adding a
-     * bar would make the bar look like pure cost; the bar buys that row back,
-     * and the owner asked what came off the screen to pay for it.
-     */
-    assert.match(SCREEN, /\{!tabBar && \(\s*<View style=\{s\.topBar\}>/,
-      'the top link row survives alongside the bar, which is not either design');
+  test('the streak sits on the exercise line, outside the picker control', () => {
+    const line = region(SCREEN, '<View style={s.exerciseLine}>', '{state.lastTime.head}');
+    const streakAt = line.indexOf('style={s.streak}');
+    assert.ok(streakAt >= 0, 'the streak is not on the exercise line -- §10 lost its launch-screen streak');
+    assert.ok(line.lastIndexOf('</Pressable>', streakAt) >= 0,
+      'the streak is INSIDE the pressable that opens the picker, so it reads as part of that control (§15)');
+    assert.match(line, /streakWorthShowing\(state\.streak\)/,
+      'the streak no longer uses the recap\'s rule, so the screen and the card can disagree');
   });
 
   test('the bar is a real bar, not a mock', () => {
-    // 56px keeps a 44pt target with a label under the glyph. Measuring the
-    // current screen against a fake would answer nothing.
     assert.ok(TAB_BAR_HEIGHT >= 56, `${TAB_BAR_HEIGHT}px is not a tab bar, it is a row of icons`);
     const style = region(SCREEN, '  tabBar: {', '  tabItem:');
     assert.match(style, /height: TAB_BAR_HEIGHT/);
@@ -64,8 +47,6 @@ describe('the tab bar is built, and shipped to nobody (R523)', () => {
   });
 
   test('and it says which destination you are on', () => {
-    // The thing a tab bar gives that a link row cannot. Without it this is a
-    // row of links that happens to be at the bottom.
     assert.match(SCREEN, /id === 'now' && s\.tabGlyphOn/);
     assert.match(SCREEN, /tabGlyphOn: \{ color: VOLT \}/);
   });

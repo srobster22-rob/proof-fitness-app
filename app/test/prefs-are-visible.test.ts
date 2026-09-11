@@ -175,16 +175,6 @@ describe('every stored preference visibly changes the app (R520)', () => {
      * here to diff. Its visibility is pinned at the point it is used instead.
      */
     const EXEMPT = new Map([
-      /*
-       * An EXPERIMENT, not a shipped preference (OWNER.md, 2026-09-08): the
-       * owner asked to see a tab-bar variant and the current screen side by
-       * side and to choose from the pictures, so it is off and neither is the
-       * default. It does change the app visibly — that is the entire point of
-       * it — but demonstrating that here would assert an interface the owner
-       * has not agreed to keep. Removes when they choose: it either becomes a
-       * real preference with a case above, or it and the variant are deleted.
-       */
-      ['pref.tabBar', 'an unchosen experiment; see OWNER.md 2026-09-08'],
       ['pref.skipMachineName',
       'read directly by NowScreen for the equipment sheet, never via state()']]);
     for (const key of keys) {

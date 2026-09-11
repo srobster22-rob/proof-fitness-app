@@ -57,46 +57,37 @@ describe('the streak is visible on launch (§10)', () => {
     assert.equal(weekStreak(repo.allSets(), NOW), 1);
   });
 
+  /*
+   * R640: the owner shipped the tab bar and moved the streak "to the exercise
+   * line". The top row these tests used to read is gone, so they read the
+   * exercise line instead -- same three promises: the recap's rule, a status
+   * not a control, and not allowed to grow the row it sits in.
+   */
   test('the screen reuses the recap rule rather than inventing one', () => {
-    const bar = region(src, '<View style={s.topRight}>', '</View>');
-    assert.match(bar, /streakWorthShowing\(state\.streak\)/,
-      'the header decides for itself what counts as a streak');
-    // R150 settled that one week is not a streak; the header must not
-    // resurrect the question by using a different threshold.
+    const line = region(src, '<View style={s.exerciseLine}>', '{state.lastTime.head}');
+    assert.match(line, /streakWorthShowing\(state\.streak\)/,
+      'the exercise line decides for itself what counts as a streak');
+    // R150 settled that one week is not a streak.
     assert.equal(streakWorthShowing(1), false);
     assert.equal(streakWorthShowing(2), true);
   });
 
   test('it is a status, not a control', () => {
-    /*
-     * A number that looks tappable and is not is its own bug. The two words
-     * beside it and the gear are all destinations; this is the only thing in
-     * that row that goes nowhere, so it carries no role and no onPress.
-     */
-    const bar = region(src, '<View style={s.topRight}>', '</View>');
-    const streak = region(bar, '<Text style={s.topStreak}', '</Text>');
+    // It shares a line with the name that opens the picker, which makes this
+    // more important than it was beside the gear: it must not read as part of
+    // that control, so it sits after the pressable closes and has no role.
+    const line = region(src, '<View style={s.exerciseLine}>', '{state.lastTime.head}');
+    const at = line.indexOf('<Text style={s.streak}');
+    assert.ok(at > line.indexOf('</Pressable>'), 'the streak is inside the picker control');
+    const streak = region(line, '<Text style={s.streak}', '</Text>');
     assert.doesNotMatch(streak, /onPress|accessibilityRole/);
-    // It still has to be announced, since the digits alone say nothing.
     assert.match(streak, /accessibilityLabel=\{fill\(T\('streakA11y'\)/);
   });
 
-  test('it rides with the gear so the row keeps its three even gaps', () => {
-    /*
-     * `topBar` is spaced on the reasoning that the eye reads the GAPS, and
-     * three of them measured even is why it looks right. A fourth sibling
-     * would redistribute that — so the streak is grouped with the gear and the
-     * row still has three children.
-     */
-    const bar = region(src, '<View style={s.topBar}>', 'A fixed column on a phone');
-    const pressables = bar.match(/<Pressable/g) ?? [];
-    assert.equal(pressables.length, 3, 'the top bar gained or lost a destination');
-    assert.match(bar, /<View style=\{s\.topRight\}>/);
-  });
-
-  test('the streak text does not set the row height', () => {
-    // Sized at `label` deliberately: the gear defines the row, so adding this
-    // cannot push the header down and cost the hero its space (§15/layoutFor).
-    const style = region(src, '  topStreak: {', '},');
+  test('the streak text does not set the line height', () => {
+    // Sized at `label`: the lift name defines the line, so the streak cannot
+    // push the header down and cost the hero its space (layoutFor).
+    const style = region(src, '  streak: {', '},');
     assert.match(style, /fontSize: TYPE\.label/);
   });
 });

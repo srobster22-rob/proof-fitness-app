@@ -34,9 +34,11 @@ function style(name: string): string {
 }
 
 describe('Now screen — layout invariants', () => {
-  test('the nav links are in flow, so the header cannot ride up into them', () => {
-    assert.doesNotMatch(style('topBar'), /position:\s*'absolute'/,
-      'an absolute topBar overlaps the exercise name — it is only ever hidden by a short one');
+  // R640: the top link row is gone; the tab bar replaced it. Same rule, new
+  // element: an absolute bar would sit over LOG SET instead of below it.
+  test('the tab bar is in flow, so the column cannot slide under it', () => {
+    assert.doesNotMatch(style('tabBar'), /position:\s*'absolute'/,
+      'an absolute tabBar covers the bottom of the column on a short phone');
   });
 
   test('the screen has a content column below the links', () => {
@@ -81,8 +83,15 @@ describe('Now screen — layout invariants', () => {
   });
 
   test('the exercise name has a definite width, so a long one truncates', () => {
-    assert.match(style('exerciseTap'), /alignSelf:\s*'stretch'/,
-      'the stretch must be on the Pressable; on the Text inside it the parent is still shrink-to-fit');
+    // R640: the name now shares its line with the streak, so the stretch is on
+    // the line and the Pressable takes the remaining width with flex: 1 --
+    // still a definite width, which is all numberOfLines needs.
+    assert.match(style('exerciseLine'), /alignSelf:\s*'stretch'/,
+      'the exercise line is shrink-to-fit, so the name inside it has no bound');
+    assert.match(style('exerciseTap'), /flex:\s*1/,
+      'the Pressable does not take the width of the line, so a long name is unbounded');
+    assert.match(style('exerciseTap'), /minWidth:\s*0/,
+      'without minWidth: 0 a flex child refuses to shrink below its content');
     // Through `pressStyle` now, which composes the base with the held state —
     // the stretch still has to be in there or the name shrink-wraps again.
     assert.match(SOURCE, /pressStyle\(s\.exerciseTap,/,

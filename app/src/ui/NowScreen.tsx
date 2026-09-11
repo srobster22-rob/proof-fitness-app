@@ -20,7 +20,7 @@ import {
 import { ConfirmSheet } from './ConfirmSheet.tsx';
 import type { Repo } from '../data/repo.ts';
 import { COLUMN } from './column.ts';
-import { TAB_BAR_HEIGHT, tabBarOn } from './tab-bar.ts';
+import { TAB_BAR_HEIGHT } from './tab-bar.ts';
 import { ScreenModal, useExitOnce } from './ScreenModal.tsx';
 import { useDragScroll } from './drag-scroll.ts';
 import { Arrive } from './Arrive.tsx';
@@ -174,8 +174,6 @@ export function NowScreen({
   const [addingTo, setAddingTo] = useState<string | null>(null);
   // Honour the system's reduced-motion setting — see `useReducedMotion`.
   const still = useReducedMotion();
-  // OWNER.md 2026-09-08: off by default; neither variant ships until chosen.
-  const tabBar = tabBarOn(repo);
   /* The day rail drags with a held mouse button, not just a wheel — see
      `useDragScroll`. On a phone this changes nothing; touch already worked. */
   const railDrag = useDragScroll<any>();
@@ -513,61 +511,6 @@ export function NowScreen({
         The pair still reads as a pair: that distinction is carried by two WORDS
         against one glyph, not by how tightly they were bunched.
       */}
-      {/*
-        The top link row is what a bottom tab bar REPLACES, so the variant
-        removes it rather than keeping both. Keeping both would be the easy
-        version of this comparison and a dishonest one: it would make the bar
-        look like pure cost, when in reality it buys back the 31px this row
-        occupies. The owner asked what came off the screen to pay for the bar,
-        and this row is the answer's first line.
-      */}
-      {!tabBar && (
-      <View style={s.topBar}>
-        <Pressable onPress={onOpenProgress} hitSlop={14} disabled={!onOpenProgress}
-          style={pressStyle(null, 'quiet', still)}
-          accessibilityRole="link" accessibilityLabel={T('progress')}>
-          <Text style={s.topLink}>{T('progress')}</Text>
-        </Pressable>
-        <Pressable onPress={onOpenGoals} hitSlop={14} disabled={!onOpenGoals}
-          style={pressStyle(null, 'quiet', still)}
-          accessibilityRole="link" accessibilityLabel={T('goals')}>
-          <Text style={s.topLink}>{T('goals')}</Text>
-        </Pressable>
-        {/*
-          The streak rides with the gear, not as a fourth item in the row.
-
-          §10 asks for "a streak, visible on launch, that counts training days
-          not app opens", and it reached the recap and the shared card while
-          never appearing on the screen the app actually opens on. But the row
-          above is spaced on the reasoning that the eye reads the GAPS, and
-          three of them measured even is why it looks right; a fourth sibling
-          would redistribute that and break the pair-versus-glyph reading the
-          comment describes. Grouped here, the row still has three gaps.
-
-          It is a STATUS, so it is not pressable and carries no role — the two
-          words beside it are destinations and the gear is a destination, and a
-          number that looks tappable and is not is its own bug (§15).
-
-          Below two it does not render at all. `streakWorthShowing` is the
-          recap's rule, reused rather than re-decided, so the screen and the
-          card can never disagree about what counts as a streak — R150 settled
-          that one week is not one.
-        */}
-        <View style={s.topRight}>
-          {streakWorthShowing(state.streak) && (
-            <Text style={s.topStreak}
-              accessibilityLabel={fill(T('streakA11y'), { n: state.streak })}>
-              {state.streak} {T('weekShort')}
-            </Text>
-          )}
-          <Pressable onPress={onOpenSettings} hitSlop={16} disabled={!onOpenSettings}
-            style={pressStyle(null, 'quiet', still)}
-            accessibilityRole="link" accessibilityLabel={T('settings')}>
-            <Text style={s.topGear}>⚙</Text>
-          </Pressable>
-        </View>
-      </View>
-      )}
 
       {/*
         A fixed column on a phone, a scrolling one on a window too short to hold
@@ -595,6 +538,7 @@ export function NowScreen({
             assistive technology says, not what is painted, and the a11y tree
             was reporting the only way to change exercise as an unlabelled
             "generic" — invisible to VoiceOver rather than merely quiet. */}
+        <View style={s.exerciseLine}>
         <Pressable
           onPress={() => setPickerOpen(true)}
           hitSlop={14}
@@ -621,6 +565,20 @@ export function NowScreen({
             <Text style={s.exerciseCaret}>▾</Text>
           </View>
         </Pressable>
+          {/*
+            The streak, moved here when the tab bar took the top row it used to
+            share with the gear (owner, 2026-09-10: "move the streak to the
+            exercise line"). Still a STATUS -- outside the pressable, no role --
+            so it cannot read as part of the control that opens the picker
+            (§15). Still `streakWorthShowing`, so this screen and the recap agree.
+          */}
+          {streakWorthShowing(state.streak) && (
+            <Text style={s.streak}
+              accessibilityLabel={fill(T('streakA11y'), { n: state.streak })}>
+              {state.streak} {T('weekShort')}
+            </Text>
+          )}
+        </View>
         {/* §4: last session's numbers are visible with no interaction at all.
             The label only says "Last time" when the numbers really are theirs —
             and it is never blank. Composed in `lastTimeLine()` rather than here,
@@ -1262,7 +1220,6 @@ export function NowScreen({
         one you are ON — which is what a tab bar gives that a link row cannot:
         a visible answer to "where am I".
       */}
-      {tabBar && (
         <View style={s.tabBar}>
           {([
             ['now', T('nowWord'), undefined],
@@ -1285,7 +1242,6 @@ export function NowScreen({
             </Pressable>
           ))}
         </View>
-      )}
       </ColumnWrap>
 
       {/* Rendered conditionally rather than toggled through Modal's `visible`.
@@ -2179,14 +2135,6 @@ const s = StyleSheet.create({
    * (unchanged, still one line, still the exact spacing the comment above
    * measured) and turns "unreachable" into "a second line" at extreme scale.
    */
-  topBar: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap'
-  },
-  // Same tier as the two links beside it. It was 17px at #9AA5AF against
-  // their 11px at #7C8792, so the least important control in the row was
-  // the most prominent thing in it.
-  topGear: { color: '#7C8792', fontSize: 15, fontWeight: '600' },
-  topLink: { color: '#7C8792', fontSize: 12, fontWeight: '800', letterSpacing: 1.2, paddingVertical: 10 },
   /*
    * `flex-start`, not `center`.
    *
@@ -2223,7 +2171,10 @@ const s = StyleSheet.create({
   // Text was measured inside an unbounded parent whatever was set on it.
   // "Romanian Deadlift From A Deficit" came out 491px wide on a 375px screen,
   // hanging off BOTH edges. `maxWidth: '100%'` on the Text did not bind either.
-  exerciseTap: { alignSelf: 'stretch' },
+  exerciseTap: { flex: 1, minWidth: 0 },
+  // The name keeps the width it had and the streak takes only what its own
+  // text needs, so a long lift still ellipsizes instead of pushing it off.
+  exerciseLine: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', gap: 12 },
   exerciseRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   // Sized off the name rather than the label scale: it belongs to the
   // heading it marks, not to the chrome around it.
@@ -2231,7 +2182,7 @@ const s = StyleSheet.create({
   /*
    * R511, on the owner's note that the screen 'looks a little sloppy and
    * AI-generated'. This was 22px with letterSpacing 2 -- the exact treatment
-   * used by `topLink`, `railLabel` and every other CHROME label on the screen,
+   * used by `railLabel` and every other CHROME label on the screen,
    * only bigger. Wide tracking on a short all-caps string reads as a category
    * heading, so the one thing the screen is actually about was dressed as
    * furniture, and nothing on the page claimed the top of the hierarchy.
@@ -2255,18 +2206,11 @@ const s = StyleSheet.create({
   // shrink-to-fit Text in a centred column has none. `textAlign` keeps it
   // looking exactly as it did while it was shrink-to-fit and centred.
   /*
-   * The gear and the streak as one right-hand group, so the row keeps the three
-   * even gaps the comment above `topBar` measured. `alignItems: 'center'` puts
-   * the number on the glyph's optical centre rather than its baseline, which
-   * sits low.
-   */
-  topRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  /*
    * Volt, because a streak is the one thing on this screen that is news, and
    * small, because §15 spends the accent without letting it compete with the
    * hero. Sized at `label` so the row's height is still set by the gear.
    */
-  topStreak: {
+  streak: {
     color: VOLT, fontSize: TYPE.label, fontWeight: '900', letterSpacing: SPACING.label
   },
   lastTime: {
@@ -2570,9 +2514,8 @@ const s = StyleSheet.create({
   railTextDone: { color: '#79838D' },
   railNext: { color: VOLT, fontSize: 10, fontWeight: '900', letterSpacing: 1 },
   /*
-   * The experimental bottom bar (OWNER.md, 2026-09-08). NOT shipped: off
-   * unless `pref.tabBar` is '1', because the owner asked to see both variants
-   * before choosing either.
+   * The bottom bar -- shipped R640 on the owner's word (2026-09-10), replacing
+   * the PROGRESS / GOALS / gear row that used to sit above the lift.
    *
    * A real bar rather than a mock — 56px, so each destination keeps a 44pt
    * target with a label under its glyph, which is what makes it a tab bar and

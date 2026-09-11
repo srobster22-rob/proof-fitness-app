@@ -3479,3 +3479,24 @@ were audits, retractions and comparison material; the self-directed queue
 is empty of real product value. Wrote ~/.claude/loop-state/<sid>.blocked
 (the hook's own documented exit) to release this session only. Re-saving
 LOOP_ON puts it back to work the moment the owner answers anything.
+
+R640 - Stage 0: OWNER DECISION ANSWERED in chat, 2026-09-10: "ship the tab
+bar, move the streak to the exercise line." PICK (logged first): make the bar
+the only layout -- remove the flag and the top link row it replaced, move the
+12 WK streak onto the exercise line beside the name, flip the R523 "shipped to
+nobody" test to guard the shipped shape instead.
+BUILD: NowScreen -- top link row deleted, bar unconditional, streak moved
+onto a new `exerciseLine` row beside (not inside) the picker's Pressable;
+`exerciseTap` flex:1/minWidth:0 so long names still ellipsize. tab-bar.ts
+lost PREF_TAB_BAR/tabBarOn. Tests: R523 "shipped to nobody" rewritten to
+guard the shipped shape; streak, layout and i18n tests re-pointed from the
+top row to the exercise line / bar; prefs test dropped the pref.tabBar
+exemption, as its own comment said to on the owner's choice.
+REVIEW: suite 2154 pass / 0 fail (was 2155: the "rides with the gear" test
+went with the row). Planted the streak INSIDE the Pressable: "it is a status,
+not a control" and "the streak sits on the exercise line, outside the picker
+control" both failed by name; restored byte-identical from a scratch copy.
+PRODUCT: 375x568 -- no top row, DEADLIFT and 12 WK on one line (streak
+x313-355), LOG SET bottom y375, bar at the bottom, no scroll; 375x812 same,
+no scroll. Viewport reset. --check current; no share code moved.
+OWNER.md: tab bar moved to Done. | next: three owner decisions remain.

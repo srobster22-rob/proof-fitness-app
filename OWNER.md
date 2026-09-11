@@ -52,10 +52,7 @@ a little sloppy and AI-generated.
   phone size produced wrong verdicts before. Look at it at 375x812 (or on an
   actual phone) and tell me what specifically looks off — a screenshot with
   a circle on the offending part would cost you thirty seconds and save me
-  several rounds of guessing wrong. The bottom tab bar below is still the one
-  concrete, already-built lever most likely to help with exactly this
-  complaint, since a tab bar is the single biggest visual signal of "real app"
-  vs. "a page" — see that entry for the tradeoff.
+  several rounds of guessing wrong. (The tab bar shipped R640 -- see Done.)
 
 - OWNER DECISION, FILED R557 (small, and I could not verify the fix from here):
   type a machine name — "Arsenal" — then tap outside instead of pressing Return,
@@ -107,143 +104,6 @@ a little sloppy and AI-generated.
   moves two grid steps (+10 lb / +5 kg) instead of one. I did not make it,
   because +10 lb on a plateaued bench is a training judgement, not a bug fix.
 
-- OWNER DECISION, WAITING ON YOU (built R523): the bottom tab bar. Both
-  versions exist. Neither ships — the flag is off, there is no Settings
-  control for it, and a test fails the build if it ever defaults on.
-
-  TO SEE THEM: run the app, then in the browser console
-    fetch('/tabbar.b64').then(r=>r.text()).then(t=>{localStorage.setItem('proof.db.v1',t);location.reload()})
-  and `/seed.b64` the same way to go back. Same data, one preference apart.
-
-  WHAT CAME OFF TO PAY FOR THE BAR:
-  | | current | tab bar |
-  | --- | --- | --- |
-  | top row (PROGRESS / GOALS / gear) | 36px | removed — the bar replaces it |
-  | bottom bar | none | 56px |
-  | net change to the column | — | **+20px** |
-  | the 14 WK streak | shown, beside the gear | **gone** — the bar has no room |
-  | at 375x812 | fits | fits |
-  | at 375x568 | fits | fits |
-
-  So the bar is NOT the 50px disaster I filed in R516. It costs 20px net, not
-  50, because it takes the top row with it — and both still fit at 568.
-
-  THE REAL PRICE IS THE STREAK, not the pixels. §10 asks for a streak visible
-  on launch, and it rode with the gear in the row the bar deletes. A tab bar
-  has four slots and none of them is a status. Your options, if you want the
-  bar: put the streak on the exercise line, drop it from Now and leave it to
-  the recap, or accept a fifth non-tappable slot (which §15 warns about —
-  something that looks tappable and is not).
-
-  MY READ, for what it is worth: at 812 the bar looks more like a real fitness
-  app and costs nothing you notice. At 568 it is tighter and the streak loss
-  is real. I would take the bar and move the streak, but this is a taste call
-  about your product and the pictures are the point.
-
-  UPDATE, R628: built the side-by-side you asked for -- four screenshots,
-  current and tab-bar at both 568 and 812, handed to you directly rather than
-  described. Found a real bug while doing it, not a taste question: the tab-
-  bar build's day-plan sheet ("TODAY IS... SKIP — WORK IT OUT AS I GO") prints
-  its SKIP line straight through the new bottom bar's own labels
-  (NOW/PROGRESS/GOALS/SETTINGS) — confirmed at BOTH 568 and 812, so it is not
-  the short-phone squeeze this entry already covers, it is a genuine layout
-  collision nobody had looked for because nobody had put both builds next to
-  each other at a real size until this round. Separately, and on the CURRENT
-  build too: at 568 with the day sheet still showing, LOG SET overlaps the
-  plan-chooser row beneath it — gone once a day is picked, but real on a
-  first launch on the short phone, tab bar or not. Neither is fixed yet —
-  filed here rather than patched blind, since the tab-bar one especially
-  should get fixed on whichever build you actually pick, not both, and I do
-  not know that yet. Look at the four pictures with this in mind: the SKIP
-  overlap will read as broken in the tab-bar shots, and it is a bug, not the
-  tradeoff being asked about.
-
-  DIAGNOSED, NOT FIXED (R629): went looking for the CURRENT build's overlap
-  before touching anything. `LOG SET`'s own box measures 95x27px at y=369-396
-  in the live DOM at 375x568 — the button's real footprint, not the giant
-  green rectangle it paints as, meaning the visible button is being drawn
-  well outside the box that's supposed to contain it. The day sheet's own
-  `TODAY IS` label sits at y=386-401, directly inside that same range. Both
-  are real elements at their real measured positions, not a screenshot
-  artifact — this is an actual layout collapse between the sheet's Modal
-  portal and the main screen's own flex layout at this specific height, not
-  a simple z-index fix. I did not chase it further: this needs careful,
-  non-blind changes to layout code three sheets deep (ScreenModal's backdrop,
-  NowScreen's flex column, and whatever is compressing LOG SET's box), and a
-  wrong fix here risks the logging path itself, which every §4 rule in this
-  app treats as the one thing that must never break. Better done as its own
-  round with room to verify thoroughly than squeezed in behind the tab-bar
-  ask. Reproduction: fresh seed, 375x568, day sheet still open (before
-  picking PUSH/PULL/LEGS).
-
-  R630, A HYPOTHESIS TESTED AND KILLED: the backdrop's own wrapper carries
-  `transform: matrix(1,0,0,1,0,12)` — a stuck `translateY(12)`, and 12 is
-  exactly `ScreenModal.tsx`'s own `RISE` constant, the entrance animation's
-  rise distance. Strong enough a match that I wrote and shipped a fix
-  (explicitly zero the transform in the settled branch, since it was
-  previously just ABSENT rather than reset — a real react-native-web
-  footgun on its own). Full dev-server restart, fresh bundle, re-measured:
-  the transform was STILL `translateY(12)` and LOG SET/TODAY IS had not
-  moved one pixel. The fix was live in source and did nothing, which means
-  the coincidence was a coincidence — this transform is not coming from
-  ScreenModal's entrance state at all. Reverted the change rather than
-  claim a fix that measurably did not fix anything. The 95x27 LOG SET box,
-  the 12px offset, and their exact overlap are still real and still
-  unexplained; `RISE` is now ruled out as the cause, which narrows the
-  search but does not end it.
-
-  R631, one more data point, deliberately not chased further: only ONE
-  backdrop element exists in the DOM at the time of the overlap -- ruled out
-  a duplicate/stale modal instance as the cause. The 12px transform sits on
-  the Modal portal's own wrapper, outside anything `ScreenModal.tsx` writes,
-  which points at `react-native-web`'s own `Modal` polyfill (a library
-  default, maybe safe-area-related) rather than app code. That is a
-  different, larger question than a bug fix -- possibly not a bug at all,
-  just a fixed inset nothing in this app currently accounts for -- and
-  answering it needs reading react-native-web's Modal source, not more
-  measurement from the app side. Parking it here rather than spending a
-  third round measuring the same two elements.
-
-  RETRACTED, R633 -- THE CURRENT-BUILD OVERLAP IS NOT A BUG. My preview pane
-  was hidden (`document.hidden === true`), which freezes CSS transitions at
-  their first frame: the sheet's wrapper sat at opacity 0 / translateY(12),
-  RISE exactly, with both CSSTransitions reporting currentTime 0 after
-  seconds. Screenshots forced paints of that frozen, part-transparent
-  entrance, so the sheet looked ghosted over a bright LOG SET. Finishing the
-  transitions: opacity 1, no transform, and elementFromPoint at LOG SET's
-  position returns the sheet -- an ordinary bottom sheet over a dimmed
-  screen, which is what it is meant to be. R629-R631 were measuring an
-  artifact of my own tooling. Nothing to fix; nothing was shipped for it.
-  The TAB-BAR build's SKIP line crossing the bar's labels (R628) was taken
-  the same way and must be re-checked the same way before it counts.
-
-  RE-CHECKED, R634 -- ALSO NOT A BUG. Tab-bar build, 375x568, transitions
-  finished: SKIP at y517-532, the bar's labels at y545-559, no overlap, and
-  SKIP is the topmost element at its own position. It is the day sheet
-  sitting over a dimmed bar, as any sheet does. So the tab-bar question is
-  back to exactly what it was before R628: +20px net, and the streak has
-  nowhere to go. No hidden defect on either side. Sorry for the detour --
-  judge the four R628 pictures as a pixel/streak tradeoff only, and note
-  their sheets are caught mid-fade (the ghosting is the capture, not the app).
-
-  CLEAN PICTURES, R636 -- use these, not R628's. All four retaken with every
-  animation finished and the day question skipped, so each shows the logging
-  screen at rest: current vs tab bar, at 375x568 and 375x812, in this
-  session's transcript. What they show, read straight off them:
-  - At 568 both fit with no scrolling; the tab bar version moves DEADLIFT up
-    ~36px into the space the top row gave back, and ends in the 56px bar.
-  - At 812 both leave a large empty band below NEXT SET 1 -- the bar sits in
-    space the current build does not use at all.
-  - The only thing that visibly LEAVES the screen is the top row, and with it
-    PROGRESS / GOALS text links and the 12 WK streak. The bar brings PROGRESS
-    and GOALS back as tabs; the streak has no home.
-  One honesty note: the two builds load different demo snapshots
-  (seed.b64 was regenerated R628, tabbar.b64 was not), so the weight reads
-  225 in one and 235 in the other. Same screen, same layout -- ignore it.
-  FIXED R637: tabbar.b64 is now rebuilt from today's seed.b64 plus the one
-  tab-bar preference, so both builds load identical data (DEADLIFT, 225).
-  If you load them yourself, the only difference left is the bar.
-
 
 ## Never
 - NEVER run `git checkout`, `restore`, `reset`, `clean`, `stash`, `rebase` or
@@ -258,6 +118,17 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Bottom tab bar -- SHIPPED R640** on your word (2026-09-10: "ship the tab
+  bar, move the streak to the exercise line").
+  - The bar (NOW / PROGRESS / GOALS / SETTINGS) is the only layout now. The
+    flag, the old PROGRESS / GOALS / gear row and the "shipped to nobody" test
+    are gone; the test guards the shipped shape instead.
+  - The 12 WK streak sits at the right end of the exercise line, beside the
+    lift's name. Still a status (not tappable, outside the name's picker
+    control), still hidden below 2 weeks, same rule as the recap.
+  - Measured in the app: fits with no scrolling at 375x568 and 375x812.
+  - The R628-R637 comparison notes above were for the decision and are moot
+    now; `/tabbar.b64` loads the same screen as `/seed.b64`.
 - **Bland → not bland** — R522. Half of this already existed and half was
   missing, which took looking to find out.
   - LOGGING a set already had feedback: the chip animates in (`Arrive`).
