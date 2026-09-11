@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { Repo } from '../src/data/repo.ts';
 import {
   NowModel, WEIGHT_STEP, PLATE, REP_JUMP, typedWeight, MAX_TYPED_WEIGHT, layoutFor, columnHeight, heroWidth, HIT, lastTimeLine, goalTail, revealOffset, splitPickerGroups
-, customJump, customRepJump
+, customJump, customRepJump, lastTimeParts
 } from '../src/ui/now-model.ts';
 import { STARTING_TWELVE } from '../src/domain/coldstart.ts';
 import { dayOf, inPlanDay, sessionPlanDay } from '../src/domain/split.ts';
@@ -1270,7 +1270,7 @@ describe('Now screen — the line under the lift name is never blank (§4)', () 
    */
   test('logging the FIRST EVER set does not blank the line', () => {
     const m = new NowModel(repoWith(), () => T0);
-    assert.equal(lineOf(m), 'First time');
+    assert.equal(lineOf(m), `First time — ${m.state().weight} is a starting point`);
     m.log();
     const after = lineOf(m);
     assert.notEqual(after.trim(), '', 'this is the bug: a blank line where copy used to be');
@@ -1297,7 +1297,7 @@ describe('Now screen — the line under the lift name is never blank (§4)', () 
     assert.ok(m.addCustomExercise('Hack Squat'), 'the custom lift must be created');
     const s = m.state();
     assert.equal(s.prefillSource, 'fallback', 'no seed exists for an invented movement');
-    assert.equal(s.lastTime.head + s.lastTime.tail, 'First time');
+    assert.equal(s.lastTime.head + s.lastTime.tail, `First time — ${s.weight} is a starting point`);
   });
 
   test('a second session speaks about the previous one, never about this one', () => {
@@ -1323,11 +1323,43 @@ describe('Now screen — the line under the lift name is never blank (§4)', () 
     );
   });
 
+  /*
+   * R641, the owner's call on the R555 filing: on day one the hero shows a
+   * confident number the lifter never lifted. The app knows it chose it
+   * (prefill source seed/fallback), so the line says so -- and ONLY then.
+   */
+  test('an app-chosen starting weight is named as a starting point', () => {
+    assert.equal(lastTimeLine({ previous: null, thisSession: [], start: 45 }),
+      'First time — 45 is a starting point');
+    assert.equal(lastTimeParts({ previous: null, thisSession: [], start: 20 }, 'es').head,
+      'Primera vez — 20 es un punto de partida');
+  });
+
+  test('the label never claims a number the lifter chose themselves', () => {
+    // A real previous session, or a set logged today, always outranks it.
+    assert.equal(lastTimeLine({ previous: setOf(135, 5), thisSession: [], start: 45 }),
+      'Last time  135 × 5');
+    assert.equal(lastTimeLine({ previous: null, thisSession: [setOf(95, 8)], start: 45 }),
+      'Just did  95 × 8');
+    // And a lift with history hands the model no start at all.
+    const m = new NowModel(trained(), () => T0);
+    assert.doesNotMatch(lineOf(m), /starting point/);
+  });
+
+  test('the label names the number the app chose, not one the lifter tapped to', () => {
+    const m = new NowModel(repoWith(), () => T0);
+    const chosen = m.state().weight;
+    m.bumpWeight(1);
+    assert.notEqual(m.state().weight, chosen);
+    assert.equal(lineOf(m), `First time — ${chosen} is a starting point`);
+  });
+
   test('switching to an untrained lift mid-session still says something', () => {
     const m = new NowModel(trained(), () => T0);
     m.log();
     m.selectExercise('bench');
-    assert.equal(lineOf(m), 'First time', 'never trained, nothing logged today');
+    assert.equal(lineOf(m), `First time — ${m.state().weight} is a starting point`,
+      'never trained, nothing logged today');
     m.log();
     assert.match(lineOf(m), /^Just did  /, 'trained today, never before');
   });

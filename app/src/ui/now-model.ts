@@ -573,6 +573,12 @@ export interface LastTimeInput {
    * never `thisSession` — see `lastTimeParts`.
    */
   coach?: Suggestion | null;
+  /**
+   * The weight the APP chose for a lift never trained (prefill source seed or
+   * fallback), or null when the number is the lifter's own. Owner, 2026-09-10:
+   * day one should say the 45 is a starting point, not something they did.
+   */
+  start?: number | null;
 }
 
 /**
@@ -586,7 +592,7 @@ export interface LastTimeInput {
 export function lastTimeParts(input: LastTimeInput, lang: Language = 'en'): {
   head: string; tail: string; hit: boolean;
 } {
-  const { previous, thisSession, goal, coach } = input;
+  const { previous, thisSession, goal, coach, start } = input;
   /*
    * The coach outranks "Last time", and ONLY that. It never displaces "Just
    * did" — that line is the confirmation that the set you just logged landed,
@@ -601,6 +607,7 @@ export function lastTimeParts(input: LastTimeInput, lang: Language = 'en'): {
     : thisSession.length
       ? `${t(lang, 'justDid')}  ${loadLabel(thisSession[thisSession.length - 1].weight)} × ` +
         `${thisSession[thisSession.length - 1].reps}`
+      : start ? fill(t(lang, 'firstTimeStart'), { w: loadLabel(start) })
       : t(lang, 'firstTime');
   return { head, tail: goalTail(goal, lang), hit: goal?.justHit === true };
 }
@@ -945,6 +952,8 @@ export class NowModel {
   private weight = 0;
   private reps = 0;
   private source: Prefill['source'] = 'seed';
+  /** What `loadPrefill` put in the hero, kept so the label can name it. */
+  private startWeight = 0;
 
   constructor(repo: Repo, now: () => number = Date.now, locale?: string | null) {
     this.repo = repo;
@@ -1118,6 +1127,7 @@ export class NowModel {
     this.weight = p.weight;
     this.reps = p.reps;
     this.source = p.source;
+    this.startWeight = p.weight;
 
     // Equipment carries over the same way the numbers do — the last set of
     // this lift is the best guess at how the next one will be done, and §4
@@ -1320,6 +1330,7 @@ export class NowModel {
         previous: this.lastTime(),
         thisSession: sessionSets.filter(s => s.exerciseId === this.exerciseId),
         goal: this.goalHint(),
+        start: this.source === 'history' ? null : this.startWeight,
         coach: coachSuggestion(
           this.historyInSessionUnit(), this.exerciseId, this.now(),
           {

@@ -71,24 +71,6 @@ a little sloppy and AI-generated.
   works in the product, and an unverifiable change is not one I should ship.
   Say the word and it goes in with a device check rather than a pane check.
 
-- OWNER DECISION, FILED R555: on day one the app shows a confident "45" under
-  the words "First time", and never says the 45 is a STARTING SUGGESTION rather
-  than something you did. The app already knows the difference — the prefill
-  carries seed / history / fallback — and R299 decided not to show it, because
-  the Now hero is the most crowding-sensitive surface in the app.
-
-  I RE-MEASURED THAT and the premise has changed. On a 375x568 phone (the short
-  one) with a full twelve-week history the column now fits with ZERO overflow,
-  and that line uses 115px of a 335px column — nearly three times its width
-  still free. The constraint there is vertical, and a longer one-line label adds
-  no height. The label would also only ever appear on day one or on a movement
-  you have never trained, which is the emptiest that screen ever is.
-
-  So it now fits. Whether it EARNS the space is yours: your rule is "if it needs
-  explaining, it's wrong", and one reading is that a starting weight explaining
-  itself is exactly that. Something like "First time — 45 is a starting point",
-  shown only when the number was seeded. I have not built it.
-
 - OWNER DECISION, FILED R548 (no action needed unless you disagree): should the
   STRENGTH goal climb faster than SIZE? It used to, by 2.5 lb — but every
   suggested weight now snaps to the loadable grid (5 lb / 2.5 kg), because the
@@ -118,6 +100,15 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Day-one starting point label -- SHIPPED R641** on your word (2026-09-10).
+  - When the number in the hero was chosen by the app (a lift you have never
+    trained), the line under the name reads "First time — 45 is a starting
+    point" (Spanish: "Primera vez — 45 es un punto de partida").
+  - It names the number the app chose even if you tap to a different one
+    before logging. Once you log a set it becomes "Just did 45 × 8"; any lift
+    with history shows "Last time" or the coach, as before.
+  - Measured on a fresh install at 375x568: fits on one line, no truncation,
+    in both languages.
 - **Bottom tab bar -- SHIPPED R640** on your word (2026-09-10: "ship the tab
   bar, move the streak to the exercise line").
   - The bar (NOW / PROGRESS / GOALS / SETTINGS) is the only layout now. The

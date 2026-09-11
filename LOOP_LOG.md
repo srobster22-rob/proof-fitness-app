@@ -3500,3 +3500,28 @@ PRODUCT: 375x568 -- no top row, DEADLIFT and 12 WK on one line (streak
 x313-355), LOG SET bottom y375, bar at the bottom, no scroll; 375x812 same,
 no scroll. Viewport reset. --check current; no share code moved.
 OWNER.md: tab bar moved to Done. | next: three owner decisions remain.
+
+R641 - OWNER DECISION ANSWERED in chat: "add the day-one starting point
+label" (OWNER.md R555 filing). PICK (logged first): when the hero's number
+was chosen by the app (prefill source seed/fallback), the line under the
+lift says "First time — 45 is a starting point" instead of "First time".
+Only the first-time branch changes; history, "Just did" and the coach win
+as before. English + Spanish.
+BUILD: LastTimeInput gains `start` (app-chosen weight, or null when the
+number is the lifter's own); NowModel keeps `startWeight` from loadPrefill
+and passes it only when source !== 'history'; the first-time branch fills
+new i18n key firstTimeStart (en + es). REVIEW: suite 2154 -> 2157 pass /
+0 fail; three existing tests updated (they asserted bare "First time" in the
+exact case the owner wants labelled), three added (label + Spanish; never on
+a lifter's own number; names the chosen number, not a tapped one). Plant A
+(label follows the tapped weight) -> "the label names the number the app
+chose..." failed by name. Plant B (branch removed) -> five failed by name
+incl. "an app-chosen starting weight is named as a starting point".
+Restored byte-identical. PRODUCT: fresh install, 375x568 -- "First time —
+45 is a starting point" over a 45 hero, scrollWidth == clientWidth (335);
+Spanish strings measured in the same box, no overflow; after LOG SET and a
+reload it reads "Just did 45 × 8". (A first read showed the old text only
+because I had hand-edited that DOM node for the Spanish measurement --
+React never repaints a node you mutated; reload settled it.) Restored
+seed.b64 and desktop viewport. OWNER.md: R555 moved to Done.
+| next: two owner decisions remain (strength step, machine-name blur).
