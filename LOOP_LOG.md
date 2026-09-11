@@ -3450,3 +3450,14 @@ Flagged that the two demo snapshots differ (225 vs 235) so the owner does
 not read it as a difference in the builds. Restored seed.b64 and desktop
 viewport. No code changed; suite 2155/0. SHIP: comparison material only,
 per the owner's own ask; neither build changed. | next: owner's pick.
+
+R637 - Stage 0: OWNER.md unchanged by the owner. PICK: R636's pictures had
+to carry a "225 vs 235, ignore it" caveat because tabbar.b64 was a hand-made
+snapshot from Sep 8 03:58 while seed.b64 was regenerated since. BUILD:
+rebuilt tabbar.b64 = seed.b64 + meta row pref.pref.tabBar=1 (the exact key
+read out of the old snapshot first, not guessed) via node:sqlite; old copy
+kept in scratch. VERIFIED IN THE PRODUCT: loaded it in the preview -- tab
+bar present, DEADLIFT, "Last time 225 x 5", identical to seed.b64. Removed a
+temp .sqlite my script dropped in public/. Both .b64 files are gitignored
+dev artifacts, so the commit is OWNER.md + log only. Suite 2155/0. Restored
+seed.b64 in the preview. | next: owner's pick.

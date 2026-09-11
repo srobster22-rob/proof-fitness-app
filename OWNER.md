@@ -240,6 +240,9 @@ a little sloppy and AI-generated.
   One honesty note: the two builds load different demo snapshots
   (seed.b64 was regenerated R628, tabbar.b64 was not), so the weight reads
   225 in one and 235 in the other. Same screen, same layout -- ignore it.
+  FIXED R637: tabbar.b64 is now rebuilt from today's seed.b64 plus the one
+  tab-bar preference, so both builds load identical data (DEADLIFT, 225).
+  If you load them yourself, the only difference left is the bar.
 
 
 ## Never
