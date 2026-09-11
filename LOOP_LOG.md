@@ -3553,3 +3553,10 @@ check of the keyboard-dismiss path is still worth doing. Restored seed.b64
 and viewport. OWNER.md: R557 moved to Done. Lesson: run the FULL suite
 after editing OWNER.md -- tests read it. | next: one owner decision left
 (strength step, R548).
+
+R643 - OWNER DECISION ANSWERED in chat: "keep strength and size the same"
+(R548 filing). Nothing to build -- the current behaviour IS the answer (one
+grid step for both on a plateau; they differ on the rep threshold, 5 vs 8).
+Closed the filing, recorded it under Done. No test reads the R548 filing;
+full suite run after the OWNER.md edit anyway (R642's lesson). All owner
+decisions in ## Next are now answered.

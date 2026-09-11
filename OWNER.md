@@ -54,21 +54,6 @@ a little sloppy and AI-generated.
   a circle on the offending part would cost you thirty seconds and save me
   several rounds of guessing wrong. (The tab bar shipped R640 -- see Done.)
 
-- OWNER DECISION, FILED R548 (no action needed unless you disagree): should the
-  STRENGTH goal climb faster than SIZE? It used to, by 2.5 lb — but every
-  suggested weight now snaps to the loadable grid (5 lb / 2.5 kg), because the
-  coach was telling kilo lifters to "try 61.25", and 1.25 kg total is 0.625 kg
-  a side, which is not a plate. A 2.5 lb difference cannot survive that in
-  either unit, so on a plateau the two goals now say the same thing.
-
-  They still differ where it matters and always did: strength releases the
-  weight at 5 reps, size waits for 8. Settings now says that instead of
-  promising a step size the app cannot deliver.
-
-  If you want them to differ on WEIGHT too, the change is one line — strength
-  moves two grid steps (+10 lb / +5 kg) instead of one. I did not make it,
-  because +10 lb on a plateaued bench is a training judgement, not a bug fix.
-
 
 ## Never
 - NEVER run `git checkout`, `restore`, `reset`, `clean`, `stash`, `rebase` or
@@ -83,6 +68,10 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Strength vs size step -- DECIDED R643, no change** (2026-09-10: "keep
+  strength and size the same"). On a plateau both goals suggest one grid step
+  (+5 lb / +2.5 kg). They still differ where they always did: strength moves
+  the weight at 5 reps, size waits for 8.
 - **Machine name saves on tap away -- SHIPPED R642** on your word (2026-09-10).
   - A typed machine name now lands when you dismiss the keyboard, tap
     elsewhere on the sheet, or tap outside the sheet to close it -- not only on
