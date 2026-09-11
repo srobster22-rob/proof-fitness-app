@@ -3430,3 +3430,10 @@ the tab-bar decision is back to a clean pixel/streak tradeoff. Lesson for
 the harness: in this pane, call document.getAnimations().forEach(a =>
 a.finish()) before measuring or screenshotting anything that animates in.
 No code changed; suite 2155/0. | next: five owner decisions wait.
+
+R635 - Stage 0: OWNER.md unchanged by the owner. PICK: make R633's lesson
+durable -- HANDOFF trap 20: a hidden pane freezes CSS transitions at frame
+0, and a screenshot of that frame reads as a layout bug (it cost R628-R633).
+Recipe recorded: finish() every animation, then elementFromPoint decides
+what is on top. Doc-only; suite 2155/0 (HANDOFF pin tests still pass).
+Nothing to plant or rebuild. | next: five owner decisions wait.

@@ -334,6 +334,17 @@ test suite and obvious in a picture.
    adding a new subprocess-spawning test that writes ANY file: check whether another test reads
    that same path, and if so, redirect the write rather than trusting it will never race.
 
+20. **A hidden pane freezes CSS TRANSITIONS at frame 0, not just rAF — and a screenshot of that**
+   **frozen frame looks exactly like a layout bug.** Cost R628-R633: every sheet enters on a
+   220ms opacity/`translateY(12)` transition (ScreenModal's `RISE`). With `document.hidden`
+   true, both CSSTransitions sat at `currentTime 0` for seconds, so the sheet was really at
+   opacity 0 and 12px low. Screenshots force a paint of that state, and the result is a ghosted
+   sheet over a bright LOG SET that reads as an overlap. It was filed as two bugs, "fixed" once
+   (no effect, the code was fine), and diagnosed for three rounds. Before measuring or
+   screenshotting anything that animates in, run
+   `document.getAnimations().forEach(a => a.finish())`, then use `elementFromPoint` to decide
+   what is actually on top. A resting sheet over a dimmed screen is not an overlap.
+
 
 ## Architecture in one paragraph
 
