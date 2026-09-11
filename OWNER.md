@@ -54,23 +54,6 @@ a little sloppy and AI-generated.
   a circle on the offending part would cost you thirty seconds and save me
   several rounds of guessing wrong. (The tab bar shipped R640 -- see Done.)
 
-- OWNER DECISION, FILED R557 (small, and I could not verify the fix from here):
-  type a machine name — "Arsenal" — then tap outside instead of pressing Return,
-  and the app keeps MACHINE and silently drops the name. Return is the only
-  commit, which is what the code intends ("the name is the optional half").
-
-  Two things make it worth your ruling rather than mine. The app's own rule for
-  the equipment right beside it is the opposite — it saves the moment you
-  answer, because "an answer given and then abandoned is an answer thrown away"
-  — and tapping outside is how a phone keyboard usually gets dismissed. The fix
-  is one line and uses machinery that already exists (`onApply` records without
-  closing the sheet).
-
-  I built it, then removed it: focus events are not delivered to the preview
-  pane at all (HANDOFF trap 17, measured this round), so I could not prove it
-  works in the product, and an unverifiable change is not one I should ship.
-  Say the word and it goes in with a device check rather than a pane check.
-
 - OWNER DECISION, FILED R548 (no action needed unless you disagree): should the
   STRENGTH goal climb faster than SIZE? It used to, by 2.5 lb — but every
   suggested weight now snaps to the loadable grid (5 lb / 2.5 kg), because the
@@ -100,6 +83,15 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Machine name saves on tap away -- SHIPPED R642** on your word (2026-09-10).
+  - A typed machine name now lands when you dismiss the keyboard, tap
+    elsewhere on the sheet, or tap outside the sheet to close it -- not only on
+    Return. Return still saves and closes.
+  - Only when the name actually changed, so an untouched field does not
+    re-record or buzz.
+  - Verified in the pane with a real outside-tap and a dispatched blur; a
+    device check of the keyboard-dismiss path is still worth doing, since this
+    pane never delivers genuine focus events (HANDOFF trap 17).
 - **Day-one starting point label -- SHIPPED R641** on your word (2026-09-10).
   - When the number in the hero was chosen by the app (a lift you have never
     trained), the line under the name reads "First time — 45 is a starting

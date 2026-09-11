@@ -55,7 +55,13 @@ describe('the machine name has one commit path, and the model keeps what it gets
     assert.equal(fresh.state().equipment, 'machine');
   });
 
-  test('the screen commits the name on Return, and that is the only commit', () => {
+  /*
+   * R642: the owner answered R557 -- "save the machine name on tap away". So
+   * this no longer pins ONE commit path; it pins all three: Return (commit and
+   * close), losing focus (commit, stay), and dismissing the sheet (commit,
+   * close) -- the last two only when the name changed.
+   */
+  test('the name commits on Return, on losing focus, and on dismissing the sheet', () => {
     /*
      * If a second commit path appears — an onBlur, a save button — the owner
      * filing in OWNER.md is answered and should be removed rather than left
@@ -78,16 +84,20 @@ describe('the machine name has one commit path, and the model keeps what it gets
     const field = around(SCREEN, 'machineNamePlaceholder', 700, 200);
     assert.match(field, /onSubmitEditing=\{\(\) => pick\('machine', machine\)\}/,
       'Return is no longer the commit for the machine name');
-    assert.doesNotMatch(field, /onBlur/,
-      'the machine field gained a second commit path — good, but answer and remove ' +
-      'the OWNER.md filing from R557, and verify it on a DEVICE (trap 17: the pane ' +
-      'delivers no focus events, so a pane check proves nothing here)');
+    assert.match(field, /onBlur=\{keepName\}/,
+      'tapping away from the machine field drops the typed name again');
+    assert.match(SCREEN, /const close = \(\) => \{ keepName\(\); leave\(onClose\); \};/,
+      'dismissing the equipment sheet no longer keeps the typed name');
+    assert.match(SCREEN,
+      /kit === 'machine' && machine\.trim\(\) !== \(state\.machine \?\? ''\)\) onApply\('machine', machine\)/,
+      'keepName records on every blur, or outside the machine step');
   });
 
-  test('the filing is still on the owner\'s list', () => {
+  test('the owner\'s answer is recorded, and the filing is closed', () => {
     const owner = fs.readFileSync(path.join(APP, '..', 'OWNER.md'), 'utf8');
-    assert.match(owner, /FILED R557/, 'the machine-name filing left OWNER.md');
-    assert.match(owner, /trap 17/,
-      'the filing lost the reason it was filed rather than fixed');
+    assert.match(owner, /Machine name saves on tap away -- SHIPPED R642/,
+      'the answered decision is not in the Done list of OWNER.md');
+    assert.doesNotMatch(owner, /FILED R557/,
+      'the R557 filing is still open in OWNER.md after the owner answered it');
   });
 });

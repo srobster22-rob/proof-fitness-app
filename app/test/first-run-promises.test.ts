@@ -47,32 +47,36 @@ describe('the first screen keeps the promises it makes (R555)', () => {
       `the app claimed history to somebody who has none: "${head}"`);
   });
 
-  test('the seed/history distinction is computed and still unsurfaced, on purpose', () => {
-    /*
-     * `prefillSource` is on `NowState` and no screen reads it. That is a
-     * DECISION (R299), not an oversight, so this pins the decision and its
-     * escape hatch rather than the field — if somebody surfaces it, this test
-     * should be deleted along with the acknowledgement, not quietly edited.
-     */
+  /*
+   * R641: the owner answered R555 -- "add the day-one starting point label".
+   * The distinction now reaches the screen through the line itself
+   * (`lastTimeParts({ start })`), not through the raw `prefillSource` field,
+   * which is why the field is still screen-unread and still acknowledged.
+   */
+  test('day one names its number as a starting point', () => {
+    const m = new NowModel(fresh(), () => T0, 'en-US');
+    assert.equal(m.state().lastTime.head, 'First time — 45 is a starting point');
+  });
+
+  test('the raw seed/history field stays off the screen; the label carries it', () => {
     const screens = ['NowScreen.tsx'].map(f =>
       fs.readFileSync(path.join(APP, 'src', 'ui', f), 'utf8')).join('\n');
     assert.doesNotMatch(screens, /prefillSource/,
-      'prefillSource now reaches a screen — good, but update field-scan.cjs\'s ' +
-      'ACKNOWLEDGED entry and OWNER.md, which both say it does not');
+      'prefillSource now reaches a screen -- update field-scan.cjs, whose ' +
+      'ACKNOWLEDGED entry says only tests read it');
 
     const scan = fs.readFileSync(path.join(APP, 'tools', 'field-scan.cjs'), 'utf8');
-    assert.match(scan, /R555 RE-MEASURED THE CROWDING PREMISE/,
-      'the acknowledgement lost the measurement and is back to inherited reasoning');
+    assert.match(scan, /R641: THE OWNER DECIDED/,
+      'the acknowledgement still describes the decision as pending');
     assert.match(scan, /115px of a 335px column/,
       'the measurement behind the decision is gone, so the next session cannot check it');
   });
 
-  test('the owner has the decision, with the number attached', () => {
-    // Owner-only decisions get filed, not made. A filing with no measurement is
-    // just an opinion forwarded, which is what R299 already did once.
+  test('the owner\'s answer is recorded, and the filing is closed', () => {
     const owner = fs.readFileSync(path.join(APP, '..', 'OWNER.md'), 'utf8');
-    assert.match(owner, /FILED R555/, 'the day-one filing is gone from OWNER.md');
-    assert.match(owner, /115px of a 335px column/,
-      'the filing lost the measurement that makes it decidable');
+    assert.match(owner, /Day-one starting point label -- SHIPPED R641/,
+      'the answered decision is not in the Done list of OWNER.md');
+    assert.doesNotMatch(owner, /FILED R555/,
+      'the R555 filing is still open in OWNER.md after the owner answered it');
   });
 });

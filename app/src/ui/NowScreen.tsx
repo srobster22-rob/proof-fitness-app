@@ -1894,7 +1894,18 @@ function EquipmentSheet({ state, onPick, onApply, onClose, skipMachine, onSkipMa
   // and keep the machine-name step up — so only `onClose` and `onPick`
   // (every chip that is a COMPLETE answer) need the deferred leave.
   const { closing, leave } = useExitOnce(still);
-  const close = () => leave(onClose);
+  /*
+   * A typed machine name is an answer, and an answer given and then abandoned
+   * is an answer thrown away -- the rule the kit chips above already follow.
+   * Owner, 2026-09-10: "save the machine name on tap away". Return was the only
+   * commit, so typing "Arsenal" and dismissing the keyboard or tapping outside
+   * kept MACHINE and silently dropped the name. Only when it changed, so an
+   * untouched field neither re-records nor buzzes.
+   */
+  const keepName = () => {
+    if (kit === 'machine' && machine.trim() !== (state.machine ?? '')) onApply('machine', machine);
+  };
+  const close = () => { keepName(); leave(onClose); };
   const pick = (k: Equipment | null, m?: string) => leave(() => onPick(k, m));
 
   return (
@@ -1978,10 +1989,10 @@ function EquipmentSheet({ state, onPick, onApply, onClose, skipMachine, onSkipMa
                 style={s.kitInput}
                 value={machine}
                 onChangeText={setMachine}
-                // Return is the commit, since there is no longer a button to be
-                // the commit. Typing and dismissing still keeps the kit — the
-                // name is the optional half.
+                // Return commits and closes; losing focus (the keyboard
+                // dismissed, a tap elsewhere on the sheet) commits and stays.
                 onSubmitEditing={() => pick('machine', machine)}
+                onBlur={keepName}
                 returnKeyType="done"
                 placeholder={T('machineNamePlaceholder')}
                 placeholderTextColor="#7C8792"

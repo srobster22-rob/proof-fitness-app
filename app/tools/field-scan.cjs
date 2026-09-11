@@ -96,7 +96,11 @@ const ACKNOWLEDGED = {
     'trained, which is the emptiest the screen ever is. So the first half of the ' +
     'Removes-when condition is arguably met on measurement; the second half is not ours ' +
     'to decide and is filed in OWNER.md. Left unsurfaced, deliberately, pending that. ' +
-    'Removes when: an owner decides the extra distinction is worth the crowding (R464).'
+    'R641: THE OWNER DECIDED (2026-09-10) and it shipped -- day one now reads "First time -- 45 ' +
+    'is a starting point". It reaches the screen through `lastTimeParts({ start })`, which ' +
+    'NowModel derives from `this.source` directly, so this raw field is STILL read only by ' +
+    'tests. Acknowledged for good as a test-facing field. ' +
+    'Removes when: a screen needs the seed/history/fallback split itself, not just the label.'
 };
 
 function fields(file, ifaceName) {

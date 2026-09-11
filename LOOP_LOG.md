@@ -3525,3 +3525,31 @@ because I had hand-edited that DOM node for the Spanish measurement --
 React never repaints a node you mutated; reload settled it.) Restored
 seed.b64 and desktop viewport. OWNER.md: R555 moved to Done.
 | next: two owner decisions remain (strength step, machine-name blur).
+
+R642 - OWNER DECISION ANSWERED in chat: "save the machine name on tap away"
+(OWNER.md R557 filing). PICK (logged first): a typed machine name lands when
+the field loses focus AND when the sheet is dismissed by tapping outside,
+through the existing onApply (records, does not close). Only when the name
+actually changed, so an untouched field does not re-record or buzz.
+BUILD: EquipmentSheet gains keepName() -- onApply('machine', name) only when
+kit is machine and the trimmed name differs from state; wired to the field's
+onBlur and into close() (backdrop tap / back). Return still pick()s and closes.
+CORRECTION TO R641: it shipped with one test failing. I removed the R555
+filing from OWNER.md AFTER my last full suite run, and
+first-run-promises.test.ts pins that filing. Caught on this round's first
+run. Fixed here: that file now pins the shipped label and the closed filing;
+field-scan.cjs's prefillSource acknowledgement records the owner's decision
+(the raw field is still test-only -- the screen gets the label via start).
+machine-name-commit.test.ts re-pointed from "Return is the only commit" to
+all three commit paths plus the closed filing. REVIEW: suite 2157 -> 2158
+pass / 0 fail. Plant (close() without keepName) -> "the name commits on
+Return, on losing focus, and on dismissing the sheet" failed by name;
+restored byte-identical. PRODUCT, 375x812: MACHINE, typed "Arsenal" with a
+real input event, tapped the backdrop -> sheet closed, screen shows ARSENAL.
+Reopened, typed "Hammer", dispatched focusout/blur with the sheet open ->
+sheet stayed open; after a reload the screen shows HAMMER. The blur was
+dispatched, not a genuine focus loss (trap 17), so OWNER.md says a device
+check of the keyboard-dismiss path is still worth doing. Restored seed.b64
+and viewport. OWNER.md: R557 moved to Done. Lesson: run the FULL suite
+after editing OWNER.md -- tests read it. | next: one owner decision left
+(strength step, R548).
