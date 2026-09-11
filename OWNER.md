@@ -204,6 +204,19 @@ a little sloppy and AI-generated.
   measurement from the app side. Parking it here rather than spending a
   third round measuring the same two elements.
 
+  RETRACTED, R633 -- THE CURRENT-BUILD OVERLAP IS NOT A BUG. My preview pane
+  was hidden (`document.hidden === true`), which freezes CSS transitions at
+  their first frame: the sheet's wrapper sat at opacity 0 / translateY(12),
+  RISE exactly, with both CSSTransitions reporting currentTime 0 after
+  seconds. Screenshots forced paints of that frozen, part-transparent
+  entrance, so the sheet looked ghosted over a bright LOG SET. Finishing the
+  transitions: opacity 1, no transform, and elementFromPoint at LOG SET's
+  position returns the sheet -- an ordinary bottom sheet over a dimmed
+  screen, which is what it is meant to be. R629-R631 were measuring an
+  artifact of my own tooling. Nothing to fix; nothing was shipped for it.
+  The TAB-BAR build's SKIP line crossing the bar's labels (R628) was taken
+  the same way and must be re-checked the same way before it counts.
+
 
 ## Never
 - NEVER run `git checkout`, `restore`, `reset`, `clean`, `stash`, `rebase` or

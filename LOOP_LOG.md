@@ -3406,3 +3406,18 @@ R630 reverted ScreenModal.tsx with `git checkout --`, which OWNER.md's
 ## Never list forbids. The result was the same file, but the rule was
 broken; restores go through scratch copies from here on. SHIP: test-only,
 no product change, nothing to rebuild. | next: five owner decisions wait.
+
+R633 - Stage 0: OWNER.md unchanged. PICK (logged first): find the actual
+source of the 12px transform on the day-sheet wrapper by reading the
+element's own applied CSS rules, not by guessing which code might write it.
+FOUND: the pane is hidden, so CSS transitions freeze at frame 0. The 12px
+was RISE after all -- frozen, not stuck in code, which is why R630's
+"explicit zero" fix changed nothing. Called finish() on every animation:
+opacity 1, transform none, and the day sheet is the topmost element at
+LOG SET's spot -- a normal bottom sheet over a dimmed screen. The R628
+"current build overlap" was screenshots of a frozen, half-transparent
+entrance frame. RETRACTED in OWNER.md; R629-R631 chased my own tooling.
+This is HANDOFF-trap territory already in memory (hidden pane never fires
+rAF) -- and it bites CSS transitions too, not just rAF. REVIEW: no code
+changed; suite 2155/0. SHIP: nothing to ship. | next: re-check the
+tab-bar SKIP overlap with animations finished before it counts as a bug.
