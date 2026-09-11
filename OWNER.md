@@ -226,6 +226,21 @@ a little sloppy and AI-generated.
   judge the four R628 pictures as a pixel/streak tradeoff only, and note
   their sheets are caught mid-fade (the ghosting is the capture, not the app).
 
+  CLEAN PICTURES, R636 -- use these, not R628's. All four retaken with every
+  animation finished and the day question skipped, so each shows the logging
+  screen at rest: current vs tab bar, at 375x568 and 375x812, in this
+  session's transcript. What they show, read straight off them:
+  - At 568 both fit with no scrolling; the tab bar version moves DEADLIFT up
+    ~36px into the space the top row gave back, and ends in the 56px bar.
+  - At 812 both leave a large empty band below NEXT SET 1 -- the bar sits in
+    space the current build does not use at all.
+  - The only thing that visibly LEAVES the screen is the top row, and with it
+    PROGRESS / GOALS text links and the 12 WK streak. The bar brings PROGRESS
+    and GOALS back as tabs; the streak has no home.
+  One honesty note: the two builds load different demo snapshots
+  (seed.b64 was regenerated R628, tabbar.b64 was not), so the weight reads
+  225 in one and 235 in the other. Same screen, same layout -- ignore it.
+
 
 ## Never
 - NEVER run `git checkout`, `restore`, `reset`, `clean`, `stash`, `rebase` or

@@ -3437,3 +3437,16 @@ durable -- HANDOFF trap 20: a hidden pane freezes CSS transitions at frame
 Recipe recorded: finish() every animation, then elementFromPoint decides
 what is on top. Doc-only; suite 2155/0 (HANDOFF pin tests still pass).
 Nothing to plant or rebuild. | next: five owner decisions wait.
+
+R636 - Stage 0: OWNER.md unchanged by the owner. PICK (logged first): the
+owner's top ask is pictures, and R628's four are ghosted mid-fade. Retake
+current/tab-bar x 568/812 with every animation finished first (trap 20).
+BUILD/REVIEW: loaded each snapshot, skipped the day sheet with a real
+pointer sequence, finish()ed every animation, then captured. All four clean
+(two capture retries on timeouts, one tiled frame discarded). Read-offs
+filed in OWNER.md: both fit at 568; at 812 the bar lives in space the
+current build leaves empty; what leaves is the top row incl. the streak.
+Flagged that the two demo snapshots differ (225 vs 235) so the owner does
+not read it as a difference in the builds. Restored seed.b64 and desktop
+viewport. No code changed; suite 2155/0. SHIP: comparison material only,
+per the owner's own ask; neither build changed. | next: owner's pick.
