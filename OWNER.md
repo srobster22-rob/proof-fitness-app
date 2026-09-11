@@ -217,6 +217,15 @@ a little sloppy and AI-generated.
   The TAB-BAR build's SKIP line crossing the bar's labels (R628) was taken
   the same way and must be re-checked the same way before it counts.
 
+  RE-CHECKED, R634 -- ALSO NOT A BUG. Tab-bar build, 375x568, transitions
+  finished: SKIP at y517-532, the bar's labels at y545-559, no overlap, and
+  SKIP is the topmost element at its own position. It is the day sheet
+  sitting over a dimmed bar, as any sheet does. So the tab-bar question is
+  back to exactly what it was before R628: +20px net, and the streak has
+  nowhere to go. No hidden defect on either side. Sorry for the detour --
+  judge the four R628 pictures as a pixel/streak tradeoff only, and note
+  their sheets are caught mid-fade (the ghosting is the capture, not the app).
+
 
 ## Never
 - NEVER run `git checkout`, `restore`, `reset`, `clean`, `stash`, `rebase` or

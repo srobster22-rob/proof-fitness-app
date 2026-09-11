@@ -3421,3 +3421,12 @@ This is HANDOFF-trap territory already in memory (hidden pane never fires
 rAF) -- and it bites CSS transitions too, not just rAF. REVIEW: no code
 changed; suite 2155/0. SHIP: nothing to ship. | next: re-check the
 tab-bar SKIP overlap with animations finished before it counts as a bug.
+
+R634 - Stage 0: OWNER.md unchanged by the owner. PICK: re-check R628's
+tab-bar "SKIP crosses the bar" with transitions finished, since R633 showed
+the pane freezes them. RESULT: SKIP y517-532, bar labels y545-559, no
+overlap, SKIP topmost -- a sheet over a dimmed bar. Retracted in OWNER.md;
+the tab-bar decision is back to a clean pixel/streak tradeoff. Lesson for
+the harness: in this pane, call document.getAnimations().forEach(a =>
+a.finish()) before measuring or screenshotting anything that animates in.
+No code changed; suite 2155/0. | next: five owner decisions wait.
