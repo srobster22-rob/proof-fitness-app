@@ -3461,3 +3461,13 @@ bar present, DEADLIFT, "Last time 225 x 5", identical to seed.b64. Removed a
 temp .sqlite my script dropped in public/. Both .b64 files are gitignored
 dev artifacts, so the commit is OWNER.md + log only. Suite 2155/0. Restored
 seed.b64 in the preview. | next: owner's pick.
+
+R638 - Stage 0: OWNER.md unchanged by the owner. PICK (logged first): the
+demo opens on DEADLIFT with no coach line -- confirm that silence is honest
+(under 2 sessions in the 14-day window), not a coach defect.
+RESULT: honest silence. Read the seed's sets table directly: DEADLIFT has 1
+session in the 14-day window (09-04); the coach needs 2. Only squat and leg
+press have 2 (latest 09-06). Bench has also aged down to 1 -- the snapshot
+decays by calendar, and OWNER.md already tells the owner to run
+`npm run seed` when the line looks empty, which is the documented remedy.
+No defect, nothing built. Suite 2155/0. | next: owner's pick.
