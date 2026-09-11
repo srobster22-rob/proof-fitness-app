@@ -3471,3 +3471,11 @@ press have 2 (latest 09-06). Bench has also aged down to 1 -- the snapshot
 decays by calendar, and OWNER.md already tells the owner to run
 `npm run seed` when the line looks empty, which is the documented remedy.
 No defect, nothing built. Suite 2155/0. | next: owner's pick.
+
+R639 - Stage 0: OWNER.md unchanged by the owner. BLOCKED, filed rather than
+manufactured: every item in ## Next is an owner decision (tab bar, day-one
+label, strength step, machine-name blur, UI-sloppy specifics). R632-R638
+were audits, retractions and comparison material; the self-directed queue
+is empty of real product value. Wrote ~/.claude/loop-state/<sid>.blocked
+(the hook's own documented exit) to release this session only. Re-saving
+LOOP_ON puts it back to work the moment the owner answers anything.
