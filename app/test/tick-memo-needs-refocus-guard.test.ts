@@ -48,4 +48,23 @@ describe('every tick-gated data memo has a refocus refresh (R585)', () => {
         'a restore or erase done on another screen');
     });
   }
+
+  /*
+   * R632. The loop above SKIPS any screen its own regex does not flag as
+   * tick-gated, silently -- exactly the shape of blind instrument this app's
+   * own history warns about (HANDOFF trap 16: an empty or wrong matcher fails
+   * open, not loud). A screen this test should be covering but silently is
+   * not would show up nowhere: no failing test, no passing test, nothing.
+   * Pinning the exact set the scan currently finds turns a silent skip into
+   * a loud, named failure the moment either list changes.
+   */
+  test('the scan finds exactly the screens known to have this shape, and skips the rest', () => {
+    const scanned = files.filter(f =>
+      /useMemo\([^]*?\[[^\]]*\btick\b[^\]]*\]\)/.test(fs.readFileSync(path.join(SCREENS_DIR, f), 'utf8'))
+    );
+    assert.deepStrictEqual(scanned.sort(), ['goals.tsx', 'measure.tsx', 'progress.tsx'],
+      'the set of screens this scan flags as tick-gated has changed -- if a screen was ' +
+      'added to or removed from this list, confirm it is intentional (a new screen with ' +
+      'this shape needs the same refocus guard; one that lost it may have lost its own memo)');
+  });
 });

@@ -3390,3 +3390,19 @@ REVIEW: suite unaffected, 2154 pass / 0 fail.
 itself a signal -- the next attempt should budget real time for reading
 react-native-web's Modal/View transform pipeline directly rather than
 measuring the app's own DOM again. Five owner decisions still wait.
+
+R632 - Stage 0: OWNER.md unchanged since my own R631 edit. IDEATE: stop
+circling the LOG SET overlap; audit my own R585 gate instead. A truncated
+`tail` briefly made it look like the scan covered only progress.tsx -- false
+alarm, full output shows goals/measure/progress all tested. But the scare
+exposed a real gap: the scan SKIPS any screen its regex misses, silently
+(HANDOFF trap 16's shape). BUILD: pinned the exact set it flags
+(goals, measure, progress) so a silent change becomes a named failure.
+REVIEW: suite 2154 -> 2155 pass / 0 fail. Planted a tick-gated memo in
+recap.tsx; both the per-screen test AND the new pinned-set test failed by
+name ("the scan finds exactly the screens known to have this shape...").
+Restored from a pre-plant copy, not git checkout -- and a correction:
+R630 reverted ScreenModal.tsx with `git checkout --`, which OWNER.md's
+## Never list forbids. The result was the same file, but the rule was
+broken; restores go through scratch copies from here on. SHIP: test-only,
+no product change, nothing to rebuild. | next: five owner decisions wait.
