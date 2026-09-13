@@ -68,6 +68,14 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **LOG SET / day-sheet overlap (R628-R631) -- NOT A BUG, closed R644.**
+  Re-measured with the pane fronted: the sheet settles at opacity 1,
+  transform none, and covers LOG SET at 375x568 exactly as at 812. Every
+  earlier measurement (TODAY IS at y386, a stuck translateY(12) = RISE,
+  LOG SET showing through the sheet) was the sheet's 220ms entrance frozen
+  at its first frame, because the pane's document was hidden and CSS
+  transitions do not advance in a hidden document. Recorded as HANDOFF trap
+  19. Nothing in the app changed; the R630 "fix" was rightly reverted.
 - **Strength vs size step -- DECIDED R643, no change** (2026-09-10: "keep
   strength and size the same"). On a plateau both goals suggest one grid step
   (+5 lb / +2.5 kg). They still differ where they always did: strength moves

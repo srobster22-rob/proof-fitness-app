@@ -3572,3 +3572,7 @@ hidden document; R630's fix could not have moved it and was rightly
 reverted. BUILD: HANDOFF trap 19; OWNER.md diagnosis notes removed, closed
 under Done. No app code changed, so no plant; suite run after the OWNER.md
 edit. SHIP: nothing to rebuild; viewport reset, seed reloaded.
+R644 correction: the commit above landed with LOOP_LOG only -- the script
+that edited OWNER.md/HANDOFF.md aborted on its first step (the R629 notes
+had already left OWNER.md with the tab-bar entry in R640) and I did not
+check its exit before committing. Done entry and trap 19 written now.

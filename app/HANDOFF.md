@@ -664,3 +664,14 @@ threw. §11 makes that file the user's only backup.
 **`tools/seed-history.ts`** builds a real history (progress / stall / year-two)
 and prints the base64 SQLite blob the web build stores. Two of BUILD_LOOP's seven
 journeys cannot be reached without it.
+
+19. **A hidden pane freezes CSS transitions at their first frame.** The sheet's
+    entrance is a 220ms opacity/translateY transition. With `document.hidden`
+    true it never advances, so the overlay sits at partial opacity and
+    `translateY(12)` -- RISE's own value -- indefinitely, and a screenshot or
+    `getBoundingClientRect` taken "after settling" reads a mid-animation frame:
+    content 12px low and the screen behind showing through. R628-R631 spent
+    four rounds diagnosing that as a layout bug. Before believing an overlap
+    measurement, read `getComputedStyle(wrapper).opacity/transform` -- if they
+    are not `1` / `none`, front the pane (or `getAnimations().forEach(a =>
+    a.finish())`) and measure again.
