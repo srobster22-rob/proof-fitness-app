@@ -35,10 +35,21 @@ describe('the tab bar is the layout, and the streak moved with it (R640)', () =>
     assert.match(screen('goals.tsx'), /<TabBar current="goals"/);
     assert.match(screen('settings.tsx'), /<TabBar current="settings"/);
     for (const f of ['progress.tsx', 'goals.tsx', 'settings.tsx']) {
-      assert.match(screen(f), /go=\{tab => router\.replace\(TAB_ROUTE\[tab\] as never\)\}/,
-        `${f}: a tab tap must replace, not push -- a push stacks tab on tab`);
+      assert.match(screen(f), /go=\{tab => goTab\(router, tab\)\}/,
+        `${f}: tab routing must go through goTab, the one place that knows NOW is the root`);
     }
     assert.doesNotMatch(SCREEN, /tabGlyph|tabLabel:/, 'Now still has its own copy of the bar styles');
+  });
+
+  test('NOW pops back to the root; the other tabs replace (R646)', () => {
+    // replace('/') stacked a second Now under every trip; measured 1 -> 2 -> 3
+    // live LOG SET buttons. Now is always the root, so it is reached by popping.
+    const go = region(BAR, 'export function goTab', 'const GLYPH');
+    assert.match(go, /if \(tab === 'now'\) router\.dismissAll\(\);/,
+      'NOW no longer pops to the root -- it stacks a second Now screen');
+    assert.match(go, /else router\.replace\(TAB_ROUTE\[tab\] as never\);/,
+      'a sibling tab must replace, not push');
+    assert.doesNotMatch(go, /router\.push/);
   });
 
   test('the top link row it replaced is gone', () => {

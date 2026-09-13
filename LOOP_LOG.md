@@ -3602,3 +3602,25 @@ edit script asserted AFTER writing NowScreen and aborted, so the screens
 and tests were untouched on the first run -- the first suite run showed 5
 failures, which is what exposed it. Viewport reset, seed reloaded.
 | next: ## Next still holds only the owner's-eye UI note.
+
+R646 - Stage 0: ## Next unchanged (owner's-eye UI note only). PICK (logged
+first): measured after R645 -- tapping NOW from another tab does
+router.replace('/'), which swaps the top of the stack for a SECOND Now
+(mounted LOG SET buttons: 1 -> 2 -> 3 across two round trips). Each trip
+leaves another live Now screen underneath. NOW must pop back to the root
+Now that is already there, not stack a copy. Put the routing in one shared
+helper in TabBar.tsx so all three screens fix together.
+BUILD: TabBar.tsx exports goTab(router, tab) -- NOW -> router.dismissAll()
+(pops to the root Now that is always underneath), siblings -> replace.
+progress/goals/settings call goTab instead of inlining replace. Test:
+"NOW pops back to the root; the other tabs replace (R646)" reads goTab's
+body; the R645 per-screen assertion now checks the goTab call. REVIEW:
+suite 2163 -> 2164 pass / 0 fail. Plant (NOW back to replace('/')) -> the
+new test failed by name; restored byte-identical. PRODUCT, 375x812: live
+LOG SET buttons stayed at 1 across Now->Progress->Now and
+Now->Goals->Settings->Now (was 1 -> 2 -> 3); lands on / with NOW lit.
+Trap 7 bit again: a heredoc'd python edit turned '\n}' into a literal
+newline inside a TS string, breaking the test file AND tsc (which the
+R573 in-suite check caught); a second heredoc "fix" was a no-op for the
+same reason. Fixed with the Edit tool, anchoring on 'const GLYPH' instead.
+Viewport reset. | next: ## Next still holds only the owner's-eye UI note.

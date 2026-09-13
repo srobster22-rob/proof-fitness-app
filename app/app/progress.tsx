@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useGuardedPush, useGuardedLeave } from '../src/ui/guarded-push.ts';
-import { TabBar, TAB_ROUTE } from '../src/ui/TabBar.tsx';
+import { TabBar, goTab } from '../src/ui/TabBar.tsx';
 import { View, Text, StyleSheet, ScrollView, Pressable, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -268,7 +268,7 @@ export default function Progress() {
             revision={tick} />
         </ScrollView>
       )}
-      <TabBar current="progress" go={tab => router.replace(TAB_ROUTE[tab] as never)} />
+      <TabBar current="progress" go={tab => goTab(router, tab)} />
     </SafeAreaView>
   );
 }
