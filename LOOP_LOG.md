@@ -3560,3 +3560,15 @@ grid step for both on a plateau; they differ on the rep threshold, 5 vs 8).
 Closed the filing, recorded it under Done. No test reads the R548 filing;
 full suite run after the OWNER.md edit anyway (R642's lesson). All owner
 decisions in ## Next are now answered.
+
+R644 - Stage 0: OWNER.md ## Next holds only the "sloppy UI" note, which
+needs the owner's eye. PICK (logged first): re-test the R628-R631 overlap
+now that the pane is fronted, with the hypothesis that it was a frozen
+entrance transition, not layout. RESULT: confirmed. At 375x568 after reload
+the sheet wrapper reads opacity 1 / transform none, TODAY IS sits at y374
+(not 386), and the opaque sheet covers LOG SET -- screenshot matches 812.
+The 12px was RISE because the entrance transition froze at frame one in a
+hidden document; R630's fix could not have moved it and was rightly
+reverted. BUILD: HANDOFF trap 19; OWNER.md diagnosis notes removed, closed
+under Done. No app code changed, so no plant; suite run after the OWNER.md
+edit. SHIP: nothing to rebuild; viewport reset, seed reloaded.
