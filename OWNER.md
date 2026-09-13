@@ -37,8 +37,8 @@ a little sloppy and AI-generated.
   gitignored — nothing to review in the diff — but it means the feature was
   never actually gone, only invisible in the one place you'd look to judge it.
 
-  TO SEE IT: run the app, `npm run seed` first if the line looks empty, then
-  in the browser console
+  TO SEE IT: run the app (it regenerates the sample data on start since R647,
+  so the line cannot go stale), then in the browser console
     fetch('/seed.b64').then(r=>r.text()).then(t=>{localStorage.setItem('proof.db.v1',t);location.reload()})
   BENCH PRESS on Now should show a climbing/plateau/hold line, not just "Last
   time". Settings → COACHING changes its wording live.

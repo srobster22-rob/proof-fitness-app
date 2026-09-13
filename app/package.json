@@ -13,7 +13,7 @@
     "e2e": "node tools/render-recap.ts",
     "typecheck": "tsc --noEmit",
     "check-deps": "node check-deps.cjs",
-    "web": "expo start --web --port 8099",
+    "web": "node tools/seed-web.ts && expo start --web --port 8099",
     "seed": "node tools/seed-web.ts",
     "cards": "node tools/card-sheet.cjs"
   },

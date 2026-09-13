@@ -3624,3 +3624,25 @@ newline inside a TS string, breaking the test file AND tsc (which the
 R573 in-suite check caught); a second heredoc "fix" was a no-op for the
 same reason. Fixed with the Edit tool, anchoring on 'const GLYPH' instead.
 Viewport reset. | next: ## Next still holds only the owner's-eye UI note.
+
+R647 - Stage 0: ## Next unchanged (owner's-eye UI note only). Checked the
+R645 bar at 375x568 on all tabs first: pinned at y568, lists scroll above
+it, no page scroll -- no defect. PICK (logged first): the preview's sample
+data goes stale on its own. seed.b64 is a snapshot of dated history, so
+once its last session ages past the coach's 14-day window the coach line
+silently drops to "Last time" -- it hid the AI feature from the owner in
+R586 and again in R628, both times found only by accident. Make
+`npm run web` (what the preview server runs) regenerate seed.b64 first
+(1.7s), and pin that with a test.
+BUILD: package.json "web" = `node tools/seed-web.ts && expo start --web
+--port 8099`. New test/seed-fresh-on-web.test.ts pins the script and that
+the seeder dates history from Date.now() (otherwise regenerating would not
+help). OWNER.md's "npm run seed first" instruction updated to say it is
+automatic. REVIEW: suite 2164 -> 2166 pass / 0 fail. Plant (old web script)
+-> "npm run web writes a fresh seed before starting the dev server" failed
+by name; restored byte-identical. PRODUCT: restarted the preview server --
+its log shows "seeded 12 weeks -- 288 sets, 36 sessions" before Metro
+starts, and seed.b64's mtime moved to 02:57:12, eleven seconds before the
+check. Loaded it at 375x812: BENCH PRESS, "175 and climbing, 2 sessions --
+try 180", 13 WK. Viewport reset. | next: ## Next still holds only the
+owner's-eye UI note.
