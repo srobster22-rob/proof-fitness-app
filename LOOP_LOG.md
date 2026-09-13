@@ -3576,3 +3576,29 @@ R644 correction: the commit above landed with LOOP_LOG only -- the script
 that edited OWNER.md/HANDOFF.md aborted on its first step (the R629 notes
 had already left OWNER.md with the tab-bar entry in R640) and I did not
 check its exit before committing. Done entry and trap 19 written now.
+
+R645 - Stage 0: ## Next holds only the owner's-eye UI note. PICK (logged
+first): the tab bar shipped R640 renders on Now ONLY -- tap PROGRESS and the
+bar vanishes, and the other three tabs answer "where am I" with a back link.
+A bar that disappears when you use it is not a tab bar. Extract it to
+src/ui/TabBar.tsx and render it on Progress, Goals and Settings with the
+current tab lit; sibling tabs navigate with router.replace (the idiom
+settings.tsx already uses), NOW with replace('/'). Back links stay -- removing
+them is a design call. Measure (pushed from Progress) stays a sub-screen.
+BUILD: src/ui/TabBar.tsx (shared, `current` lit + disabled, `go(tab)`,
+labels from one table entry each); NowScreen renders it with a -20 bleed
+and lost its five bar styles + TAB_BAR_HEIGHT import; progress/goals/
+settings render it before </SafeAreaView> with router.replace(TAB_ROUTE).
+Tests: tab-bar-experiment gains "every tab the bar names renders the bar,
+lit on itself" and reads TabBar.tsx for the bar shape; now-layout and
+language tests re-pointed to TabBar.tsx. REVIEW: suite 2158 -> 2163 pass /
+0 fail. Plant (bar removed from progress.tsx) -> the new test failed by
+name; restored byte-identical. PRODUCT, 375x812: /progress, /goals,
+/settings each show the bar pinned at y757-812 with exactly their own tab
+volt; tapping GOALS/SETTINGS/NOW lands on /goals, /settings, / with the
+right tab lit and LOG SET present on Now; no page scroll. Screenshot of
+Progress confirms bar under the scrolling list. Mistake caught in-round: my
+edit script asserted AFTER writing NowScreen and aborted, so the screens
+and tests were untouched on the first run -- the first suite run showed 5
+failures, which is what exposed it. Viewport reset, seed reloaded.
+| next: ## Next still holds only the owner's-eye UI note.

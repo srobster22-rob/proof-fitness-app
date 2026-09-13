@@ -37,7 +37,8 @@ describe('Now screen — layout invariants', () => {
   // R640: the top link row is gone; the tab bar replaced it. Same rule, new
   // element: an absolute bar would sit over LOG SET instead of below it.
   test('the tab bar is in flow, so the column cannot slide under it', () => {
-    assert.doesNotMatch(style('tabBar'), /position:\s*'absolute'/,
+    const bar = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'TabBar.tsx'), 'utf8');
+    assert.doesNotMatch(region(bar, '  tabBar: {', '  tabItem:'), /position:\s*'absolute'/,
       'an absolute tabBar covers the bottom of the column on a short phone');
   });
 

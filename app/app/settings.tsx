@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useGuardedLeave } from '../src/ui/guarded-push.ts';
+import { TabBar, TAB_ROUTE } from '../src/ui/TabBar.tsx';
 import { getRepo } from '../src/data/db.ts';
 import { COLUMN } from '../src/ui/column.ts';
 import { displayUnit } from '../src/ui/display-unit.ts';
@@ -300,6 +301,7 @@ export default function Settings() {
           <Text style={s.linkText}>{t(lang, 'exportData')} · {t(lang, 'restore')}  →</Text>
         </Pressable>
       </ScrollView>
+      <TabBar current="settings" go={tab => router.replace(TAB_ROUTE[tab] as never)} />
     </SafeAreaView>
   );
 }

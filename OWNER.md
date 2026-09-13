@@ -68,6 +68,11 @@ a little sloppy and AI-generated.
 
 ## Done
 <!-- the agent moves finished items here with the round number and result -->
+- **Tab bar on every tab -- R645.** R640 drew it on Now only, so tapping
+  PROGRESS made it vanish. Progress, Goals and Settings now carry the same
+  bar with their own tab lit; tabs switch with replace, so nothing stacks.
+  Their DONE/back links stay -- dropping them is your call. Measure stays a
+  sub-screen of Progress, no bar.
 - **LOG SET / day-sheet overlap (R628-R631) -- NOT A BUG, closed R644.**
   Re-measured with the pane fronted: the sheet settles at opacity 1,
   transform none, and covers LOG SET at 375x568 exactly as at 812. Every

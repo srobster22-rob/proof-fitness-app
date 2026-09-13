@@ -20,7 +20,7 @@ import {
 import { ConfirmSheet } from './ConfirmSheet.tsx';
 import type { Repo } from '../data/repo.ts';
 import { COLUMN } from './column.ts';
-import { TAB_BAR_HEIGHT } from './tab-bar.ts';
+import { TabBar } from './TabBar.tsx';
 import { ScreenModal, useExitOnce } from './ScreenModal.tsx';
 import { useDragScroll } from './drag-scroll.ts';
 import { Arrive } from './Arrive.tsx';
@@ -1215,33 +1215,10 @@ export function NowScreen({
         )}
       </View>
 
-      {/*
-        The bar. The same three destinations the top row had, plus NOW as the
-        one you are ON — which is what a tab bar gives that a link row cannot:
-        a visible answer to "where am I".
-      */}
-        <View style={s.tabBar}>
-          {([
-            ['now', T('nowWord'), undefined],
-            ['progress', T('progress'), onOpenProgress],
-            ['goals', T('goals'), onOpenGoals],
-            ['settings', T('settings'), onOpenSettings]
-          ] as Array<[string, string, (() => void) | undefined]>).map(([id, label, go]) => (
-            <Pressable
-              key={id}
-              accessibilityRole="link"
-              accessibilityLabel={label}
-              disabled={!go}
-              onPress={go}
-              style={pressStyle(s.tabItem, 'quiet', still)}
-            >
-              <Text style={[s.tabGlyph, id === 'now' && s.tabGlyphOn]}>
-                {id === 'now' ? '◆' : id === 'progress' ? '↗' : id === 'goals' ? '◎' : '⚙'}
-              </Text>
-              <Text style={[s.tabLabel, id === 'now' && s.tabLabelOn]} numberOfLines={1}>{label}</Text>
-            </Pressable>
-          ))}
-        </View>
+      {/* The bar -- shared with every tab it names, see TabBar.tsx. Bleeds
+          past the root padding so it reads as chrome, not content. */}
+      <TabBar current="now" style={s.tabBleed}
+        go={tab => (tab === 'progress' ? onOpenProgress : tab === 'goals' ? onOpenGoals : onOpenSettings)?.()} />
       </ColumnWrap>
 
       {/* Rendered conditionally rather than toggled through Modal's `visible`.
@@ -2536,16 +2513,7 @@ const s = StyleSheet.create({
    * `marginHorizontal: -20` cancels the root padding so the bar reaches both
    * edges, which is what makes it read as chrome rather than as content.
    */
-  tabBar: {
-    flexDirection: 'row', height: TAB_BAR_HEIGHT,
-    borderTopWidth: 1, borderTopColor: '#161B20', backgroundColor: '#0B0D0F',
-    marginHorizontal: -20
-  },
-  tabItem: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
-  tabGlyph: { color: '#9AA5AF', fontSize: 15, fontWeight: '700' },
-  tabGlyphOn: { color: VOLT },
-  tabLabel: { color: '#9AA5AF', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
-  tabLabelOn: { color: VOLT },
+  tabBleed: { marginHorizontal: -20 },
   finish: { paddingVertical: 12, paddingHorizontal: 16 },
   finishText: { color: MUTED, fontSize: 12, fontWeight: '800', letterSpacing: 1.5 },
 

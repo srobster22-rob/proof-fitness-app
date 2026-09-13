@@ -364,10 +364,10 @@ describe('every accessibility label on the logging screen is translated', () => 
   // R640: the destinations moved into the tab bar, which builds each tab's
   // visible label and its accessibility label from the SAME entry.
   test('the tab bar reuses the same keys the visible PROGRESS/GOALS/SETTINGS labels use', () => {
-    assert.match(src, /\['progress', T\('progress'\), onOpenProgress\]/);
-    assert.match(src, /\['goals', T\('goals'\), onOpenGoals\]/);
-    assert.match(src, /\['settings', T\('settings'\), onOpenSettings\]/);
-    assert.match(src, /accessibilityLabel=\{label\}/,
+    const bar = readFileSync(path.join(HERE, '..', 'src', 'ui', 'TabBar.tsx'), 'utf8');
+    assert.match(bar, /now: 'nowWord', progress: 'progress', goals: 'goals', settings: 'settings'/);
+    assert.match(bar, /const label = t\(lang, LABEL\[id\]\);/);
+    assert.match(bar, /accessibilityLabel=\{label\}/,
       'the tab spoken aloud is not the tab drawn');
   });
 
