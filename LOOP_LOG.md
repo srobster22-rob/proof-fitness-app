@@ -3735,3 +3735,32 @@ plus a return to Now: 1024x768 -> 430px wide at left 297 on every one
 Viewport reset; no data touched. Lesson: a style test that passes is not a
 layout that works -- the first version of this fix was green and wrong.
 | next: R651 -- pin Now's bar outside its scroller on short windows.
+
+R651 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. PICK (logged first, measured in R650): on a window
+short enough that Now's column switches to a ScrollView (375x380), Now's
+tab bar is INSIDE that scroller -- at rest only its top 4px are on screen,
+it appears only after scrolling to the end -- while Progress, Goals and
+Settings render their bar outside their scroll views, pinned. R640 placed
+the bar before </ColumnWrap>. Move it out so it is pinned on every tab at
+every height, without changing the phone layout.
+BUILD: moved Now's <TabBar current="now" .../> from the last child of
+ColumnWrap to directly after </ColumnWrap>, still inside the padded root,
+so the -20 bleed and R650's stretch override still apply. Test "Now pins
+its bar outside the scrolling column, like every other tab (R651)" checks
+the bar comes after </ColumnWrap> (plain indexOf, no regex). REVIEW: suite
+2170 -> 2171 pass / 0 fail. Plant (pre-move NowScreen restored from the
+scratch copy) -> the R651 test failed by name; post-move copy restored
+byte-identical. PRODUCT, same probes as the pre-edit baseline:
+375x812 bar 756-812, LOG SET 402-474, hero 109px -- identical;
+375x568 bar 512-568, LOG SET 319-375, hero 62px -- identical;
+375x380 bar was 376-432 inside the scroller (4px visible), now 324-380,
+fully visible, outside the scroller, and unmoved at scroll top and scroll
+end. Trade-off, stated plainly: at 380px the pinned bar takes 56px from a
+window with no room, so LOG SET's bottom 11px sit below the column's
+visible edge until you scroll (45px still tappable). That is the app's own
+rule -- phones do not scroll, windows this short do. Viewport reset; no
+data touched. Found for later: fixedHeight still budgets TOP_BAR = 31 for
+the top link row R640 deleted and nothing for the 56px bar, and
+fixed-height-no-drift.test.ts still passes over a style that no longer
+exists -- a blind check. R652 candidate. | next: R652.

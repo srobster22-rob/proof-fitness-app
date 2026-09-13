@@ -142,6 +142,18 @@ describe('the tab bar is the layout, and the streak moved with it (R640)', () =>
       'Now\'s bar lost its stretch override, so the COLUMN cap shrinks it inside the padded column');
   });
 
+  test('Now pins its bar outside the scrolling column, like every other tab (R651)', () => {
+    // On a window short enough for ColumnWrap to become a ScrollView, a bar
+    // inside it scrolled with the content: at 375x380 only its top 4px were on
+    // screen until you scrolled to the end. The other tabs render the bar after
+    // their ScrollView, so it stays put.
+    const closeColumn = SCREEN.indexOf('</ColumnWrap>');
+    const bar = SCREEN.indexOf('<TabBar current="now"');
+    assert.ok(closeColumn >= 0 && bar >= 0, 'anchor missing -- ColumnWrap or the Now bar was renamed');
+    assert.ok(bar > closeColumn,
+      'Now\'s tab bar is inside ColumnWrap again, so it scrolls away on a short window');
+  });
+
   test('and it says which destination you are on', () => {
     assert.match(BAR, /const on = id === current;/);
     assert.match(BAR, /on && s\.tabGlyphOn/);

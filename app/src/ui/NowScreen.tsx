@@ -1215,11 +1215,14 @@ export function NowScreen({
         )}
       </View>
 
-      {/* The bar -- shared with every tab it names, see TabBar.tsx. Bleeds
+      </ColumnWrap>
+      {/* The bar -- shared with every tab it names, see TabBar.tsx. OUTSIDE the
+          column (R651): inside it, a window short enough for ColumnWrap to become
+          a ScrollView carried the bar with the content -- 4px of it showing at
+          375x380 -- while every other tab pins its bar. Bleeds
           past the root padding so it reads as chrome, not content. */}
       <TabBar current="now" style={s.tabBleed}
         go={tab => (tab === 'progress' ? onOpenProgress : tab === 'goals' ? onOpenGoals : onOpenSettings)?.()} />
-      </ColumnWrap>
 
       {/* Rendered conditionally rather than toggled through Modal's `visible`.
           On react-native-web a transparent Modal stayed on screen after
