@@ -3703,3 +3703,35 @@ byte-identical. PRODUCT: Progress<->Settings three round trips keep exactly
 EDIT THIS WORKOUT lands on / with 1 mounted LOG SET (was 2) and NEXT SET 2,
 the logged set kept. Seed restored after. | next: ## Next holds only the
 owner's-eye UI note.
+
+R650 - Stage 0: OWNER.md unchanged since R647 (my own edit); ## Next holds
+only the owner's-eye UI note. Checked first, no defect: Progress->Measure->
+DONE and Progress->past recap->DONE each return to exactly 1 mounted
+Progress, twice; with R649 every push/back path is now walked. At 375x460
+Now's bar is pinned in the viewport, not inside the scroller. PICK (logged
+first): at 1024x768 Now's bar is 430px wide and centred (left 297) -- it
+sits inside the COLUMN-capped column -- but the shared TabBar on Progress
+and Goals spans the full 1024px, so the bar jumps width every time you
+switch tabs on a tablet or wide window. The app's own rule, stated on the
+sheet style, is "Capped and centred, like every other surface". Cap TabBar
+to COLUMN; on a phone nothing changes (width 100% <= 430).
+Mid-round regression, caught by measuring, not by the suite: capping TabBar
+with ...COLUMN passed 2170/0 but broke Now. COLUMN brings width '100%', and
+inside Now's padded column that is the padded width, so the -20 bleed only
+shifted the bar: Now measured 335px at left 20 on a 375 phone (was 375 full
+bleed) and 390px at left 317 at 1024 (others 430 at 297). Fix: Now's
+tabBleed also sets alignSelf 'stretch', width 'auto'. Also found while
+testing short heights, and logged as R651's pick: at 375x380 (where Now's
+column switches to a ScrollView) Now's bar is INSIDE the scroller -- 4px of
+it visible until you scroll to the end -- while the other tabs pin theirs.
+BUILD: TabBar's tabBar style gains ...COLUMN (imports COLUMN); Now's
+tabBleed gains alignSelf 'stretch', width 'auto'. Test "the bar is capped
+to the phone column on every tab, like every other surface (R650)" pins
+both halves. REVIEW: suite 2169 -> 2170 pass / 0 fail. Plant A (Now loses
+the stretch override) and plant B (TabBar loses ...COLUMN) each failed the
+R650 test by name; both restored byte-identical. PRODUCT, all four tabs
+plus a return to Now: 1024x768 -> 430px wide at left 297 on every one
+(was Now 430 / others 1024); 375x812 -> 375px at left 0 on every one.
+Viewport reset; no data touched. Lesson: a style test that passes is not a
+layout that works -- the first version of this fix was green and wrong.
+| next: R651 -- pin Now's bar outside its scroller on short windows.

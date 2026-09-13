@@ -4,6 +4,7 @@ import { getRepo } from '../data/db.ts';
 import { t, languageOf } from '../domain/i18n.ts';
 import { pressStyle, useReducedMotion } from './press.ts';
 import { TAB_BAR_HEIGHT, type Tab } from './tab-bar.ts';
+import { COLUMN } from './column.ts';
 
 const VOLT = '#CCFF00';
 
@@ -55,7 +56,10 @@ export function TabBar({ current, go, style }: {
 const s = StyleSheet.create({
   // 56px keeps a 44pt target with a label under the glyph -- see TAB_BAR_HEIGHT.
   // The border is what separates chrome from content above it.
+  // Capped and centred like every other surface: on a wide window Now's bar
+  // was 430px (inside its column) and every other tab's was full width (R650).
   tabBar: {
+    ...COLUMN,
     flexDirection: 'row', height: TAB_BAR_HEIGHT,
     borderTopWidth: 1, borderTopColor: '#161B20', backgroundColor: '#0B0D0F'
   },

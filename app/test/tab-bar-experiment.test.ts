@@ -128,6 +128,20 @@ describe('the tab bar is the layout, and the streak moved with it (R640)', () =>
     assert.match(style, /borderTopWidth: 1/, 'nothing separates the bar from the content above it');
   });
 
+  test('the bar is capped to the phone column on every tab, like every other surface (R650)', () => {
+    // At 1024x768 Now's bar was 430px and centred (it sits inside the capped
+    // column) while Progress and Goals drew it 1024px wide, so it jumped width
+    // on every tab switch.
+    const style = region(BAR, '  tabBar: {', '  tabItem:');
+    assert.match(style, /\.\.\.COLUMN/, 'the bar spans a wide window on some tabs and not others');
+    assert.match(BAR, /import \{ COLUMN \} from '\.\/column\.ts';/);
+    // COLUMN's width '100%' resolves to Now's PADDED column, so without the
+    // stretch override Now's bar shrank to 335px on a 375px phone. The suite
+    // passed with that regression; only measuring caught it.
+    assert.match(SCREEN, /tabBleed: \{ marginHorizontal: -20, alignSelf: 'stretch', width: 'auto' \}/,
+      'Now\'s bar lost its stretch override, so the COLUMN cap shrinks it inside the padded column');
+  });
+
   test('and it says which destination you are on', () => {
     assert.match(BAR, /const on = id === current;/);
     assert.match(BAR, /on && s\.tabGlyphOn/);

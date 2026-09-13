@@ -2513,7 +2513,11 @@ const s = StyleSheet.create({
    * `marginHorizontal: -20` cancels the root padding so the bar reaches both
    * edges, which is what makes it read as chrome rather than as content.
    */
-  tabBleed: { marginHorizontal: -20 },
+  // TabBar is COLUMN-capped (width 100%). Inside Now's padded column that
+  // 100% is the padded width, so the bleed only shifted it: measured 335px at
+  // left 20 on a 375px phone (R650). Stretch restores the full-bleed width;
+  // COLUMN's maxWidth still caps it at 430 on a wide window.
+  tabBleed: { marginHorizontal: -20, alignSelf: 'stretch', width: 'auto' },
   finish: { paddingVertical: 12, paddingHorizontal: 16 },
   finishText: { color: MUTED, fontSize: 12, fontWeight: '800', letterSpacing: 1.5 },
 
