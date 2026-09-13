@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useGuardedLeave } from '../src/ui/guarded-push.ts';
-import { TabBar, goTab } from '../src/ui/TabBar.tsx';
+import { TabBar } from '../src/ui/TabBar.tsx';
+import { goTab } from '../src/ui/tab-bar.ts';
 import { getRepo } from '../src/data/db.ts';
 import { COLUMN } from '../src/ui/column.ts';
 import { displayUnit } from '../src/ui/display-unit.ts';

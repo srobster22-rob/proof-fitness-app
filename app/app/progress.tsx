@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useGuardedPush, useGuardedLeave } from '../src/ui/guarded-push.ts';
-import { TabBar, goTab } from '../src/ui/TabBar.tsx';
+import { TabBar } from '../src/ui/TabBar.tsx';
+import { goTab } from '../src/ui/tab-bar.ts';
 import { View, Text, StyleSheet, ScrollView, Pressable, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';

@@ -3646,3 +3646,30 @@ starts, and seed.b64's mtime moved to 02:57:12, eleven seconds before the
 check. Loaded it at 375x812: BENCH PRESS, "175 and climbing, 2 sessions --
 try 180", 13 WK. Viewport reset. | next: ## Next still holds only the
 owner's-eye UI note.
+
+R648 - Stage 0: ## Next unchanged (owner's-eye UI note only). Two
+hypotheses killed cheaply first: Goals' undo strip is in flow above the bar
+(not pinned under it), and Now gets the same top+bottom safe area from
+index.tsx as the other tabs. PICK (logged first): a real R646 regression.
+NOW calls router.dismissAll(), which assumes Now is underneath. Open the app
+straight onto /progress (a refresh, a deep link) and the stack is just
+Progress -- measured: tapping NOW leaves you on /progress, no LOG SET.
+expo-router's dismissAll is a POP_TO_TOP, a no-op on a one-screen stack.
+Fix: pop when canGoBack(), else replace('/'). Move goTab into tab-bar.ts
+(no react-native import) so it gets behavioural tests with a fake router
+instead of a source regex.
+BUILD: Tab, TAB_ROUTE and goTab moved from TabBar.tsx into tab-bar.ts (no
+react-native import); goTab = `tab === 'now' && canGoBack()` ? dismissAll
+: replace(TAB_ROUTE[tab]). TabBar.tsx imports the type; the three screens
+import goTab from tab-bar.ts. Tests: the R646 source-regex test replaced by
+three behaviour tests against a fake router -- NOW pops when something is
+underneath (R646), NOW replaces to / when nothing is (R648), siblings
+always replace. REVIEW: suite 2166 -> 2168 pass / 0 fail. Plant (unguarded
+dismissAll, the R646 form) -> "NOW still works when the app was opened
+straight onto another tab (R648)" failed by name; restored byte-identical.
+PRODUCT: loaded /progress directly, tapped NOW -> landed on / with LOG SET
+visible (was: stayed on /progress). R646 not regressed: Now->Progress->Now
+and Now->Goals->Settings->Now keep exactly 1 mounted LOG SET. No data or
+viewport touched. Lesson worth keeping: R646 was verified only from a
+fresh start on /, so the one path that broke it -- entering on another
+tab -- was never walked. | next: ## Next holds only the owner's-eye UI note.

@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useGuardedLeave } from '../src/ui/guarded-push.ts';
-import { TabBar, goTab } from '../src/ui/TabBar.tsx';
+import { TabBar } from '../src/ui/TabBar.tsx';
+import { goTab } from '../src/ui/tab-bar.ts';
 import { getRepo } from '../src/data/db.ts';
 import { t, fill, languageOf, dateLocale, FILTER_KEY, SORT_KEY, HORIZON_KEY } from '../src/domain/i18n.ts';
 import { planOf } from '../src/domain/split.ts';

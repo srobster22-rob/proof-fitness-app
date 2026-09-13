@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TAB_BAR_HEIGHT } from '../src/ui/tab-bar.ts';
+import { TAB_BAR_HEIGHT, goTab, type Tab } from '../src/ui/tab-bar.ts';
 import { region } from './helpers/source.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -41,15 +41,44 @@ describe('the tab bar is the layout, and the streak moved with it (R640)', () =>
     assert.doesNotMatch(SCREEN, /tabGlyph|tabLabel:/, 'Now still has its own copy of the bar styles');
   });
 
-  test('NOW pops back to the root; the other tabs replace (R646)', () => {
-    // replace('/') stacked a second Now under every trip; measured 1 -> 2 -> 3
-    // live LOG SET buttons. Now is always the root, so it is reached by popping.
-    const go = region(BAR, 'export function goTab', 'const GLYPH');
-    assert.match(go, /if \(tab === 'now'\) router\.dismissAll\(\);/,
-      'NOW no longer pops to the root -- it stacks a second Now screen');
-    assert.match(go, /else router\.replace\(TAB_ROUTE\[tab\] as never\);/,
-      'a sibling tab must replace, not push');
-    assert.doesNotMatch(go, /router\.push/);
+  /*
+   * Behaviour, not source: goTab lives in tab-bar.ts, which has no
+   * react-native import, so it runs here against a fake router.
+   */
+  function fakeRouter(canGoBack: boolean) {
+    const calls: string[] = [];
+    return {
+      calls,
+      canGoBack: () => canGoBack,
+      dismissAll: () => { calls.push('dismissAll'); },
+      replace: (h: never) => { calls.push(`replace ${h as unknown as string}`); }
+    };
+  }
+
+  test('NOW pops back to the root Now when it is underneath (R646)', () => {
+    const r = fakeRouter(true);
+    goTab(r, 'now');
+    assert.deepEqual(r.calls, ['dismissAll'],
+      'NOW replaced instead of popping -- that stacks a second Now under every trip');
+  });
+
+  test('NOW still works when the app was opened straight onto another tab (R648)', () => {
+    // A refresh or deep link onto /progress leaves nothing underneath, and
+    // popping to the top of a one-screen stack does nothing.
+    const r = fakeRouter(false);
+    goTab(r, 'now');
+    assert.deepEqual(r.calls, ['replace /'],
+      'with nothing underneath, NOW must replace to the root or it is a dead button');
+  });
+
+  test('the other tabs replace, never push or pop', () => {
+    for (const tab of ['progress', 'goals', 'settings'] as Tab[]) {
+      for (const back of [true, false]) {
+        const r = fakeRouter(back);
+        goTab(r, tab);
+        assert.deepEqual(r.calls, [`replace /${tab}`], `${tab} with canGoBack=${back}`);
+      }
+    }
   });
 
   test('the top link row it replaced is gone', () => {

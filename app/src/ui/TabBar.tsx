@@ -3,30 +3,9 @@ import { View, Text, Pressable, StyleSheet, type StyleProp, type ViewStyle } fro
 import { getRepo } from '../data/db.ts';
 import { t, languageOf } from '../domain/i18n.ts';
 import { pressStyle, useReducedMotion } from './press.ts';
-import { TAB_BAR_HEIGHT } from './tab-bar.ts';
+import { TAB_BAR_HEIGHT, type Tab } from './tab-bar.ts';
 
 const VOLT = '#CCFF00';
-
-export type Tab = 'now' | 'progress' | 'goals' | 'settings';
-
-/** Route for each tab. NOW is the root; the others are its siblings. */
-export const TAB_ROUTE: Record<Tab, string> = {
-  now: '/', progress: '/progress', goals: '/goals', settings: '/settings'
-};
-
-/**
- * Where a tab tap goes. NOW is the root screen and is ALWAYS under the current
- * one, so it is reached by popping back to it: `replace('/')` swapped the top
- * of the stack for a second Now, and every trip through another tab left one
- * more live Now screen underneath (R646, measured 1 -> 2 -> 3). The other three
- * are siblings of each other, one deep, so `replace` keeps the stack at two.
- */
-export function goTab(
-  router: { dismissAll: () => void; replace: (h: never) => void }, tab: Tab
-): void {
-  if (tab === 'now') router.dismissAll();
-  else router.replace(TAB_ROUTE[tab] as never);
-}
 
 const GLYPH: Record<Tab, string> = { now: '◆', progress: '↗', goals: '◎', settings: '⚙' };
 const LABEL: Record<Tab, 'nowWord' | 'progress' | 'goals' | 'settings'> = {
