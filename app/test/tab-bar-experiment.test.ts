@@ -81,6 +81,30 @@ describe('the tab bar is the layout, and the streak moved with it (R640)', () =>
     }
   });
 
+  /*
+   * R649. The bar's own taps were fixed in R646/R648, but screens also link to
+   * each other: Progress pushed Settings (mounted Progress screens 1 -> 2 -> 3
+   * -> 4 over three round trips) and the Recap's EDIT THIS WORKOUT replaced
+   * itself with a second Now. Every hop to a tab from a screen that is not the
+   * root goes through goTab, which knows how to reach a tab without stacking it.
+   */
+  test('screens reach a tab through goTab, never by pushing or replacing it directly (R649)', () => {
+    const offenders: string[] = [];
+    for (const f of fs.readdirSync(path.join(HERE, '..', 'app'))) {
+      if (!f.endsWith('.tsx') || f === 'index.tsx' || f.startsWith('_') || f.startsWith('+')) continue;
+      for (const m of screen(f).matchAll(/(?:push|replace)\(\s*['"]\/(?:progress|goals|settings)?['"]/g)) {
+        offenders.push(`${f}: ${m[0]}`);
+      }
+    }
+    assert.deepEqual(offenders, [],
+      'a screen links to a tab by push/replace -- a push stacks a copy of that tab, ' +
+      'and a replace to / stacks a second Now');
+    assert.match(screen('recap.tsx'), /reopenSession\(recap\.sessionId\)\) goTab\(router, 'now'\)/,
+      'EDIT THIS WORKOUT no longer returns to Now through goTab');
+    assert.match(screen('progress.tsx'), /onSettings=\{\(\) => goTab\(router, 'settings'\)\}/,
+      'the backup section no longer reaches Settings through goTab');
+  });
+
   test('the top link row it replaced is gone', () => {
     // Keeping both would put PROGRESS / GOALS / settings on screen twice.
     assert.doesNotMatch(SCREEN, /style=\{s\.topBar\}|style=\{s\.topLink\}|style=\{s\.topGear\}/,

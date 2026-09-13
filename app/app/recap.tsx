@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, Share } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGuardedLeave } from '../src/ui/guarded-push.ts';
+import { goTab } from '../src/ui/tab-bar.ts';
 import { getRepo } from '../src/data/db.ts';
 import { t, fill, languageOf, number } from '../src/domain/i18n.ts';
 
@@ -318,7 +319,7 @@ export default function Recap() {
           <Pressable accessibilityRole="button" style={pressStyle(s.reopen, 'quiet', still)} hitSlop={10}
             accessibilityLabel={T('reopenA11y')}
             onPress={() => {
-              if (repo.reopenSession(recap.sessionId)) router.replace('/' as never);
+              if (repo.reopenSession(recap.sessionId)) goTab(router, 'now');
             }}
           >
             <Text style={s.reopenText}>{T('editWorkout')}</Text>

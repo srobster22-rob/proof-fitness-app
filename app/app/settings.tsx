@@ -297,7 +297,7 @@ export default function Settings() {
             of buttons here would be a second place for the same thing to go
             wrong. */}
         <Pressable accessibilityRole="button" style={pressStyle(s.link, 'quiet', still)}
-          onPress={() => router.replace('/progress' as never)}
+          onPress={() => goTab(router, 'progress')}
           accessibilityLabel={`${t(lang, 'exportData')}. ${t(lang, 'restore')}`}>
           <Text style={s.linkText}>{t(lang, 'exportData')} · {t(lang, 'restore')}  →</Text>
         </Pressable>

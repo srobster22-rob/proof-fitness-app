@@ -163,7 +163,7 @@ export default function Progress() {
           */}
           <YouRow onPress={() => push('/measure')} still={still} />
           <Backup busy={busy} note={note} run={run} repo={repo} still={still}
-            onSettings={() => push('/settings')}
+            onSettings={() => goTab(router, 'settings')}
             onErased={() => { buzz.destroyed(); setNote(T('everythingErased')); setTick(t => t + 1); }}
             revision={tick} />
         </View>
@@ -264,7 +264,7 @@ export default function Progress() {
           )}
 
           <Backup busy={busy} note={note} run={run} repo={repo} still={still}
-            onSettings={() => push('/settings')}
+            onSettings={() => goTab(router, 'settings')}
             onErased={() => { buzz.destroyed(); setNote(T('everythingErased')); setTick(t => t + 1); }}
             revision={tick} />
         </ScrollView>

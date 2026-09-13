@@ -3673,3 +3673,33 @@ and Now->Goals->Settings->Now keep exactly 1 mounted LOG SET. No data or
 viewport touched. Lesson worth keeping: R646 was verified only from a
 fresh start on /, so the one path that broke it -- entering on another
 tab -- was never walked. | next: ## Next holds only the owner's-eye UI note.
+
+R649 - Stage 0: ## Next unchanged (owner's-eye UI note only). PICK (logged
+first): in-app cross-links still stack screens the way R646's NOW did.
+Measured: Progress's backup section pushes Settings, and Settings' EXPORT MY
+DATA . RESTORE link replaces back to Progress -- each round trip leaves one
+more live Progress screen underneath (mounted: 1 -> 2 -> 3 -> 4 over three
+cycles; only NOW clears them). Suspect the same shape in the Recap's EDIT
+THIS WORKOUT, which does replace('/') from a Recap pushed on top of Now.
+Route both through goTab so every hop between tab screens follows one rule.
+Baseline for the suspect, measured before touching code: Recap -> EDIT THIS
+WORKOUT took mounted LOG SET from 1 to 2 -- a second Now stacked under.
+BUILD: progress.tsx's two onSettings now goTab(router, 'settings');
+settings.tsx's EXPORT MY DATA . RESTORE link goTab(router, 'progress');
+recap.tsx's reopen goTab(router, 'now') (imports goTab). Popping back to
+the existing Now is safe for a reopened workout: resume() ->
+startNextIfFinished() reads the session's live row, whose ended_at the
+reopen just cleared, so Now keeps it. New test "screens reach a tab through
+goTab, never by pushing or replacing it directly (R649)" scans every
+non-root screen for push/replace to a tab route. Two older tests pinned the
+literal push('/settings'): erase-claim now checks the goTab call (its rule,
+Settings cannot reach the erase path, is unchanged); screens-refresh-on-
+focus's named Progress test now cites push('/measure') -- Progress still
+opens Measure and past recaps over itself, so it must still refresh on
+focus. REVIEW: suite 2168 -> 2169 pass / 0 fail. Plant (one onSettings back
+to push('/settings')) -> the R649 test failed by name; restored
+byte-identical. PRODUCT: Progress<->Settings three round trips keep exactly
+1 mounted Progress screen (was 1 -> 2 -> 3 -> 4); LOG SET -> FINISH ->
+EDIT THIS WORKOUT lands on / with 1 mounted LOG SET (was 2) and NEXT SET 2,
+the logged set kept. Seed restored after. | next: ## Next holds only the
+owner's-eye UI note.

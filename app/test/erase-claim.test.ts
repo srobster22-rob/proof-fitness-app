@@ -62,7 +62,9 @@ describe('the app only claims to have erased when it erased', () => {
     const control = around(src, 'onPress={onSettings}', 200, 200);
     assert.doesNotMatch(control, /onErased/,
       'the settings control can reach the erase path');
-    assert.match(src, /onSettings=\{\(\) => push\('\/settings'\)\}/,
+    // R649: Settings is reached through goTab, not pushed over Progress, so a
+    // round trip no longer stacks copies of either screen.
+    assert.match(src, /onSettings=\{\(\) => goTab\(router, 'settings'\)\}/,
       'the control no longer goes to the one Settings');
   });
 

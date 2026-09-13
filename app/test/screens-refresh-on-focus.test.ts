@@ -74,12 +74,14 @@ describe('a screen that opens another one re-reads when it comes back', () => {
       'bodyweight — leaves them showing what they read on the way in');
   });
 
-  test('and Progress is one of them, since Settings opens over it', () => {
+  test('and Progress is one of them, since it opens Measure and past recaps over itself', () => {
     // Named explicitly as well as swept, because this is the instance that was
     // actually broken and a sweep with a subtly wrong predicate would pass.
+    // R649: Settings no longer opens over Progress (goTab replaces, so Progress
+    // remounts fresh), but Measure and a past session's recap still do.
     const src = readFileSync(path.join(SCREENS, 'progress.tsx'), 'utf8');
-    assert.match(src, /push\('\/settings'\)/,
-      'Progress no longer opens Settings — re-check whether this rule still applies');
+    assert.match(src, /push\('\/measure'\)/,
+      'Progress no longer opens Measure over itself -- re-check whether this rule still applies');
     assert.match(src, /useFocusEffect\(useCallback\(\(\) => \{ setTick/,
       'Progress stopped refreshing on focus');
   });
