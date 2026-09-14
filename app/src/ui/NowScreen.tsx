@@ -1099,6 +1099,7 @@ export function NowScreen({
                       hitSlop={slop(36, 14)}
                       accessibilityLabel={
                         fill(T('setByRepsA11y'), { n: i + 1, weight: loadLabel(set.weight), reps: set.reps }) +
+                        (state.prSetIds.includes(set.id) ? T('personalRecordA11y') : '') +
                         `${set.note ? fill(T('notedA11y'), { note: set.note }) : ''}` +
                         T('tapToEditA11y')
                       }

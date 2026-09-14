@@ -3912,3 +3912,24 @@ TabBar swapped back in) -> "a control that paints its selection on its
 children announces it too (R654)" and "and it says which destination you
 are on" both failed by name; fixed copy restored byte-identical. No data
 or viewport touched. | next: ## Next holds only the owner's-eye UI note.
+
+R655 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. Checked R654's regex blind spots first: nothing uses
+`&& SELECTED_TEXT` conditionally, and the picker's `pickCurrent` row already
+spreads onState. PICK (logged first, measured live): a personal-record set
+is silent to a screen reader. Logged 180x5 on Bench (best was 175): the chip
+paints chipPR and shows a star, but its spoken label is "Set 1, 180 by 5.
+Tap to edit." -- a button's own label replaces its children, so the star is
+never read. §8 calls the PR the emotional payload. Add a record clause to
+the chip's label when the set is in prSetIds, en + es.
+BUILD: i18n personalRecordA11y (en ", a personal record"; es ", récord
+personal"); the set chip's accessibilityLabel appends it when
+state.prSetIds.includes(set.id) -- the same condition that paints chipPR
+and the star. New test/pr-announced.test.ts pins both full sentences and
+the shared condition. REVIEW: suite 2173 -> 2175 pass / 0 fail. Plant
+(pre-R655 NowScreen) -> "the chip adds it under the same condition that
+paints the record" failed by name; fixed copy restored byte-identical.
+PRODUCT, live: 180x5 on Bench (best 175) -> chip reads "Set 1, 180 by 5, a
+personal record. Tap to edit." with the star; a second 180x5, not a new
+record, reads "Set 2, 180 by 5. Tap to edit." with no star. Seed restored.
+| next: ## Next holds only the owner's-eye UI note.

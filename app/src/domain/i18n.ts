@@ -588,6 +588,7 @@ const EN = {
   reasonColonA11y: ': {reason}',
   setByRepsA11y: 'Set {n}, {weight} by {reps}',
   notedA11y: ', noted: {note}',
+  personalRecordA11y: ', a personal record',
   tapToEditA11y: '. Tap to edit.',
 
   everythingErased: 'Everything erased.',
@@ -1104,6 +1105,7 @@ const ES: Partial<Record<Key, string>> = {
   reasonColonA11y: ': {reason}',
   setByRepsA11y: 'Serie {n}, {weight} por {reps}',
   notedA11y: ', con nota: {note}',
+  personalRecordA11y: ', récord personal',
   tapToEditA11y: '. Toca para editar.',
 
   everythingErased: 'Todo borrado.',
