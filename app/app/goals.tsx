@@ -243,7 +243,7 @@ export default function Goals() {
           out: a countdown makes the safe option the one you can miss. */}
       {undo && (
         <View style={s.undoBar}>
-          <Text style={s.undoText} numberOfLines={1}>{undo.label}</Text>
+          <Text style={s.undoText} numberOfLines={1} role="status">{undo.label}</Text>
           <Pressable accessibilityRole="button" hitSlop={10}
             style={pressStyle(null, 'quiet', still)}
             accessibilityLabel={T('undo')}

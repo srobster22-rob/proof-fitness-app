@@ -4012,3 +4012,34 @@ set editor's remove error cannot be triggered normally -- covered by the
 sweep. Nothing saved. | next: ## Next holds only the owner's-eye UI note;
 result messages (undo strip, export/restore note) remain a status-role
 question.
+
+R659 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. PICK (logged first): R658's follow-up -- result
+messages that are not errors are also never announced. Two shapes: Goals'
+undo strip mounts only after a wipe ({undo && ...}, a label beside UNDO and
+x), so its label gets role "status"; Progress's backup note is always
+mounted and only its text changes (resting line -> "Working..." -> the
+result), the reliable case for a polite live region. Confirming the
+installed React Native types accept role="status" and aria-live on Text
+before editing (accessibilityRole has no status value).
+Confirmed in the installed types first: React Native's Role union includes
+'status', aria-live is typed, and TextProps extends AccessibilityProps.
+BUILD: Goals' undo-strip label Text gets role="status" (the label only,
+not the UNDO / dismiss buttons beside it); Progress's always-mounted
+backup note gets role="status" aria-live="polite". New
+test/results-announced.test.ts pins both, requires exactly one status
+role inside the undo strip, and requires the backup note to stay mounted
+and change its text in place. REVIEW: suite 2178 -> 2180 pass / 0 fail,
+run on the saved post-fix copies (the run outlived the 2-minute tool
+limit and finished in the background, exit 0). Plant (pre-R659 goals.tsx
++ progress.tsx) -> "the undo strip label is a status, and only the label"
+and "the backup note is a polite live region that stays mounted" both
+failed by name; fixed copies restored byte-identical, so the suite pass
+stands. PRODUCT, live: the first probe found an empty page -- a reload
+while the pane was hidden never mounted the app (#root had no children);
+fronting the tab fixed it, and nothing had been changed. Then: Progress's
+backup note is a role=status, aria-live=polite element reading "A plain
+JSON file. Yours to keep, readable without this app."; Goals WIPE -> WIPE
+IT shows the undo strip, and the only role=status element is "Squat goal
+wiped.", which does not contain the UNDO button. Seed restored. | next:
+## Next holds only the owner's-eye UI note.

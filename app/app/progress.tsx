@@ -504,7 +504,7 @@ function Backup({ busy, note, run, repo, onErased, onSettings, still, revision }
       {/* A during-state, not just a done-state. `note` only ever spoke after the
           work finished, so the whole time a file was being written or read the
           screen said the same sentence it says at rest. */}
-      <Text style={s.backupNote}>
+      <Text style={s.backupNote} role="status" aria-live="polite">
         {busy
           ? T('workingEllipsis')
           : note ?? T('plainJsonFile')}
