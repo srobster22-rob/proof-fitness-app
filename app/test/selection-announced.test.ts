@@ -26,6 +26,32 @@ function pressables(src: string): Array<[number, string]> {
   return out;
 }
 
+/**
+ * A Pressable's OWN children: the text from the end of its opening tag to its
+ * matching `</Pressable>`, with every nested Pressable cut out. `tags` maps a
+ * tag's start index to its full text, so a nested self-closing tag is skipped
+ * without changing the depth.
+ */
+function ownChildren(src: string, from: number, tags: Map<number, string>): string {
+  let out = '', depth = 1, i = from;
+  const re = /<Pressable\b|<\/Pressable>/g;
+  re.lastIndex = from;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src))) {
+    if (depth === 1) out += src.slice(i, m.index);
+    if (m[0] === '</Pressable>') {
+      depth--;
+      if (depth === 0) return out;
+    } else {
+      const tag = tags.get(m.index) ?? '<Pressable';
+      if (!tag.endsWith('/>')) depth++;
+      re.lastIndex = m.index + tag.length;
+    }
+    i = re.lastIndex;
+  }
+  return out;
+}
+
 function sources(): Array<[string, string]> {
   const out: Array<[string, string]> = [];
   for (const dir of [path.join(ROOT, 'app'), path.join(ROOT, 'src', 'ui')]) {
@@ -107,6 +133,39 @@ describe('a selected control says so (§4)', () => {
       'spread {...onState(<the same condition the style uses>)} onto them');
     assert.ok(painted >= 15,
       `only ${painted} selection-painting controls found — the scan went stale`);
+  });
+
+  /*
+   * R654. The sweep above reads only each Pressable's OPENING TAG, so a control
+   * that paints its selected state on its CHILDREN escaped it. The tab bar did:
+   * `on && s.tabGlyphOn` sits on the Texts inside each tab, and the tab you were
+   * on reported `aria-disabled` -- measured on Progress -- with nothing saying
+   * selected. This reads each Pressable's OWN children, with nested Pressables
+   * cut out: a sheet's backdrop contains every chip in the sheet, and each chip
+   * is judged by its own tag rather than charged to the backdrop.
+   */
+  test('a control that paints its selection on its children announces it too (R654)', () => {
+    let childPainted = 0;
+    const offenders: string[] = [];
+    for (const [name, src] of sources()) {
+      const tags = new Map(pressables(src));
+      for (const [idx, tag] of tags) {
+        if (tag.endsWith('/>') || PAINTS_SELECTED.test(tag)) continue;
+        if (!PAINTS_SELECTED.test(ownChildren(src, idx + tag.length, tags))) continue;
+        childPainted++;
+        if (/\{\.\.\.onState\(/.test(tag)) continue;
+        // Same named exemptions as the tag sweep: the skip-machine checkbox
+        // colours its child box and says `aria-checked`, which is right for a
+        // checkbox (measured live on Settings: aria-checked "false").
+        if (EXEMPT.find(e => e.file === name && e.match.test(tag))) continue;
+        offenders.push(`${name}:${src.slice(0, idx).split('\n').length}`);
+      }
+    }
+    assert.deepEqual(offenders, [],
+      'these controls colour their children when chosen and say nothing about it -- ' +
+      'spread {...onState(<the same condition>)} onto the Pressable itself');
+    assert.ok(childPainted >= 1,
+      `found ${childPainted} child-painted controls; the tab bar alone should count, so the scan went stale`);
   });
 
   test('nothing reaches for accessibilityState, which the web silently drops', () => {

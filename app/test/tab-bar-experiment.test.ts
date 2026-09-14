@@ -158,6 +158,14 @@ describe('the tab bar is the layout, and the streak moved with it (R640)', () =>
     assert.match(BAR, /const on = id === current;/);
     assert.match(BAR, /on && s\.tabGlyphOn/);
     assert.match(BAR, /tabGlyphOn: \{ color: VOLT \}/);
-    assert.match(BAR, /disabled=\{on\}/, 'the tab you are on must not be a link to itself');
+    // R654: `disabled` made the tab you are on announce as unavailable and
+    // dropped it from keyboard focus -- the only "you are here" cue was colour.
+    // It says selected instead, and a tap on it simply does nothing.
+    assert.match(BAR, /\{\.\.\.onState\(on\)\}/,
+      'the tab you are on does not announce itself as selected');
+    assert.match(BAR, /onPress=\{on \? undefined : \(\) => go\(id\)\}/,
+      'the tab you are on navigates to itself');
+    assert.doesNotMatch(BAR, /disabled=\{on\}/,
+      'the tab you are on is announced as unavailable again');
   });
 });

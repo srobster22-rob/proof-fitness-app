@@ -3875,3 +3875,40 @@ pinned at 332-392, no page scroll. Measure fits in 347px, last line at 356.
 With R652 that covers all six screens at short and phone heights after a
 reload. No code changed; nothing to plant. One screenshot attempt timed out
 (hidden pane) and was replaced by a text read of the same band.
+
+R654 - Stage 0: OWNER.md unchanged since R647. Shortlist: (a) the tab bar's
+current tab is shown by colour only; (b) Spanish tab labels at 375 --
+dropped, the words are short (PROGRESO, METAS, AJUSTES, AHORA, SEM). PICK
+(logged first): (a), and the blind spot that let it through. The R474
+sweep (selection-announced.test.ts) requires every Pressable whose style
+paints a selected state to spread onState() -- but it only reads the
+Pressable's OPENING TAG. TabBar paints its current tab on the child Texts
+(`on && s.tabGlyphOn`), so it escapes the sweep, and a screen reader gets
+nothing to say which tab you are on. Measure how many other controls paint
+selection on children before deciding how far to widen the sweep.
+Scan before widening the test: 11 hits, but 10 were my scanner charging
+sheet backdrops (and the sheet inside) for every chip they contain -- each
+chip already spreads onState on its own tag. The only real child-painted,
+unannounced control was TabBar. BUILD: TabBar spreads {...onState(on)} and
+the current tab's onPress is undefined instead of disabled={on}, so it is
+announced as selected, not unavailable, and stays keyboard-focusable.
+tab-bar-experiment.test.ts now requires both and forbids disabled={on}.
+New sweep in selection-announced.test.ts judges each Pressable by its OWN
+children (nested Pressables cut out) and fails if it counts none.
+PRODUCT, live: on Progress the current tab reads aria-selected true,
+aria-pressed true, no aria-disabled, tabindex 0 (was aria-disabled true,
+tabindex -1, nothing selected); tapping it stays on /progress; GOALS
+navigates and becomes the selected tab; NOW returns to / with LOG SET and
+NOW selected.
+First suite run: the new sweep failed on settings.tsx:225 -- the
+skip-machine checkbox, which colours a child box (skipMachine && s.boxOn)
+and announces through aria-checked (live: "false", correct). Not a gap: it
+is exactly the shape R474 already exempts by name. The new sweep ignored
+that EXEMPT list; it now consults it, so exemptions stay in one place with
+their reasons. Settings also confirmed the fix there: SETTINGS is the tab
+reporting aria-selected.
+REVIEW: suite 2172 -> 2173 pass / 0 fail (tsc included). Plant (pre-R654
+TabBar swapped back in) -> "a control that paints its selection on its
+children announces it too (R654)" and "and it says which destination you
+are on" both failed by name; fixed copy restored byte-identical. No data
+or viewport touched. | next: ## Next holds only the owner's-eye UI note.

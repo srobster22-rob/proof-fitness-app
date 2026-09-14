@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { getRepo } from '../data/db.ts';
 import { t, languageOf } from '../domain/i18n.ts';
-import { pressStyle, useReducedMotion } from './press.ts';
+import { pressStyle, useReducedMotion, onState } from './press.ts';
 import { TAB_BAR_HEIGHT, type Tab } from './tab-bar.ts';
 import { COLUMN } from './column.ts';
 
@@ -40,8 +40,8 @@ export function TabBar({ current, go, style }: {
             key={id}
             accessibilityRole="link"
             accessibilityLabel={label}
-            disabled={on}
-            onPress={() => go(id)}
+            {...onState(on)}
+            onPress={on ? undefined : () => go(id)}
             style={pressStyle(s.tabItem, 'quiet', still)}
           >
             <Text style={[s.tabGlyph, on && s.tabGlyphOn]}>{GLYPH[id]}</Text>
