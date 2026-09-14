@@ -3861,3 +3861,17 @@ NowScreen swapped back in) -> "a column short enough to scroll keeps TODAY
 instead of shrinking it away (R652)" failed by name; post-fix copy restored
 byte-identical. Seed and viewport restored. | next: ## Next holds only the
 owner's-eye UI note.
+
+R653 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. PICK (logged with the result, since it was an audit):
+walk every non-Now screen at 375x400 -- the height class R652 found broken
+on Now -- using HANDOFF trap 20's rule (load the route AFTER resizing).
+RESULT, no defect: Progress, Goals and Settings each pin the bar at
+344-400 inside the window, and at full scroll their last rows end above it
+(ERASE EVERYTHING 316, CHANGE 165, EXPORT MY DATA . RESTORE 288). The 126px
+under Goals' list is the goal card's CHANGE/WIPE, + ADD A GOAL and WIPE ALL,
+all clear of the bar. A past recap scrolls its content in 332px with SHARE
+pinned at 332-392, no page scroll. Measure fits in 347px, last line at 356.
+With R652 that covers all six screens at short and phone heights after a
+reload. No code changed; nothing to plant. One screenshot attempt timed out
+(hidden pane) and was replaced by a text read of the same band.
