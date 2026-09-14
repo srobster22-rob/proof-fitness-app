@@ -842,7 +842,7 @@ function AddGoal({
                 })}
           </Text>
 
-          {error && <Text style={s.error}>{error}</Text>}
+          {error && <Text style={s.error} accessibilityRole="alert">{error}</Text>}
           </ScrollView>
 
           <Pressable accessibilityRole="button" style={pressStyle(s.save, 'primary', still)} onPress={submit}

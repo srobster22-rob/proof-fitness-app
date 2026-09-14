@@ -209,7 +209,7 @@ export default function Progress() {
                 </Pressable>
               </View>
               <Text style={s.weeklyText}>{weekly}</Text>
-              {weeklyShareError && <Text style={s.weeklyShareError}>{weeklyShareError}</Text>}
+              {weeklyShareError && <Text style={s.weeklyShareError} accessibilityRole="alert">{weeklyShareError}</Text>}
             </View>
           )}
 

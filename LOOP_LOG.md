@@ -3977,3 +3977,38 @@ Measure toggle only renders with 2+ readings and the seed has none, so it
 is covered by the test and the forwarded-prop check, not a live read.
 Nothing saved; viewport untouched. | next: ## Next holds only the
 owner's-eye UI note.
+
+R658 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. Finding: nothing in the app is a live region -- no
+aria-live, accessibilityLiveRegion or announceForAccessibility -- so a
+message that appears after an action, without focus moving to it, is never
+read. PICK (logged first), scoped to the errors: Goals' add-goal sheet,
+both Measure sheets, Settings' jump fields and Recap's share error each
+render `{error && <Text>}`. They get role "alert", which screen readers
+announce when the element is inserted -- unlike aria-live on a node that
+only mounts once it has text. react-native-web 0.21 emits the role
+straight through (createDOMProps: domProps.role = role). The rest timer is
+deliberately excluded; it ticks every second. Result messages (undo strip,
+export/restore note) are a separate status-role question.
+The new sweep's first run failed on two error messages I had not listed --
+exactly its job: Progress's weeklyShareError (line 212) and NowScreen's
+removeError in the set editor (line 1822). Both get role alert too, making
+seven. Live so far: Recap SHARE on web inserts "Share is not supported in
+this browser" as role=alert; Measure RECORD IT with an empty field inserts
+"That does not look like a bodyweight in lb." as role=alert, nothing saved.
+BUILD: accessibilityRole="alert" on all seven conditionally rendered error
+messages -- Goals' add-goal sheet, both Measure sheets, Settings' jump
+fields, Recap's share error, Progress's weekly share error and the set
+editor's remove error. New test/errors-announced.test.ts sweeps app/ and
+src/ui for `{...error && <Text>}` and requires the role (fails below 5
+found; its first run caught the two I had missed). REVIEW: suite 2177 ->
+2178 pass / 0 fail. Plant (all six pre-R658 screens) -> "every
+conditionally rendered error message is an alert" failed by name; all six
+fixed copies restored byte-identical. PRODUCT, live, three of seven:
+Recap SHARE and Progress weekly SHARE each insert "Share is not supported
+in this browser" as role=alert; Measure RECORD IT with an empty field
+inserts "That does not look like a bodyweight in lb." as role=alert. The
+set editor's remove error cannot be triggered normally -- covered by the
+sweep. Nothing saved. | next: ## Next holds only the owner's-eye UI note;
+result messages (undo strip, export/restore note) remain a status-role
+question.

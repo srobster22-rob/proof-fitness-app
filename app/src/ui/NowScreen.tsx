@@ -1819,7 +1819,7 @@ function ExercisePicker({
               here it costs no space, never moves as the library grows, and
               stays as quiet as §7 wants it to be.
               */}
-            {removeError && <Text style={s.removeError}>{removeError}</Text>}
+            {removeError && <Text style={s.removeError} accessibilityRole="alert">{removeError}</Text>}
             {adding ? (
               <View style={s.addRow}>
                 <TextInput

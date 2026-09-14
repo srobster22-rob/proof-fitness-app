@@ -385,7 +385,7 @@ function AddReading({ kind, repo, onClose, onSaved }: {
             accessibilityLabel={T('noteForReadingA11y')}
           />
 
-          {error && <Text style={s.error}>{error}</Text>}
+          {error && <Text style={s.error} accessibilityRole="alert">{error}</Text>}
 
           <Pressable accessibilityRole="button" style={pressStyle(s.save, 'primary', still)}
             accessibilityLabel={T('recordIt')}
@@ -498,7 +498,7 @@ function TargetSheet({ kind, repo, onClose, onSaved }: {
             </Text>
           </View>
 
-          {error && <Text style={s.error}>{error}</Text>}
+          {error && <Text style={s.error} accessibilityRole="alert">{error}</Text>}
 
           <Pressable accessibilityRole="button" style={pressStyle(s.save, 'primary', still)}
             accessibilityLabel={T('setTarget')}

@@ -337,7 +337,7 @@ export default function Recap() {
             to a ~34px splinter with its black label spilling onto the black
             background. Its own style — centred, with its own top margin — was
             always written for a block rather than a row item. */}
-        {shareError && <Text style={s.shareError}>{shareError}</Text>}
+        {shareError && <Text style={s.shareError} accessibilityRole="alert">{shareError}</Text>}
       </View>
     </SafeAreaView>
   );

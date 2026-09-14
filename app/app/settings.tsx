@@ -288,7 +288,7 @@ export default function Settings() {
             <Text style={s.fieldUnit}>{t(lang, 'repsWord')}</Text>
           </View>
         </View>
-        {error && <Text style={s.error}>{error}</Text>}
+        {error && <Text style={s.error} accessibilityRole="alert">{error}</Text>}
 
         {/* ---- data ------------------------------------------------------- */}
         <Text style={s.label}>{t(lang, 'yourData')}</Text>
