@@ -159,6 +159,29 @@ describe('Now screen — layout invariants', () => {
       'the weight is sized by layoutFor and dwarfs everything else');
   });
 
+  /*
+   * R652. Below the scroll threshold ColumnWrap becomes a ScrollView whose
+   * content container is exactly the viewport tall, and TODAY (flex: 1,
+   * overflow hidden) absorbed all the overflow by shrinking to nothing: at
+   * 375x440, after logging sets, the set counter, the day rail and the THIS
+   * WORKOUT list were absent at every scroll position -- confirmed by
+   * screenshot. In scroll mode TODAY now keeps its natural height and its set
+   * list is a plain View, so the column scrolls to them instead.
+   */
+  test('a column short enough to scroll keeps TODAY instead of shrinking it away (R652)', () => {
+    assert.match(SOURCE, /minHeight: L\.todayMin \}, L\.scrolls && s\.todayWrapScroll\]/,
+      'TODAY no longer switches to its natural height when the column scrolls');
+    const natural = style('todayWrapScroll');
+    assert.match(natural, /flexShrink:\s*0/, 'TODAY can still shrink to nothing in scroll mode');
+    assert.match(natural, /flexBasis:\s*'auto'/, 'TODAY is not sized by its content in scroll mode');
+    assert.match(SOURCE, /const TodayList: any = L\.scrolls \? View : ScrollView;/,
+      'the set list is still a nested ScrollView in scroll mode, which has no natural height');
+    assert.match(SOURCE, /const todayListProps = L\.scrolls \? \{\} : \{\s*ref: todayScroller,/,
+      'the scroller ref is attached in scroll mode, where the list is a plain View');
+    assert.match(SOURCE, /<TodayList \{\.\.\.todayListProps\}>/,
+      'the set list no longer renders through the scroll-mode switch');
+  });
+
   test('every vertical measure comes from layoutFor, not the stylesheet', () => {
     // The screen does not scroll, so these are what decide whether it fits. A
     // hard-coded one is invisible to the fit tests and puts the footer back

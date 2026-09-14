@@ -675,3 +675,12 @@ journeys cannot be reached without it.
     measurement, read `getComputedStyle(wrapper).opacity/transform` -- if they
     are not `1` / `none`, front the pane (or `getAnimations().forEach(a =>
     a.finish())`) and measure again.
+
+20. **An emulated resize does not re-lay out the Now screen until the next one.**
+    `layoutFor` reads `useWindowDimensions`, and in this pane a viewport
+    change is picked up one step late: resize 812 -> 440 and the column is
+    still laid out for 812 (no scroller at all); resize 440 -> 568 and it is
+    laid out for 440 (a scroller on a screen that fits). Measured in R652:
+    the same 440px window read `columnScrolls: false` before a reload and
+    `true` after. Every resize-only sweep reads the previous size. Resize,
+    then navigate (logged sets survive the reload), then measure.

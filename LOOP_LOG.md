@@ -3764,3 +3764,100 @@ data touched. Found for later: fixedHeight still budgets TOP_BAR = 31 for
 the top link row R640 deleted and nothing for the 56px bar, and
 fixed-height-no-drift.test.ts still passes over a style that no longer
 exists -- a blind check. R652 candidate. | next: R652.
+
+R652 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. CORRECTION to R651's last note: fixed-height-no-drift
+.test.ts never compared TOP_BAR to a style -- it only asserts the constant
+still exists and is declared hand-measured. It is not a blind check over a
+deleted style; I overstated it. HYPOTHESIS KILLED before any edit: "fit
+math should count the 56px bar instead of the deleted 31px top row".
+Swept layoutFor at 375 wide, 340-640px: fixedHeight is already ~48px
+pessimistic against the live app, and the +48 slack in `scrolls` absorbs
+it -- at 568 the model says 616 vs 616, no scroll, and the live app fits
+exactly (bar 512-568, docScroll 568). Adding the real 25px flips 568-612
+to scrolling, i.e. it would make the shortest shipping phone scroll though
+it visibly fits. The constant stays. NEW LEAD from the live sweep: the
+NEXT / SET 1 row's bottom sits at y409 at every short height (bar top 404
+at 460, 384 at 440, 344 at 400) while the column can scroll only 0/1/41px
+-- ~24px of it looks unreachable under the pinned bar. Probing before
+picking.
+PROBE RESULT, and the PICK (logged first): the NEXT row is not under the
+bar -- it is the head of `todayWrap` (flex: 1, overflow: 'hidden'). In
+ColumnWrap's scroll mode the content container is exactly the viewport
+tall (flexGrow 1), so instead of the content growing and scrolling,
+todayWrap shrinks to absorb all the overflow and clips itself: 24px tall
+at 375x460 (column scrolls 0px), 4px at 440 (0px), 0px at 400 (22px) --
+the NEXT / SET n row and the logged-set list are invisible at every scroll
+position. NowScreen's own comment says "Nothing is sacrificed any more --
+the screen scrolls instead"; live, TODAY is sacrificed. Pre-existing in
+scroll mode (R651's diff only moved the bar; todayWrap untouched). Fix
+only when L.scrolls, so every window at or above the scroll threshold --
+all shipping phones, 568 up -- is untouched.
+BLIND INSTRUMENT, caught before it drove a decision: the first "with logged
+sets" baseline located todayWrap as "the first ancestor of a NEXT label
+with overflow hidden and flexGrow 1". It matched the wrong element --
+proof: a constant 80px at every height (the chain probe had just measured
+24/4/0), "no scroller" at 400px where one plainly exists, and 0 set chips
+inside TODAY even at 812 where nothing is clipped. Its numbers are
+discarded. It did show one true thing: at 812 TODAY holds the NEXT row AND
+the day rail (NEXT ON PUSH DAY . Tricep Extension . Overhead Press . Chest
+Fly), so clipping TODAY hides the upcoming lifts too. Re-measuring with
+todayWrap identified as the clipping ancestor containing BOTH the NEXT
+label and the NEXT ON rail label, printing its text as a guard.
+Second slip, same round: the corrected baseline returned `undefined` at
+every height, including the 812 control. The script had a `return` in its
+guard, which makes the tool run it as a function body -- and then the
+trailing expression is never returned. The earlier probes that worked all
+ended in an explicit `return`. Re-run with an explicit return. Source read
+meanwhile settles the design question: TODAY holds the NEXT row, the day
+rail, a THIS WORKOUT heading and a vertical ScrollView (`todayScroll`,
+flex 1, minHeight 0) for the logged sets, scrolled programmatically through
+todayScroller.current?.scrollTo. So "give TODAY its natural height" would
+collapse that inner list; the fix has to keep a real minimum for it.
+GROUND TRUTH, by screenshot after three instrument slips, at 375x440:
+fresh (no sets) -- column is a scroller with nothing to scroll (376/376);
+the NEXT . SET 1 row is cut off under the bar's top edge and cannot be
+scrolled into view. 2 sets logged -- column scrolls 33px; LOG SET, RESTING
+and the top of CLEAR show; CLEAR/FINISH are laid out exactly where TODAY's
+rows are, because TODAY has shrunk to nothing. Scrolled to the bottom --
+CLEAR and FINISH fully reachable, but the set counter (NEXT SET 3), the
+day rail (NEXT ON PUSH DAY) and the THIS WORKOUT list are absent at every
+scroll position. Source confirms the mechanism: layoutFor depends only on
+width/height/heroChars; at 440 todayMin = 0 and scrolls = true, so
+ColumnWrap is a ScrollView and todayWrap (flex 1, overflow hidden) shrinks
+to 0. DESIGN: only when L.scrolls -- todayWrap takes its natural height
+(no grow/shrink, basis auto) so the column grows and scrolls to it, and the
+inner set list renders as a plain View instead of a nested ScrollView (a
+ScrollView has no natural height; a scroller inside a scroller is poor UX).
+The todayScroller ref and its scroll handlers stay on the ScrollView only,
+so todayScroller.current is null in scroll mode and ?.scrollTo stays safe.
+Every non-scrolling window -- all portrait phones 568 up -- is untouched.
+TRAP FOUND, and it invalidates this round's resize-only sweeps: after an
+emulated resize without a reload, Now is laid out for the PREVIOUS size
+(same 440px window: column not scrolling before reload, scrolling 376/623
+after). The live sweep, both "with sets" baselines and the first post-fix
+check all resized without reloading, so their numbers were one size
+behind -- including my "the fix made 440 worse". Measurements that
+navigated after resizing stand: R650, R651, and the 440 ground-truth
+screenshot that showed TODAY absent. HANDOFF trap 20.
+BUILD: todayWrap gets todayWrapScroll { flexGrow 0, flexShrink 0,
+flexBasis 'auto' } when L.scrolls; the set list renders through TodayList
+= L.scrolls ? View : ScrollView, with the ref and scroll handlers only in
+the ScrollView branch. (A first pass moved todayWrap's trailing comment
+onto the new style; fixed with the Edit tool.) Test "a column short enough
+to scroll keeps TODAY instead of shrinking it away (R652)".
+PRODUCT, reloaded after every resize, seed data + 2 sets: 375x440 column
+scrolls 376/623; at max scroll NEXT SET 3, the NEXT ON PUSH DAY rail, THIS
+WORKOUT with both 175x5 chips, UNDO, +, CLEAR and FINISH all sit above the
+bar (screenshot) -- before the fix TODAY was absent at every scroll
+position. 375x400 scrolls 336/622, all clear at max. 375x812 unchanged:
+the set list is still its own scroller (54/86). 375x568 does not scroll,
+so the change is inert there; FINISH ends exactly at the bar and THIS
+WORKOUT sits below it -- the fixed column giving up TODAY on the shortest
+phone, which layoutFor's own comments accept (every set is on the recap).
+Not changed.
+REVIEW: suite 2171 -> 2172 pass / 0 fail (tsc included). Plant (pre-R652
+NowScreen swapped back in) -> "a column short enough to scroll keeps TODAY
+instead of shrinking it away (R652)" failed by name; post-fix copy restored
+byte-identical. Seed and viewport restored. | next: ## Next holds only the
+owner's-eye UI note.

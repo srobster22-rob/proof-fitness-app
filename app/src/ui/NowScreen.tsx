@@ -472,6 +472,32 @@ export function NowScreen({
 
   const rest = restSince(lastAt, Date.now());
 
+  /*
+   * TODAY's set list scrolls inside TODAY while the column is fixed, and is a
+   * plain View when the column itself scrolls (R652). In scroll mode the outer
+   * ScrollView owns the scrolling: a ScrollView has no natural height, so the
+   * nested list collapsed to 0 and TODAY shrank to nothing -- at 375x440 the
+   * set counter, the day rail and the logged sets were absent at every scroll
+   * position. The ref and scroll handlers belong to the scroller only, so
+   * todayScroller.current is null in scroll mode and ?.scrollTo stays safe.
+   */
+  const TodayList: any = L.scrolls ? View : ScrollView;
+  const todayListProps = L.scrolls ? {} : {
+    ref: todayScroller,
+    style: s.todayScroll,
+    showsVerticalScrollIndicator: false,
+    scrollEventThrottle: 16,
+    onScroll: (e: { nativeEvent: { contentOffset: { y: number } } }) => {
+      todayMetrics.current.scrollTop = e.nativeEvent.contentOffset.y;
+    },
+    onLayout: (e: { nativeEvent: { layout: { height: number } } }) => {
+      todayMetrics.current.viewport = e.nativeEvent.layout.height; revealCurrent();
+    },
+    onContentSizeChange: (_w: number, h: number) => {
+      todayMetrics.current.content = h; revealCurrent();
+    }
+  };
+
   return (
     <View style={[s.root, { maxWidth: L.column }]} {...swipe.panHandlers}>
       {/* §15 bans nav chrome competing with content, but Progress and Goals have
@@ -843,7 +869,7 @@ export function NowScreen({
           about to do. So the head now names the set you are walking back to the
           bar for, and the totals stay available in the quiet style rather than
           leading. */}
-      <View style={[s.todayWrap, { marginTop: L.todayGap, minHeight: L.todayMin }]}>
+      <View style={[s.todayWrap, { marginTop: L.todayGap, minHeight: L.todayMin }, L.scrolls && s.todayWrapScroll]}>
         <View style={s.todayHead}>
           <View style={s.nextGroup}>
             <Text style={s.todayLabel}>{T('next')}</Text>
@@ -1018,15 +1044,7 @@ export function NowScreen({
           <Text style={s.todayHeading}>{T('thisWorkout')}</Text>
         )}
 
-        <ScrollView
-          ref={todayScroller}
-          style={s.todayScroll}
-          showsVerticalScrollIndicator={false}
-          scrollEventThrottle={16}
-          onScroll={e => { todayMetrics.current.scrollTop = e.nativeEvent.contentOffset.y; }}
-          onLayout={e => { todayMetrics.current.viewport = e.nativeEvent.layout.height; revealCurrent(); }}
-          onContentSizeChange={(_w, h) => { todayMetrics.current.content = h; revealCurrent(); }}
-        >
+        <TodayList {...todayListProps}>
           {/*
             Nothing at all until the first set lands.
 
@@ -1147,7 +1165,7 @@ export function NowScreen({
               )}
             </View>
           ))}
-        </ScrollView>
+        </TodayList>
       </View>
 
       {/*
@@ -2368,6 +2386,9 @@ const s = StyleSheet.create({
   // this refused to shrink and the set chips painted straight over UP NEXT and
   // FINISH. Clipping here is safe because the list inside scrolls.
   todayWrap: { flex: 1, overflow: 'hidden' },             // marginTop + minHeight from layoutFor
+  // Scroll mode only (R652): natural height, so the column grows and scrolls
+  // to TODAY instead of TODAY shrinking to nothing inside a scrolling column.
+  todayWrapScroll: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' },
   todayHead: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline',
     paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: '#161B20'
