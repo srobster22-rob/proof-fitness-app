@@ -130,7 +130,8 @@ describe('Now screen — layout invariants', () => {
   test('and the line can still only be one row', () => {
     // The colour needed a nested Text, and nesting is where numberOfLines
     // quietly stops applying. The height model treats this as exactly one row.
-    assert.match(SOURCE, /<Text style=\{s\.lastTime\} numberOfLines=\{1\}>/);
+    // R660: the tag also carries role/aria-live now; still one row.
+    assert.match(SOURCE, /<Text style=\{s\.lastTime\} numberOfLines=\{1\}[^>]*>/);
     assert.match(style('lastTime'), /alignSelf:\s*'stretch'/,
       'numberOfLines can only ellipsize against a definite width');
   });

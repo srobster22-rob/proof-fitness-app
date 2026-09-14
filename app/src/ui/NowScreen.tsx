@@ -615,7 +615,7 @@ export function NowScreen({
             exactly one row: wrapping on a narrow phone would push the hero down
             by 18px with nothing in the fit math expecting it. Truncating drops
             the goal before the last-time numbers, which is the right order. */}
-        <Text style={s.lastTime} numberOfLines={1}>
+        <Text style={s.lastTime} numberOfLines={1} role="status" aria-live="polite">
           {state.lastTime.head}
           {/* Volt only for the set that just hit the goal. §15 spends the accent
               on what matters right now, and for the length of one set that is

@@ -4043,3 +4043,43 @@ JSON file. Yours to keep, readable without this app."; Goals WIPE -> WIPE
 IT shows the undo strip, and the only role=status element is "Squat goal
 wiped.", which does not contain the UNDO button. Seed restored. | next:
 ## Next holds only the owner's-eye UI note.
+
+R660 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. PICK (logged first): a screen reader gets no
+confirmation that LOG SET worked -- the button only buzzes. The line under
+the lift is always mounted and its text changes in place ("Just did 175 x
+5", the goal gap, the coach), and it carries no live region. Make it a
+polite status. It changes only on the user's own actions (logging,
+switching lifts), never on a timer, so it cannot chatter; the NEXT SET
+counter repeats the same news and the rest timer ticks every second, so
+neither is marked. now-layout.test.ts pins that tag's exact text and needs
+loosening to allow the new props.
+GATE FAILURE, investigated before any retry: the first full run for R660
+failed 2 of 2182 -- "eight times the history is not eight times the work"
+and "a plain in-place write IS observable as a torn file". Neither file is
+in R660's diff (two lines of NowScreen.tsx, one layout-test regex, the log,
+router.d.ts). In isolation big-history-stays-fast passed 4/4;
+bundle-write-is-atomic failed on a DIFFERENT test ("writing through a temp
+file and a rename is not") three runs running, then passed 3/3. The box was
+under another session's benchmark (bench/par.js --workers=12, 5,447
+CPU-seconds; CPU at 74% of 24 threads). The race test's reader counts ANY
+failed read as torn (`catch { short++; }`), so a transient
+rename-while-open failure on Windows under contention trips it with no
+torn write at all. Not an R660 defect; whether an open failure should count
+as a torn read is a design question for that safety test, filed for its
+own round rather than loosened here. Re-running the full suite as the gate.
+BUILD: NowScreen's last-time Text gets role="status" aria-live="polite".
+now-layout.test.ts's one-row assertion loosened to allow props after
+numberOfLines={1}. New test/logged-set-announced.test.ts pins the status
+on the line and guards that the RESTING timer's Text is never a live
+region. Its first version sliced source with a bare indexOf and the repo's
+source-helper gate failed it; rewritten on upTo/region, with a check that
+the tag was read whole so the timer guard cannot pass by reading nothing.
+REVIEW: suite re-run clean, 2182 pass / 0 fail. Plant (pre-R660
+NowScreen) -> "the line under the lift is a polite status" failed by name
+while the timer guard stayed green; fixed copy restored byte-identical.
+PRODUCT, live: Now has exactly one role=status (aria-live polite), the
+line under the lift -- "Last time  175 x 5" before LOG SET, "175 last 2 --
+stay here and add a rep" after, changed in place. Seed restored. | next:
+R661 -- screen titles are not headings anywhere; the race test's
+open-failure counting is filed for its own round.
