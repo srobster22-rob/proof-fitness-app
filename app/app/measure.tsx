@@ -274,7 +274,8 @@ function KindCard({ row, expanded, onToggle, onAdd, onRemove, onTarget, onClearT
           style={pressStyle(s.historyTap, 'quiet', still)}
           accessibilityLabel={expanded
             ? T('hideReadingsA11y')
-            : fill(T('showAllReadingsA11y'), { n: row.trend.count })}>
+            : fill(T('showAllReadingsA11y'), { n: row.trend.count })}
+          aria-expanded={expanded}>
           <Text style={s.historyText}>
             {expanded ? T('hide') : `${row.trend.count} ${T('readings')}`} {expanded ? '▴' : '▾'}
           </Text>

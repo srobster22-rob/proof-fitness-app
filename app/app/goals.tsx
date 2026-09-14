@@ -795,6 +795,7 @@ function AddGoal({
               onPress={() => setUnitOpen(v => !v)}
               accessibilityRole="button"
               accessibilityLabel={fill(T('unitTapChange'), { unit: T(HORIZON_KEY[byUnit]) })}
+              aria-expanded={unitOpen}
             >
               <Text style={s.byUnitText}>{T(HORIZON_KEY[byUnit]).toUpperCase()}</Text>
               <Text style={s.byCaret}>{unitOpen ? '▴' : '▾'}</Text>

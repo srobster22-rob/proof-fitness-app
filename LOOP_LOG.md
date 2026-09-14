@@ -3948,3 +3948,32 @@ chip's NEXT tag ("suggested next" in its label), the set chip's star and
 note glyph (R655's record clause, ", noted: ..."), the split plan row's
 chosen tick (onState(chosen)) and the exercise picker's current-lift dot
 (onState(current)). No code changed; nothing to plant.
+
+R657 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. A fixed-string glyph search (the first, regex version
+returned nothing -- `\s` through the Bash tool, a blind search) found four
+glyph controls outside R656's audit. Three are fine: Goals' undo-strip x is
+labelled "Dismiss", Measure's reading x is "Remove the {value} reading",
+and Measure's readings toggle switches its label between hide/show. PICK
+(logged first): Goals' unit picker. Its label names only the current unit;
+whether its menu is open shows only in the caret, which the label hides,
+and nothing in the app sets aria-expanded. Add aria-expanded to both
+disclosure controls (the unit picker, and the readings toggle for
+consistency) -- after confirming react-native-web forwards it, since it
+silently drops accessibilityState.
+Confirmed first: react-native-web 0.21's createDOMProps reads aria-expanded
+and emits it (it is accessibilityState that it drops). BUILD: Goals' unit
+picker gets aria-expanded={unitOpen}; Measure's readings toggle gets
+aria-expanded={expanded}. New test/disclosure-expanded.test.ts sweeps every
+Pressable whose own children flip a caret on a condition and requires
+aria-expanded (fails below 2 found), and pins both controls to their own
+open state. REVIEW: suite 2175 -> 2177 pass / 0 fail. Plant (pre-R657
+goals.tsx + measure.tsx) -> both "every caret-toggling control carries
+aria-expanded" and "the two known disclosures use their own open state"
+failed by name; fixed copies restored byte-identical. PRODUCT, live: Goals
++ ADD A GOAL -> "Unit: months. Tap to change." reads aria-expanded false
+(caret down), true after a tap (caret up), false after a second tap. The
+Measure toggle only renders with 2+ readings and the seed has none, so it
+is covered by the test and the forwarded-prop check, not a live read.
+Nothing saved; viewport untouched. | next: ## Next holds only the
+owner's-eye UI note.
