@@ -3933,3 +3933,18 @@ PRODUCT, live: 180x5 on Bench (best 175) -> chip reads "Set 1, 180 by 5, a
 personal record. Tap to edit." with the star; a second 180x5, not a new
 record, reads "Set 2, 180 by 5. Tap to edit." with no star. Seed restored.
 | next: ## Next holds only the owner's-eye UI note.
+
+R656 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. Following R655's class (a labelled button hides its
+children, so a conditional mark inside it is never read): checked the day
+rail first -- no gap. Its label already adds "already trained today" for a
+done lift, "suggested next" plus the reason for the recommendation, and the
+current lift spreads onState. Scanning every labelled Pressable for
+conditional children before picking.
+RESULT, no defect: the scan found five labelled Pressables with a
+conditional mark in their own children, and every mark is already
+announced -- Settings' skip-machine checkbox tick (aria-checked), the rail
+chip's NEXT tag ("suggested next" in its label), the set chip's star and
+note glyph (R655's record clause, ", noted: ..."), the split plan row's
+chosen tick (onState(chosen)) and the exercise picker's current-lift dot
+(onState(current)). No code changed; nothing to plant.
