@@ -162,22 +162,39 @@ describe('a big history still renders fast (R565/R571)', () => {
       'goalHint is handing goalProgress the whole log again');
   });
 
-  test('re-rendering an unchanged model is nearly free', () => {
+  test('re-rendering an unchanged model does not re-read the whole history', () => {
     /*
-     * `first` uses only 5 iterations against `repeat`'s 40 (R571): both are
-     * already-warm per-call averages once memoized, so the two SHOULD land
-     * close together, and a small sample is exactly what flakes under load --
-     * this test flaked here, not in the two above, on the fifth of five
-     * full-suite runs while stabilising the rest of this file. 4x, not 2x,
-     * for the same reason the other two tests widened: real margin against
-     * contention, verified to still hold across five consecutive full-suite
-     * runs afterward.
+     * R667. This used to compare `totalOf(render, 5) / 5` with
+     * `totalOf(render, 40) / 40` -- but `totalOf` warms first, so BOTH sides
+     * were repeats after the memos had already missed or hit, and it compared
+     * a thing with itself. Measured: with `Repo.allSets`' memo line deleted, a
+     * repeat render at 600 sessions went from ~0.8ms to 175-650ms, and that
+     * check still passed, since "first" was exactly as slow as "repeat".
+     *
+     * Counted at the database instead: contention cannot move a count, and
+     * the whole-history read is the one every identity-keyed memo in the model
+     * (R495/R509/R522/R525/R665) hangs off -- lose it and they all miss.
      */
-    const render = renderOf(history(600));
-    const first = totalOf(render, 5) / 5;
-    const repeat = totalOf(render, 40) / 40;
-    assert.ok(repeat <= first * 4,
-      `a repeat render cost ${repeat.toFixed(2)}ms against ${first.toFixed(2)}ms ` +
-      'for the first — the memos are not being reused');
+    const repo = history(600);
+    const db = (repo as unknown as { db: { prepare: (sql: string) => unknown } }).db;
+    const prepare = db.prepare.bind(db);
+    let reads = 0;
+    db.prepare = (sql: string) => {
+      if (sql.startsWith('SELECT * FROM sets WHERE deleted = 0 ORDER BY')) reads++;
+      return prepare(sql);
+    };
+    const render = renderOf(repo);
+    render();
+    const settled = reads;
+    for (let i = 0; i < 20; i++) render();
+    assert.equal(reads - settled, 0,
+      `20 renders of an unchanged model read every set from sqlite ${reads - settled} times — ` +
+      'the history memo is not being reused');
+
+    // The control: the counter does see the read, exactly once after a write.
+    repo.logSet({ id: 'fresh', sessionId: 's1', exerciseId: 'bench', weight: 135, reps: 5, at: NOW - DAY });
+    render();
+    render();
+    assert.equal(reads - settled, 1, 'a write was not followed by exactly one fresh history read');
   });
 });
