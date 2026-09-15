@@ -1323,21 +1323,22 @@ export class NowModel {
        * (HANDOFF trap 9), so raw history would compare kilos against pounds
        * and suggest a jump in the wrong currency.
        *
-       * `grid` below is the FINER of WEIGHT_STEP and `this.plateJump()`
-       * (R592, continuing R548). WEIGHT_STEP alone is "reachable by the fine
-       * +/-5 stepper and loadable on a standard bar" — right until somebody
-       * tells the app they load something finer, which `jump.<unit>`'s own
+       * `grid` below is `plateGrid()`, the finest weight both WEIGHT_STEP and
+       * `this.plateJump()` land on (R668; R592 used the finer of the two, which
+       * is the same number whenever one divides the other). WEIGHT_STEP
+       * alone is "reachable by the fine +/-5 stepper and loadable on a
+       * standard bar" — right until somebody tells the app they load
+       * something finer, which `jump.<unit>`'s own
        * docstring in settings.tsx names directly ("someone running
        * microplates"). Measured: a plateau at 60 kg with a 1.25 kg custom
        * jump got "try 62.5" — the exact 2x jump that preference exists to
        * avoid — while the + button one row down would have gone to 61.25.
-       * Only the FINER direction is handled: a jump COARSER than WEIGHT_STEP
-       * (fixed-increment dumbbells, e.g. jump.lb = 7) can still land history
-       * off the WEIGHT_STEP grid, and nothing here re-derives a grid from
-       * that — filed in OWNER.md rather than guessed at, since fixing it
-       * needs the same "only snap when actually off-grid" care `bumpPlate`
-       * took in R562, applied to a function with many more branches than
-       * that one had.
+       * R668 closed the other direction this comment used to leave open: a
+       * jump that does NOT divide the stepper (dumbbells by 7 lb). The finer
+       * of 5 and 7 is 5, so after 175 -> 182 the coach said "try 190", a
+       * dumbbell that does not exist and a number the + button no longer
+       * reaches; the gcd is 1, so it says 189. A plateau there still adds the
+       * goal's own step (177.5 -> 178), no worse than the 180 it said before.
        */
       lastTime: lastTimeParts({
         previous: this.lastTime(),
@@ -1348,9 +1349,9 @@ export class NowModel {
           this.historyInSessionUnit(), this.exerciseId, this.now(),
           {
             unit: this.session.unit, goal: trainingGoal(this.repo),
-            // The finer of the fixed stepper and the lifter's own plate jump
-            // — see the comment above this call for why (R592).
-            grid: Math.min(WEIGHT_STEP[this.session.unit], this.plateJump()),
+            // The grid both the fixed stepper and the lifter's own plate jump
+            // land on — see the comment above this call for why (R592, R668).
+            grid: this.plateGrid(),
             /*
              * The empty implement, so a deload cannot suggest a weight the
              * rack does not have (R541). The engine defaults this to 0, so
@@ -1902,6 +1903,14 @@ export class NowModel {
     const grid = WEIGHT_STEP[this.session.unit];
     const target = this.weight + steps * jump;
     /*
+     * "On the grid" means on the lifter's OWN grid (R668): the finest weight
+     * both the stepper and their jump land on. Measured against the stepper
+     * alone, a jump of 7 went 175 -> 182 -> 190 -> 197 -> 205, because 182 is
+     * "off" a 5 lb grid only on account of the 7 they asked for, and got
+     * snapped as if it were a converted kilo. Ask for seven, get eight.
+     */
+    const own = this.plateGrid();
+    /*
      * SNAP ONLY WHEN THE STARTING WEIGHT IS OFF THE GRID (R562).
      *
      * R550 rounded every result, and that silently overrode a jump the lifter
@@ -1918,8 +1927,23 @@ export class NowModel {
      * press kept the half — and snapping there returns them to loadable
      * numbers without touching anyone else.
      */
-    const onGrid = Math.abs(this.weight / grid - Math.round(this.weight / grid)) < 1e-9;
+    const onGrid = Math.abs(this.weight / own - Math.round(this.weight / own)) < 1e-9;
     this.setWeight(onGrid ? target : Math.round(target / grid) * grid);
+  }
+
+  /**
+   * The finest weight both the fixed stepper and the lifter's plate jump land
+   * on: their greatest common divisor (R668). Equal to the finer of the two
+   * whenever one divides the other -- a 45 lb or 20 kg default, 1.25 kg
+   * micro-plates, a 1 lb jump -- and 1 lb for a jump of 7, so weights their own
+   * dumbbells reach are never treated as off the grid. Converted weights land
+   * on halves (`convertWeight`), so 189.5 lb is still off it and still rescued.
+   */
+  plateGrid(): number {
+    let a = Math.round(WEIGHT_STEP[this.session.unit] * 100);
+    let b = Math.round(this.plateJump() * 100);
+    while (b) [a, b] = [b, a % b];
+    return a / 100;
   }
 
   /**

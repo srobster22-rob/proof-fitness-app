@@ -67,6 +67,43 @@ describe('a plate jump the lifter set is the jump they get (R562)', () => {
     assert.equal(press('45', 189.5, 'lb', -1), 145, '-45 from an off-grid weight left it off-grid');
   });
 
+  test('a jump of 7 keeps moving 7, press after press (R668)', () => {
+    /*
+     * R562 checked ONE press from 135. The second press is where it broke:
+     * 182 is off a 5 lb grid only because of the 7 the lifter asked for, and
+     * the off-grid rescue snapped it -- 175 -> 182 -> 190 -> 197 -> 205.
+     */
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    repo.setPref('jump.lb', '7');
+    const m = new NowModel(repo, () => T0, 'en-US');
+    m.selectExercise('curl');
+    m.setWeight(175);
+    const seen: number[] = [];
+    for (let i = 0; i < 4; i++) { m.bumpPlate(1); seen.push(m.state().weight); }
+    assert.deepEqual(seen, [182, 189, 196, 203], `a jump of 7 went ${[175, ...seen].join(' -> ')}`);
+    for (let i = 0; i < 4; i++) m.bumpPlate(-1);
+    assert.equal(m.state().weight, 175, 'stripping four jumps of 7 did not return to the start');
+  });
+
+  test('and the coach climbs by the same 7 (R668)', () => {
+    // 175 then 182 on dumbbells that step by 7: the next dumbbell is 189, the
+    // + button goes to 189, and the coach must name 189 -- not 190.
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    repo.setPref('jump.lb', '7');
+    [[175, 4], [182, 2]].forEach(([weight, daysAgo], i) => {
+      const id = `s${i}`, at = T0 - daysAgo * 86_400_000;
+      repo.startSession(id, 'lb', undefined, at);
+      for (let k = 0; k < 3; k++) {
+        repo.logSet({ id: `${id}x${k}`, sessionId: id, exerciseId: 'curl', weight, reps: 10, at: at + k * 60_000 });
+      }
+      repo.endSession(id, at + 3_600_000);
+    });
+    const m = new NowModel(repo, () => T0, 'en-US');
+    m.selectExercise('curl');
+    const { head, tail } = m.state().lastTime;
+    assert.match(`${head}${tail}`, /try 189\b/, `the coach said "${head}${tail}"`);
+  });
+
   test('and a custom jump still rescues an off-grid weight', () => {
     // Both rules at once: the start is off-grid, so it snaps, even though the
     // jump is the lifter's own. Getting back onto real plates wins there.
