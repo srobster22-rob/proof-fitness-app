@@ -330,8 +330,8 @@ function AddReading({ kind, repo, onClose, onSaved }: {
   const savingRef = useRef(false);
 
   return (
-    <ScreenModal visible animationType="none" transparent onRequestClose={onClose}>
-      <Pressable style={s.backdrop} onPress={onClose}>
+    <ScreenModal visible animationType="none" transparent aria-label={T(KIND_KEY[kind])} onRequestClose={onClose}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={onClose}>
         <Pressable style={s.sheet} onPress={e => e.stopPropagation()}>
           <View style={s.grabber} />
           <Text style={s.sheetTitle}>{T(KIND_KEY[kind])}</Text>
@@ -441,8 +441,8 @@ function TargetSheet({ kind, repo, onClose, onSaved }: {
   const targetDate = monthsFrom(now, months);
 
   return (
-    <ScreenModal visible animationType="none" transparent onRequestClose={onClose}>
-      <Pressable style={s.backdrop} onPress={onClose}>
+    <ScreenModal visible animationType="none" transparent aria-label={`${T(KIND_KEY[kind])} ${T('targetSuffix')}`} onRequestClose={onClose}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={onClose}>
         <Pressable style={s.sheet} onPress={e => e.stopPropagation()}>
           <View style={s.grabber} />
           <Text style={s.sheetTitle}>{T(KIND_KEY[kind])} {T('targetSuffix')}</Text>

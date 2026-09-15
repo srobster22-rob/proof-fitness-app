@@ -4138,3 +4138,52 @@ proof-parity-* temp directories were left behind. | next: whether the race
 test should count a failed open as torn is now moot for the suite -- nothing
 rewrites the shared bundle while it runs; ## Next holds only the
 owner's-eye UI note.
+
+R663 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. Checked first: react-native-web's Modal already
+exposes each open sheet as role="dialog" with aria-modal="true" and traps
+focus (live on Goals' add-goal sheet). PICK (logged first), the two gaps it
+leaves: (1) every sheet's dialog has no accessible name, so a screen reader
+announces just "dialog"; (2) each sheet's backdrop is a Pressable, so it is
+a tab stop (tabindex 0) with no role and no label -- tabbing lands on an
+element with nothing to say. RNW's Modal passes unconsumed props onto the
+dialog element and ModalProps includes ViewProps, so each of the eight
+ScreenModal call sites can pass aria-label from a title it already
+translates; focusable={false} on the backdrop sets tabindex -1 and keeps
+tap-to-close.
+BLIND TEST, caught in the product before it shipped: with focusable={false}
+on all eight backdrops the new sweep passed 3/3 -- and live, every backdrop
+still had tabindex="0" (Goals, Measure, Now's equipment sheet). The test
+only checked the prop was written. react-native-web's Pressable computes
+its own tabIndex (the tabIndex prop if given, else -1 when disabled, else
+0) and hands that number to the DOM, which honours an explicit 0/-1 before
+it ever looks at focusable. So the working prop is tabIndex={-1}, which
+React Native types allow (0 | -1). Swapped on all eight backdrops; the test
+now pins tabIndex={-1} and forbids focusable={false} as the only guard.
+Dialog names were already right live: "New goal", "BODYWEIGHT", "DONE ON",
+aria-modal true, backdrop tap still closes, nothing saved.
+Second gate finding, also mine: orphan-scan reported ScreenModal as NEW,
+"tested, but no production caller". The scan counts a caller as `name(`,
+so a JSX component can never have one -- ScreenModal was only safe because
+no test ever wrote "ScreenModal(" either. My new sweep did, in a skip
+condition (`tag.startsWith('<ScreenModal(')`), which made the test suite
+"call" it. Grep confirmed that line was the only occurrence outside the
+component's own definition. Removed that pointless half of the condition
+(the \w guard already skips longer names). The scanner is unchanged; the
+false positive came from the test. The other full-suite failure was the
+known load-sensitive race test ("writing through a temp file and a rename
+is not").
+BUILD: aria-label on all eight ScreenModal call sites, each from a title it
+already translates -- Goals (new/edit goal, two new i18n keys en+es),
+Measure's record and target sheets, ConfirmSheet's title prop, and Now's
+day chooser, set editor, exercise picker and equipment sheet; tabIndex={-1}
+on all eight backdrops. New test/sheets-are-named-dialogs.test.ts sweeps
+both (fails below eight of either) and pins the goal-sheet names in both
+languages. REVIEW: suite 2189 pass / 0 fail. Plant (pre-R663 goals,
+measure, ConfirmSheet, NowScreen, i18n) -> "every ScreenModal carries an
+accessible name" and "no sheet backdrop is an unnamed tab stop" failed by
+name; all five fixed copies restored byte-identical. PRODUCT, live, three
+sheets: Goals' add-goal dialog named "New goal", Measure's record dialog
+"BODYWEIGHT", Now's equipment dialog "DONE ON", each aria-modal, each
+backdrop tabindex -1 (was 0), and tapping the backdrop still closes the
+sheet; nothing saved. | next: ## Next holds only the owner's-eye UI note.

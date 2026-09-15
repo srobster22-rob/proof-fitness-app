@@ -573,8 +573,8 @@ function AddGoal({
     // and sits one full viewport below the screen. This one was invisible for
     // exactly as long, and for the same reason nobody noticed: driving it with
     // synthetic pointer events works fine on something you cannot see.
-    <ScreenModal visible animationType="none" transparent onRequestClose={onClose}>
-      <Pressable style={s.backdrop} onPress={onClose}>
+    <ScreenModal visible animationType="none" transparent aria-label={editing ? T('editGoalA11y') : T('newGoalA11y')} onRequestClose={onClose}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={onClose}>
         <Pressable style={s.sheet} onPress={e => e.stopPropagation()}>
           <View style={s.grabber} />
 

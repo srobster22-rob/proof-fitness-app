@@ -79,6 +79,8 @@ const EN = {
 
   // goals
   addGoal: '+ ADD A GOAL',
+  newGoalA11y: 'New goal',
+  editGoalA11y: 'Edit goal',
   setGoal: 'SET GOAL',
   saveChanges: 'SAVE CHANGES',
   change: 'CHANGE',
@@ -743,6 +745,8 @@ const ES: Partial<Record<Key, string>> = {
   nextOn: 'SIGUIENTE EN',
 
   addGoal: '+ AÑADIR META',
+  newGoalA11y: 'Nueva meta',
+  editGoalA11y: 'Editar meta',
   setGoal: 'FIJAR META',
   saveChanges: 'GUARDAR CAMBIOS',
   change: 'CAMBIAR',

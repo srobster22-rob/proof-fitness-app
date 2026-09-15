@@ -1403,8 +1403,8 @@ function DayChooser({ state, firstEver, onPickPlan, onPickDay, onSkip }: {
   const pickDay = (d: PlanDay) => leave(() => onPickDay(d));
 
   return (
-    <ScreenModal visible animationType="none" transparent exiting={closing} onRequestClose={skip}>
-      <Pressable style={s.backdrop} onPress={skip}>
+    <ScreenModal visible animationType="none" transparent aria-label={choosingPlan ? T('howSplit') : T('todayIs')} exiting={closing} onRequestClose={skip}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={skip}>
         <Pressable style={s.sheet} onPress={e => e.stopPropagation()}>
           <View style={s.grabber} />
 
@@ -1551,8 +1551,8 @@ function EditSetSheet({
   const ok = Number.isFinite(w) && w >= 0 && w <= MAX_TYPED_WEIGHT && Number.isInteger(r) && r >= 1;
 
   return (
-    <ScreenModal visible animationType="none" transparent exiting={closing} onRequestClose={close}>
-      <Pressable style={s.backdrop} onPress={close}>
+    <ScreenModal visible animationType="none" transparent aria-label={T(adding ? 'addASet' : 'editSet')} exiting={closing} onRequestClose={close}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={close}>
         <Pressable style={s.editSheet} onPress={e => e.stopPropagation()}>
           <View style={s.grabber} />
           <Text style={s.editTitle}>{T(adding ? 'addASet' : 'editSet')}</Text>
@@ -1696,8 +1696,8 @@ function ExercisePicker({
     // It had been that way since the picker was built, because every check ran
     // on synthetic pointer events, and those hit an element whether or not a
     // human could see it. Thirty rounds of "verified live" never once looked.
-    <ScreenModal visible animationType="none" transparent exiting={closing} onRequestClose={close}>
-      <Pressable style={s.backdrop} onPress={close}>
+    <ScreenModal visible animationType="none" transparent aria-label={state.loggedThisSession.length === 0 ? T('startWith') : T('switchTo')} exiting={closing} onRequestClose={close}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={close}>
         <Pressable style={s.sheet} onPress={e => e.stopPropagation()}>
           <View style={s.grabber} />
           <View style={s.sheetHead}>
@@ -1908,8 +1908,8 @@ function EquipmentSheet({ state, onPick, onApply, onClose, skipMachine, onSkipMa
   const pick = (k: Equipment | null, m?: string) => leave(() => onPick(k, m));
 
   return (
-    <ScreenModal visible animationType="none" transparent exiting={closing} onRequestClose={close}>
-      <Pressable style={s.backdrop} onPress={close}>
+    <ScreenModal visible animationType="none" transparent aria-label={T('doneOn')} exiting={closing} onRequestClose={close}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={close}>
         <Pressable style={s.sheet} onPress={e => e.stopPropagation()}>
           <View style={s.grabber} />
           <Text style={s.sheetTitle}>{T('doneOn')}</Text>

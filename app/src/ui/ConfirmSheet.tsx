@@ -99,11 +99,11 @@ export function ConfirmSheet({
   };
 
   return (
-    <ScreenModal visible animationType="none" transparent
+    <ScreenModal visible animationType="none" transparent aria-label={title}
       exiting={closing !== null}
       onRequestClose={() => close('cancel')}>
       {/* Tapping outside cancels — the safe outcome is always the easy one. */}
-      <Pressable style={s.backdrop} onPress={() => close('cancel')}>
+      <Pressable style={s.backdrop} tabIndex={-1} onPress={() => close('cancel')}>
         <Pressable style={s.sheet} onPress={e => e.stopPropagation()}>
           <Text style={s.title}>{title}</Text>
           <Text style={s.body}>{body}</Text>
