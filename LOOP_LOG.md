@@ -4187,3 +4187,52 @@ sheets: Goals' add-goal dialog named "New goal", Measure's record dialog
 "BODYWEIGHT", Now's equipment dialog "DONE ON", each aria-modal, each
 backdrop tabindex -1 (was 0), and tapping the backdrop still closes the
 sheet; nothing saved. | next: ## Next holds only the owner's-eye UI note.
+
+R664 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. PICK (logged first), the filed instrument question
+from R660/R662: bundle-write-is-atomic.test.ts's reader counts ANY failed
+read as torn (`catch { short++; }`). Under load on Windows a reader that
+opens the file mid-rename can throw (EPERM/EBUSY/ENOENT) with no partial
+write ever visible, and that has stopped two of the last five commit
+gates. The claim the test exists to prove (R501) is about a PARTIAL read --
+a require() loading a truncated bundle -- so a failed open is a different
+event. Before splitting the counts, measure what each write technique
+actually produces: the positive control ("a plain in-place write IS
+observable as a torn file") must keep detecting tearing, and if it has been
+leaning on exceptions rather than short reads, splitting would blind it.
+Probe v1 finding, before any edit: at 93% CPU with 34 node processes, the
+temp+rename WRITER threw EPERM from renameSync after exhausting all 200
+retries at the test's 2ms spin -- the rename was refused for well over
+400ms straight. The probe crashed before printing reader counts. So the
+race test's failures under load may not be the reader at all: its writer
+loop can give up and throw, which fails the test by itself. build-domain
+.cjs spins 10ms between retries, five times the headroom. Probe v2 prints
+each race as it finishes, counts writer failures instead of crashing, and
+compares the test's 2ms spin with the build's 10ms against plain writes.
+Probe v2 (35% CPU, 23 node processes), same race as the test, per race:
+plain writes -- 83 of 500 and 67 of 100 reads came back SHORT, with zero
+read exceptions and zero writer failures. temp+rename at the test's 2ms
+spin and at the build's 10ms spin -- 0 short, 0 read exceptions, 0 writer
+failures, both runs. So the positive control detects tearing through real
+short reads, not exceptions, and counting a failed open separately cannot
+blind it. With v1's EPERM-after-200-retries at 93% CPU, the fix is two
+instrument corrections, neither loosening the claim: the reader counts a
+failed open apart from a torn read (the atomic test still demands zero
+torn reads, the control still demands more than zero), and the test's
+writer gets the build's 10ms retry spacing, since the build is what it
+vouches for. A guard test pins both.
+BUILD: bundle-write-is-atomic.test.ts -- the reader child counts a failed
+open as openErrors (reported) instead of short; short now means only a read
+that succeeded with the wrong length. The atomic writer spins 10ms between
+rename retries (the build's spacing) instead of 2ms. Types updated for the
+new count. New guard "a failed open is not a torn read, and the writer gets
+the build retry budget (R664)" pins both; the atomic test still demands
+zero torn reads and the plain-write control still demands more than zero.
+REVIEW: the fixed file alone passed 4/4. Plant (failed opens charged as
+short again, spin back to 2ms) -> the R664 guard failed by name; fixed copy
+restored byte-identical. Full suite 2190 pass / 0 fail. PRODUCT (the
+instrument itself), probe v2 on the real bundle: plain writes tore through
+83/500 and 67/100 short reads with zero exceptions; temp+rename at 2ms and
+10ms produced 0 short reads, 0 open errors, 0 writer failures; probe v1 at
+93% CPU showed the old 2ms writer exhausting its 200 retries. | next: ##
+Next holds only the owner's-eye UI note.

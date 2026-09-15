@@ -48,7 +48,7 @@ describe('rewriting a file that other processes read (R501)', () => {
    */
   async function race(
     target: string, bytes: Buffer, write: (t: string, b: Buffer) => void
-  ): Promise<{ reads: number; short: number; writes: number }> {
+  ): Promise<{ reads: number; short: number; openErrors: number; writes: number }> {
     const full = bytes.length;
     /*
      * Counted, not timed. The parent writes flat out and starves this child,
@@ -57,20 +57,24 @@ describe('rewriting a file that other processes read (R501)', () => {
      */
     const reader = `
       const fs = require('fs');
-      let reads = 0, short = 0;
+      let reads = 0, short = 0, openErrors = 0;
       const t0 = Date.now();
       const tick = () => {
         for (let i = 0; i < 100; i++) {
           reads++;
+          // R664: only a read that SUCCEEDS with the wrong length is torn. A
+          // failed open (EPERM/EBUSY/ENOENT while a rename holds the path) is a
+          // different event -- measured: plain writes tear through short reads
+          // with zero exceptions, so the positive control does not lean on it.
           try { if (fs.readFileSync(${JSON.stringify(target)}).length !== ${full}) short++; }
-          catch { short++; }
+          catch { openErrors++; }
         }
         // Or 20s, whichever comes first: with a plain in-place write the
         // reader CONTENDS with the writer's handle on Windows and crawls, so
         // a pure count target let it run past the parent's deadline and get
         // killed before it ever printed.
         if (reads < ${READS} && Date.now() - t0 < 8000) return setImmediate(tick);
-        console.log(JSON.stringify({ reads, short }));
+        console.log(JSON.stringify({ reads, short, openErrors }));
       };
       tick();
     `;
@@ -106,7 +110,7 @@ describe('rewriting a file that other processes read (R501)', () => {
      * not assumed here — the positive control above measures it every run.
      */
     assert.ok(writes > 5, `only ${writes} writes — nothing to race against`);
-    const seen = JSON.parse(out.trim()) as { reads: number; short: number };
+    const seen = JSON.parse(out.trim()) as { reads: number; short: number; openErrors: number };
     /*
      * A floor, not a quota. R510's failure log caught this firing as a FALSE
      * failure: under the load of a full suite the reader child is starved and
@@ -167,7 +171,10 @@ describe('rewriting a file that other processes read (R501)', () => {
           catch (e) {
             const code = (e as { code?: string }).code;
             if (a >= 200 || (code !== 'EPERM' && code !== 'EACCES' && code !== 'EBUSY')) throw e;
-            const till = Date.now() + 2;
+            // R664: the build's own spacing (10ms). At 2ms the 200 retries ran
+            // out on a loaded box (measured: EPERM thrown after 200 attempts at
+            // 93% CPU), failing this test with no torn read at all.
+            const till = Date.now() + 10;
             while (Date.now() < till) { /* the handle closes in microseconds */ }
           }
         }
@@ -178,6 +185,16 @@ describe('rewriting a file that other processes read (R501)', () => {
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  test('a failed open is not a torn read, and the writer gets the build retry budget (R664)', () => {
+    const self = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8');
+    assert.match(self, /catch \{ openErrors\+\+; \}/,
+      'the reader no longer counts failed opens apart from torn reads');
+    assert.doesNotMatch(self, /catch \{ short\+\+; \}/,
+      'a failed open is being charged as a partial read again');
+    assert.match(self, /const till = Date\.now\(\) \+ 10;/,
+      'the atomic writer retries faster than the build, so it gives up under load');
   });
 
   test('and the real build writes that way, leaving no temp file behind', () => {
