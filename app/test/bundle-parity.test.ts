@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
+import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 
 import { findPRs } from '../src/domain/pr.ts';
@@ -192,9 +193,10 @@ describe('browser bundle parity', () => {
  */
 describe('the harness cannot be handed a stale bundle', () => {
   const APP = path.join(HERE, '..');
-  const run = (args: string[]) => {
+  const run = (args: string[], out?: string) => {
     try {
-      return { out: execFileSync('node', args, { cwd: APP, encoding: 'utf8' }), code: 0 };
+      const env = out ? { ...process.env, PROOF_BUNDLE_OUT: out } : process.env;
+      return { out: execFileSync('node', args, { cwd: APP, encoding: 'utf8', env }), code: 0 };
     } catch (e) {
       const err = e as { stdout?: string; stderr?: string; status?: number };
       return { out: (err.stdout ?? '') + (err.stderr ?? ''), code: err.status ?? -1 };
@@ -209,36 +211,41 @@ describe('the harness cannot be handed a stale bundle', () => {
 
   test('--check reports staleness rather than curing it', () => {
     // The whole point: a checker that rebuilds is a checker that always passes.
-    const file = path.join(APP, 'dist', 'proof-domain.js');
-    const before = fs.readFileSync(file);
     /*
-     * Both writes go through a temp file and a rename, because this test
-     * mutates the REAL shipped artifact while ~120 other test processes are
-     * running, one of which requires it at load time. A plain writeFileSync
-     * truncates first, and a reader landing in that window sees zero bytes
-     * (measured: 39 of 50). Atomic here, and atomic in build-domain.cjs.
+     * Against a COPY, through PROOF_BUNDLE_OUT (R662). This used to swap drift
+     * into the REAL dist/proof-domain.js and back while other test processes
+     * require that file at load -- and on Windows a reader opening it during a
+     * rename can fail outright, which is what the atomic-write race test kept
+     * catching. build-domain.cjs reads and writes only OUT, so a copy exercises
+     * exactly the same --check.
      */
-    const swap = (bytes: Buffer | string) => {
-      const tmp = file + '.tmp' + process.pid;
-      fs.writeFileSync(tmp, bytes);
-      fs.renameSync(tmp, file);
-    };
-    swap(before.toString('utf8') + '\n// drift\n');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'proof-parity-'));
+    const copy = path.join(dir, 'proof-domain.js');
     try {
-      const { out, code } = run(['build-domain.cjs', '--check']);
+      fs.writeFileSync(copy, fs.readFileSync(BUNDLE, 'utf8') + '\n// drift\n');
+      const { out, code } = run(['build-domain.cjs', '--check'], copy);
       assert.equal(code, 1);
       assert.match(out, /STALE/);
       // And it must not have repaired the file it was asked to inspect.
-      assert.match(fs.readFileSync(file, 'utf8'), /\/\/ drift/,
+      assert.match(fs.readFileSync(copy, 'utf8'), /\/\/ drift/,
         '--check rewrote the bundle, so it can never report a problem');
     } finally {
-      swap(before);
+      fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 
   test('a plain build still writes, so --check is opt-in', () => {
-    const { code } = run(['build-domain.cjs']);
-    assert.equal(code, 0);
-    assert.equal(run(['build-domain.cjs', '--check']).code, 0);
+    // Into a temp path (R662), for the same reason: never rebuild the shipped
+    // bundle while other test processes are loading it.
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'proof-parity-'));
+    const out = path.join(dir, 'proof-domain.js');
+    try {
+      const { code } = run(['build-domain.cjs'], out);
+      assert.equal(code, 0);
+      assert.ok(fs.existsSync(out), 'the plain build did not write its output');
+      assert.equal(run(['build-domain.cjs', '--check'], out).code, 0);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

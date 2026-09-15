@@ -4108,3 +4108,33 @@ exposes exactly one heading, rendered as H1 -- GOALS, PROGRESS, SETTINGS,
 YOU, LEGS DAY on a past recap, and "Nothing here" on an unknown route. No
 data touched. | next: ## Next holds only the owner's-eye UI note; the
 atomic-write race test's open-failure counting is still filed.
+
+R662 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. PICK (logged first), the root of R660's gate failure:
+bundle-parity.test.ts rewrites the REAL dist/proof-domain.js mid-suite --
+"--check reports staleness rather than curing it" swaps drift into it and
+back, and "a plain build still writes" rebuilds it -- while other test
+processes require that same file at load. Its writes are already
+temp+rename, but on Windows a reader opening the file during a rename can
+fail outright, which is exactly what the atomic-write race test's reader
+counts (and why that test was right to flag it, not noise). build-domain.cjs
+already honours PROOF_BUNDLE_OUT and writes nothing else (the harness is
+read-only verification), and two test files already redirect it through a
+mkdtemp dir. Point both mutating tests at a temp copy so the suite never
+rewrites the shipped bundle, plus a guard that fails if either stops.
+BUILD: bundle-parity.test.ts imports os; run() takes an optional output
+path and passes it as PROOF_BUNDLE_OUT; the staleness test writes the real
+bundle plus drift into a mkdtemp copy and runs --check against the copy;
+the plain-build test builds into a mkdtemp path and --checks that; both
+clean up in finally. The read-only "passes when current" test is unchanged.
+New test/suite-leaves-shipped-bundle-alone.test.ts guards all three.
+REVIEW: suite 2186 pass / 0 fail. Plant (pre-R662 bundle-parity.test.ts)
+-> "the staleness check works on a temp copy, not dist/proof-domain.js" and
+"the plain build writes into a temp path" both failed by name; fixed copy
+restored byte-identical. PRODUCT (the suite's effect on the shipped
+artifact): dist/proof-domain.js hashed e4f6dc27...f09a before and after
+running bundle-parity.test.ts and the guard alone (11/11 and 3/3), and no
+proof-parity-* temp directories were left behind. | next: whether the race
+test should count a failed open as torn is now moot for the suite -- nothing
+rewrites the shared bundle while it runs; ## Next holds only the
+owner's-eye UI note.
