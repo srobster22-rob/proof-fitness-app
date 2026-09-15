@@ -196,3 +196,33 @@ describe('a conversion is still rescued, and the coach still names reachable wei
     assert.match(said, /try 85(?![\d.])/, `a converted climb was taken as a 3 kg jump: "${said}"`);
   });
 });
+
+/*
+ * R671. R592 rounded the coach to multiples of the lifter's jump counted from
+ * ZERO, and the lifter does not stand at zero. With a 1.5 kg jump a plateau at
+ * 85 said "try 87": the plate button goes 86.5, 88 and the stepper 87.5, 90, so
+ * no button pressed repeatedly could dial it in. 123 of the 608 suggestions in
+ * R670's sweep were this shape; the sweep itself is now a test
+ * (coach-names-weights-a-button-dials-in).
+ */
+describe('the coach counts the lifter\'s jumps from where they stand (R671)', () => {
+  test('a 1.5 kg plateau at 85 says 86.5 -- one plate press -- not 87', () => {
+    const m = lifter('kg', [[85, 8], [85, 8], [85, 8]], 'kg', '1.5');
+    const said = coachSaid(m);
+    assert.match(said, /try 86\.5(?![\d.])/, `a 1.5 kg jump, stuck at 85: "${said}"`);
+    m.bumpPlate(1);
+    assert.equal(m.state().weight, 86.5, 'one press of the plate button is not the number the coach named');
+  });
+
+  test('a deload lands on their jumps too: 85 on a 2 kg jump backs off to 77', () => {
+    const said = coachSaid(lifter('kg', [[85, 8], [85, 7], [85, 6]], 'kg', '2'));
+    assert.match(said, /back off to 77(?![\d.])/, `a 2 kg jump, grinding at 85: "${said}"`);
+  });
+
+  test('but not from a weight the plate button would snap first', () => {
+    // 83 is not a whole number of 1.25s, so +1.25 from it goes to 85, not
+    // 84.25. The coach names the stepper's 85, not a jump nothing reaches.
+    const said = coachSaid(lifter('kg', [[83, 8], [83, 8], [83, 8]], 'kg', '1.25'));
+    assert.match(said, /try 85(?![\d.])/, `a 1.25 kg jump, stuck at an off-lattice 83: "${said}"`);
+  });
+});

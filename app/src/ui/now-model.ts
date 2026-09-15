@@ -1335,23 +1335,23 @@ export class NowModel {
        * (HANDOFF trap 9), so raw history would compare kilos against pounds
        * and suggest a jump in the wrong currency.
        *
-       * `grid` below is the FINER of WEIGHT_STEP and `this.plateJump()`
-       * (R592, continuing R548). WEIGHT_STEP alone is "reachable by the fine
-       * +/-5 stepper and loadable on a standard bar" — right until somebody
-       * tells the app they load something finer, which `jump.<unit>`'s own
-       * docstring in settings.tsx names directly ("someone running
-       * microplates"). Measured: a plateau at 60 kg with a 1.25 kg custom
-       * jump got "try 62.5" — the exact 2x jump that preference exists to
-       * avoid — while the + button one row down would have gone to 61.25.
+       * `grid` below is WEIGHT_STEP, the stepper's own increment, and the
+       * lifter's plate jump goes in separately as `jump` (R671). R592 passed
+       * the FINER of the two as the grid, because WEIGHT_STEP alone is
+       * "reachable by the fine +/-5 stepper and loadable on a standard bar" —
+       * right until somebody tells the app they load something finer, which
+       * `jump.<unit>`'s own docstring in settings.tsx names directly ("someone
+       * running microplates"). Measured then: a plateau at 60 kg with a 1.25 kg
+       * jump got "try 62.5", the exact 2x jump that preference exists to avoid.
        *
-       * Not `plateGrid()`, which R668 put here and R669 took back. For a jump
-       * of 7 that grid is 1 lb, so a plateau at 175 was told "try 178" and a
-       * deload at 182 "back off to 164" -- numbers neither button reaches.
-       * What R668 was right about, a climb by whole jumps (175 -> 182, then
-       * "try 189" rather than 190), is the coach's climbing branch and needs
-       * `jump`, passed below. Still open: a finer jump that does not divide
-       * the stepper (1.5 kg) rounds to multiples of the jump, not to jumps
-       * from where the lifter stands, so a plateau at 85 says 87.
+       * But a grid of the jump counts from zero, and the lifter does not stand
+       * at zero: a plateau at 85 with a 1.5 kg jump said "try 87", which the
+       * plate button (86.5, 88) and the stepper (87.5, 90) both step over. So
+       * the coach now takes whichever is nearer the goal's target -- the
+       * stepper's grid, or a whole number of jumps from where they stand --
+       * and 60 kg on 1.25 still says 61.25. Not `plateGrid()` either, which
+       * R668 put here and R669 took back ("try 178" at 175 on dumbbells by 7);
+       * R668's climb by whole jumps (175 -> 182, "try 189") also needs `jump`.
        */
       lastTime: lastTimeParts({
         previous: this.lastTime(),
@@ -1362,9 +1362,9 @@ export class NowModel {
           this.historyInSessionUnit(), this.exerciseId, this.now(),
           {
             unit: this.session.unit, goal: trainingGoal(this.repo),
-            // The finer of the fixed stepper and the lifter's own plate jump
-            // — see the comment above this call for why (R592).
-            grid: Math.min(WEIGHT_STEP[this.session.unit], this.plateJump()),
+            // The stepper's own grid; the lifter's jump is handed over below
+            // — see the comment above this call for why (R592, R671).
+            grid: WEIGHT_STEP[this.session.unit],
             /*
              * The empty implement, so a deload cannot suggest a weight the
              * rack does not have (R541). The engine defaults this to 0, so
@@ -1380,9 +1380,9 @@ export class NowModel {
              * wrong and unnoticed for a dumbbell or bodyweight one.
              */
             base: EQUIPMENT_BASE[this.equipment ?? 'barbell'][this.session.unit],
-            // A climb by whole jumps is their plates, kept as it is -- unless the
-            // latest set is a conversion, whose step is rounding (R669).
-            jump: this.startConverted ? undefined : this.plateJump()
+            // Their jump, only where the plate button moves by exactly that from
+            // this weight: not a conversion (R669), not off their own grid (R671).
+            jump: this.startConverted || !this.onPlateGrid(this.startWeight) ? undefined : this.plateJump()
           }
         )
       }, this.lang()),
@@ -1979,6 +1979,12 @@ export class NowModel {
     let b = Math.round(this.plateJump() * 100);
     while (b) [a, b] = [b, a % b];
     return a / 100;
+  }
+
+  /** Whether the plate button moves `w` by exactly the jump, rather than snapping it first. */
+  private onPlateGrid(w: number): boolean {
+    const g = this.plateGrid();
+    return Math.abs(w / g - Math.round(w / g)) < 1e-9;
   }
 
   /**

@@ -205,6 +205,26 @@ export function coachSuggestion(
     if (grid <= 0 || at > from) return at;
     return roundTo(from + grid, grid) > from ? roundTo(from + grid, grid) : from + grid;
   };
+  /*
+   * OR A WHOLE NUMBER OF THE LIFTER'S OWN JUMPS FROM WHERE THEY STAND (R671).
+   *
+   * `grid` is the stepper's, so every number on it is one the + and - buttons
+   * dial in by pressing. A lifter with their own plate jump has a second line
+   * of numbers just as easy to reach -- the plate button, pressed from the
+   * weight they are on -- and when that line passes nearer the goal's target it
+   * is the better answer. Rounding to multiples of the jump counted from ZERO,
+   * as R592 did, lands on neither: a plateau at 85 kg with a 1.5 kg jump said
+   * "try 87", while the plate button goes 86.5, 88 and the stepper 87.5, 90.
+   * The caller passes `jump` only where the plate button really does move by
+   * exactly that from here, never for a weight it would snap first.
+   */
+  const ownJump = opts.jump ?? 0;
+  const nearer = (from: number, target: number, onGrid: number, up: boolean): number => {
+    if (!(ownJump > 0)) return onGrid;
+    const n = Math.round((target - from) / ownJump);
+    const theirs = from + (up ? Math.max(1, n) : Math.min(-1, n)) * ownJump;
+    return Math.abs(theirs - target) < Math.abs(onGrid - target) - 1e-9 ? theirs : onGrid;
+  };
   const target = TARGET_REPS[goal];
   const latest = sets[0];
 
@@ -243,7 +263,8 @@ export function coachSuggestion(
      * equipment gets exactly the old arithmetic rather than a wrong floor.
      */
     const base = opts.base ?? 0;
-    const back = Math.max(base, snap(roundTo(latest.weight * 0.9, MIN_INCREMENT[opts.unit])));
+    const tenOff = roundTo(latest.weight * 0.9, MIN_INCREMENT[opts.unit]);
+    const back = Math.max(base, nearer(latest.weight, tenOff, snap(tenOff), false));
     /*
      * At the floor there is nothing to back off TO, and the branches below
      * must not get the question: with reps falling and three sessions at one
@@ -289,7 +310,7 @@ export function coachSuggestion(
    * immediately.
    */
   if (atSameWeight >= PLATEAU_SESSIONS && sets[0].reps <= sets[atSameWeight - 1].reps) {
-    const up = raise(latest.weight, latest.weight + step);
+    const up = nearer(latest.weight, latest.weight + step, raise(latest.weight, latest.weight + step), true);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachPlateau',
@@ -302,7 +323,7 @@ export function coachSuggestion(
    * the rep target, so the weight is no longer the limiting thing.
    */
   if (atSameWeight >= MIN_SESSIONS && latest.reps >= target) {
-    const up = raise(latest.weight, latest.weight + step);
+    const up = nearer(latest.weight, latest.weight + step, raise(latest.weight, latest.weight + step), true);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachIncrease',
