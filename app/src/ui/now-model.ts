@@ -954,6 +954,12 @@ export class NowModel {
   private source: Prefill['source'] = 'seed';
   /** What `loadPrefill` put in the hero, kept so the label can name it. */
   private startWeight = 0;
+  /**
+   * Whether that prefill was a CONVERSION: the set it came from was logged in
+   * the other unit (R669). Set only by `loadPrefill`, the one path that puts a
+   * converted weight in the field; `bumpPlate` and the coach call read it.
+   */
+  private startConverted = false;
 
   constructor(repo: Repo, now: () => number = Date.now, locale?: string | null) {
     this.repo = repo;
@@ -1141,6 +1147,12 @@ export class NowModel {
     this.reps = p.reps;
     this.source = p.source;
     this.startWeight = p.weight;
+    // `prefillFor` takes this lift's latest set by `at`; its session still knows
+    // the unit it was logged in, which the converted number no longer shows.
+    let newest: LoggedSet | null = null;
+    for (const s of this.setsFor(this.exerciseId)) if (!newest || s.at > newest.at) newest = s;
+    this.startConverted = newest !== null &&
+      (this.repo.sessionUnits().get(newest.sessionId) ?? this.session.unit) !== this.session.unit;
 
     // Equipment carries over the same way the numbers do — the last set of
     // this lift is the best guess at how the next one will be done, and §4
@@ -1323,22 +1335,23 @@ export class NowModel {
        * (HANDOFF trap 9), so raw history would compare kilos against pounds
        * and suggest a jump in the wrong currency.
        *
-       * `grid` below is `plateGrid()`, the finest weight both WEIGHT_STEP and
-       * `this.plateJump()` land on (R668; R592 used the finer of the two, which
-       * is the same number whenever one divides the other). WEIGHT_STEP
-       * alone is "reachable by the fine +/-5 stepper and loadable on a
-       * standard bar" — right until somebody tells the app they load
-       * something finer, which `jump.<unit>`'s own
+       * `grid` below is the FINER of WEIGHT_STEP and `this.plateJump()`
+       * (R592, continuing R548). WEIGHT_STEP alone is "reachable by the fine
+       * +/-5 stepper and loadable on a standard bar" — right until somebody
+       * tells the app they load something finer, which `jump.<unit>`'s own
        * docstring in settings.tsx names directly ("someone running
        * microplates"). Measured: a plateau at 60 kg with a 1.25 kg custom
        * jump got "try 62.5" — the exact 2x jump that preference exists to
        * avoid — while the + button one row down would have gone to 61.25.
-       * R668 closed the other direction this comment used to leave open: a
-       * jump that does NOT divide the stepper (dumbbells by 7 lb). The finer
-       * of 5 and 7 is 5, so after 175 -> 182 the coach said "try 190", a
-       * dumbbell that does not exist and a number the + button no longer
-       * reaches; the gcd is 1, so it says 189. A plateau there still adds the
-       * goal's own step (177.5 -> 178), no worse than the 180 it said before.
+       *
+       * Not `plateGrid()`, which R668 put here and R669 took back. For a jump
+       * of 7 that grid is 1 lb, so a plateau at 175 was told "try 178" and a
+       * deload at 182 "back off to 164" -- numbers neither button reaches.
+       * What R668 was right about, a climb by whole jumps (175 -> 182, then
+       * "try 189" rather than 190), is the coach's climbing branch and needs
+       * `jump`, passed below. Still open: a finer jump that does not divide
+       * the stepper (1.5 kg) rounds to multiples of the jump, not to jumps
+       * from where the lifter stands, so a plateau at 85 says 87.
        */
       lastTime: lastTimeParts({
         previous: this.lastTime(),
@@ -1349,9 +1362,9 @@ export class NowModel {
           this.historyInSessionUnit(), this.exerciseId, this.now(),
           {
             unit: this.session.unit, goal: trainingGoal(this.repo),
-            // The grid both the fixed stepper and the lifter's own plate jump
-            // land on — see the comment above this call for why (R592, R668).
-            grid: this.plateGrid(),
+            // The finer of the fixed stepper and the lifter's own plate jump
+            // — see the comment above this call for why (R592).
+            grid: Math.min(WEIGHT_STEP[this.session.unit], this.plateJump()),
             /*
              * The empty implement, so a deload cannot suggest a weight the
              * rack does not have (R541). The engine defaults this to 0, so
@@ -1366,7 +1379,10 @@ export class NowModel {
              * actually logged on — right for a barbell lift by coincidence,
              * wrong and unnoticed for a dumbbell or bodyweight one.
              */
-            base: EQUIPMENT_BASE[this.equipment ?? 'barbell'][this.session.unit]
+            base: EQUIPMENT_BASE[this.equipment ?? 'barbell'][this.session.unit],
+            // A climb by whole jumps is their plates, kept as it is -- unless the
+            // latest set is a conversion, whose step is rounding (R669).
+            jump: this.startConverted ? undefined : this.plateJump()
           }
         )
       }, this.lang()),
@@ -1908,8 +1924,16 @@ export class NowModel {
      * alone, a jump of 7 went 175 -> 182 -> 190 -> 197 -> 205, because 182 is
      * "off" a 5 lb grid only on account of the 7 they asked for, and got
      * snapped as if it were a converted kilo. Ask for seven, get eight.
+     *
+     * Except for the one weight that IS a converted kilo (R669). For a kilo
+     * jump that does not divide 2.5 -- 1, 1.5, 2, 3 -- that finest grid is
+     * 0.5 kg, exactly what `convertWeight` rounds to, so every converted
+     * weight passed as the lifter's own and R550's rescue stopped: a bench
+     * last logged at 185 lb opened at 84 kg and a 3 kg jump went to 87.
+     * Arithmetic cannot tell 81.5 = 80 + 1.5 from 81.5 = 179.5 lb, so the
+     * prefill says where it came from instead.
      */
-    const own = this.plateGrid();
+    const own = this.startConverted && this.weight === this.startWeight ? grid : this.plateGrid();
     /*
      * SNAP ONLY WHEN THE STARTING WEIGHT IS OFF THE GRID (R562).
      *
@@ -1936,8 +1960,9 @@ export class NowModel {
    * on: their greatest common divisor (R668). Equal to the finer of the two
    * whenever one divides the other -- a 45 lb or 20 kg default, 1.25 kg
    * micro-plates, a 1 lb jump -- and 1 lb for a jump of 7, so weights their own
-   * dumbbells reach are never treated as off the grid. Converted weights land
-   * on halves (`convertWeight`), so 189.5 lb is still off it and still rescued.
+   * dumbbells reach are never treated as off the grid. It can be as fine as
+   * the half unit `convertWeight` rounds to, so it cannot spot a converted
+   * weight by itself (R669: see `startConverted`).
    */
   plateGrid(): number {
     let a = Math.round(WEIGHT_STEP[this.session.unit] * 100);

@@ -112,3 +112,87 @@ describe('a plate jump the lifter set is the jump they get (R562)', () => {
       `from 189.5 with a jump of 7 the app left ${up}, which is not loadable`);
   });
 });
+
+/** Bench sessions oldest first as [weight, reps] in `histUnit`, then a model in `sessUnit` with `jump`. */
+function lifter(histUnit: Unit, sessions: Array<[number, number]>, sessUnit: Unit, jump: string): NowModel {
+  const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+  sessions.forEach(([weight, reps], i) => {
+    const id = `h${i}`, at = T0 - (2 + 3 * (sessions.length - 1 - i)) * 86_400_000;
+    repo.startSession(id, histUnit, undefined, at);
+    for (let k = 0; k < 2; k++) {
+      repo.logSet({ id: `${id}x${k}`, sessionId: id, exerciseId: 'bench', weight, reps, at: at + k * 60_000 });
+    }
+    repo.endSession(id, at + 3_600_000);
+  });
+  repo.setPref('pref.unit', sessUnit);
+  repo.setPref(`jump.${sessUnit}`, jump);
+  const m = new NowModel(repo, () => T0, 'en-US');
+  m.selectExercise('bench');
+  return m;
+}
+
+const coachSaid = (m: NowModel) => { const { head, tail } = m.state().lastTime; return `${head} ${tail ?? ''}`; };
+
+/*
+ * R669, and the defect is mine from R668.
+ *
+ * R668 judged "on the grid" by the finest weight the stepper and the jump both
+ * land on. For a kilo jump that does not divide 2.5 -- 1, 1.5, 2, 3 -- that is
+ * 0.5 kg, which is exactly what a converted weight is rounded to, so every
+ * conversion passed as the lifter's own and R550's rescue quietly stopped. And
+ * the coach, handed the same grid, named numbers no button reaches: "try 178"
+ * at a plateau of 175 on dumbbells by 7, where it had said 180.
+ *
+ * Found by checking R668's own comment ("converted weights land on halves, so
+ * 189.5 lb is still off it") in kilos, where it is false.
+ */
+describe('a conversion is still rescued, and the coach still names reachable weights (R669)', () => {
+  test('a bench last logged in pounds is put back on the 2.5 kg grid, whatever the kilo jump', () => {
+    for (const [jump, expected] of [['1.5', 85], ['3', 87.5]] as Array<[string, number]>) {
+      const m = lifter('lb', [[175, 5], [180, 5], [185, 5]], 'kg', jump);
+      assert.equal(m.state().weight, 84, 'fixture: 185 lb should open as 84 kg');
+      m.bumpPlate(1);
+      assert.equal(m.state().weight, expected,
+        `a jump of ${jump} kg from the converted 84 left ${m.state().weight}, off the 2.5 kg grid`);
+    }
+    const lb = lifter('kg', [[80, 5], [83, 5], [86, 5]], 'lb', '1.5');
+    assert.equal(lb.state().weight, 189.5, 'fixture: 86 kg should open as 189.5 lb');
+    lb.bumpPlate(1);
+    assert.equal(lb.state().weight, 190, `a jump of 1.5 lb from the converted 189.5 left ${lb.state().weight}`);
+  });
+
+  test('and a weight reached on their own jump is still theirs: R668 is not undone', () => {
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    repo.setPref('pref.unit', 'kg');
+    repo.setPref('jump.kg', '1.5');
+    const m = new NowModel(repo, () => T0, 'en-US');
+    m.selectExercise('bench');
+    m.setWeight(80);
+    const seen: number[] = [];
+    for (let i = 0; i < 3; i++) { m.bumpPlate(1); seen.push(m.state().weight); }
+    assert.deepEqual(seen, [81.5, 83, 84.5], `a jump of 1.5 kg went ${[80, ...seen].join(' -> ')}`);
+    const own = lifter('kg', [[80, 8], [81.5, 8], [83, 8]], 'kg', '1.5');
+    own.bumpPlate(1);
+    assert.equal(own.state().weight, 84.5, 'their own logged 83 was snapped as if it were a conversion');
+  });
+
+  test('the coach names a weight a button reaches, not the finest common grid', () => {
+    const plateau = coachSaid(lifter('lb', [[175, 8], [175, 8], [175, 8]], 'lb', '7'));
+    assert.match(plateau, /try 180(?![\d.])/, `dumbbells by 7, stuck at 175: "${plateau}"`);
+    const deload = coachSaid(lifter('lb', [[182, 8], [182, 7], [182, 6]], 'lb', '7'));
+    assert.match(deload, /back off to 165(?![\d.])/, `dumbbells by 7, grinding at 182: "${deload}"`);
+    const kilos = coachSaid(lifter('kg', [[84, 8], [84, 8], [84, 8]], 'kg', '3'));
+    assert.match(kilos, /try 85(?![\d.])/, `a 3 kg jump, stuck at 84: "${kilos}"`);
+  });
+
+  test('a climb by whole jumps is still taken as it is -- but not a converted one', () => {
+    const climb = coachSaid(lifter('kg', [[80, 8], [81.5, 8], [83, 8]], 'kg', '1.5'));
+    assert.match(climb, /try 84\.5(?![\d.])/, `climbing by their 1.5 kg jump: "${climb}"`);
+    // 175 -> 182 lb reads as 79.5 -> 82.5 kg: a step of exactly 3 by rounding
+    // alone. They never loaded a 3 kg jump, so it is not their plates.
+    const converted = lifter('lb', [[175, 10], [182, 10]], 'kg', '3');
+    const said = coachSaid(converted);
+    assert.match(said, /82\.5 and climbing/, `fixture stopped being a converted climb: "${said}"`);
+    assert.match(said, /try 85(?![\d.])/, `a converted climb was taken as a 3 kg jump: "${said}"`);
+  });
+});

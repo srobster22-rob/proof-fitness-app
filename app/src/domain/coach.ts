@@ -159,7 +159,7 @@ export function coachSuggestion(
   history: LoggedSet[],
   exerciseId: string,
   now: number,
-  opts: { goal?: TrainingGoal; unit: Unit; base?: number; grid?: number }
+  opts: { goal?: TrainingGoal; unit: Unit; base?: number; grid?: number; jump?: number }
 ): Suggestion | null {
   const goal = opts.goal ?? 'size';
   const sets = topSets(history, exerciseId, now);
@@ -381,7 +381,18 @@ export function coachSuggestion(
        * lifted and §16 wants that reported honestly; it is only the SUGGESTION
        * that has to exist in a rack.
        */
-      const up = raise(latest.weight, latest.weight + theirStep);
+      /*
+       * A step that is a whole number of the lifter's own plate jumps IS their
+       * plates, and is taken as it is (R669). Dumbbells by 7: 175 -> 182 says
+       * "try 189", which their + button reaches; snapped to the 5 lb stepper it
+       * said 190, which nothing they own weighs. Every other branch keeps the
+       * stepper grid, because a goal's step is the table's number, not theirs.
+       * The caller passes `jump` only for weights the lifter loaded -- a
+       * converted step can land on a multiple by rounding alone.
+       */
+      const jumps = opts.jump ? theirStep / opts.jump : 0;
+      const theirPlates = jumps >= 1 && Math.abs(jumps - Math.round(jumps)) < 1e-9;
+      const up = theirPlates ? latest.weight + theirStep : raise(latest.weight, latest.weight + theirStep);
       return {
         kind: 'increase', weight: up, recentWeight: latest.weight,
         sessions: sets.length, key: 'coachClimbing',
