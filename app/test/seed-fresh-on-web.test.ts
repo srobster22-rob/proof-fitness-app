@@ -32,4 +32,43 @@ describe('the preview regenerates its sample data when it starts (R647)', () => 
     assert.match(src, /const now = Date\.now\(\);/);
     assert.match(src, /const start = now - week \* 7 \* DAY/);
   });
+
+  /*
+   * R666. Regenerating was not enough: the seed was BORN on the coach window's
+   * edge, its second-to-last push day exactly 14 days back, so the owner's own
+   * "TO SEE IT" steps showed "Last time 175 × 5" minutes after a fresh start.
+   * Checked here the way the owner checks it -- the real seeder, the real
+   * model, the line on screen -- a day after the seed was written, so a
+   * schedule that only works at the instant of writing cannot pass.
+   */
+  test('a day-old seed still shows the coach line the owner is told to look for (R666)', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const os = await import('node:os');
+    const { DatabaseSync } = await import('node:sqlite');
+    const { Repo } = await import('../src/data/repo.ts');
+    const { NowModel } = await import('../src/ui/now-model.ts');
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'proof-seed-'));
+    try {
+      const out = path.join(dir, 'seed.b64');
+      execFileSync(process.execPath, ['--no-warnings', path.join(APP, 'tools', 'seed-web.ts')],
+        { cwd: APP, env: { ...process.env, PROOF_SEED_OUT: out }, stdio: 'pipe' });
+      const file = path.join(dir, 'seed.db');
+      fs.writeFileSync(file, Buffer.from(fs.readFileSync(out, 'utf8'), 'base64'));
+
+      const later = Date.now() + 86_400_000;
+      const db = new DatabaseSync(file);
+      try {
+        const m = new NowModel(new Repo(db as never, () => later), () => later, 'en-US');
+        m.selectExercise('bench');
+        const { head, tail } = m.state().lastTime;
+        assert.match(`${head}${tail}`, /175 and climbing, 2 sessions — try 180/,
+          `the seeded preview shows "${head}${tail}" -- the coach line has aged out of its window`);
+      } finally {
+        db.close();
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

@@ -31,8 +31,10 @@ import { assertSaneTimes } from './seed-sanity.ts';
 import { devPort } from './dev-port.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(HERE, '..', 'public', 'seed.b64');
-const TMP = path.join(HERE, '..', 'public', '.seed.tmp.db');
+// PROOF_SEED_OUT lets a test run the real seeder without rewriting the file the
+// running preview serves (the R662 lesson, for the seed instead of the bundle).
+const OUT = process.env.PROOF_SEED_OUT ?? path.join(HERE, '..', 'public', 'seed.b64');
+const TMP = path.join(path.dirname(OUT), '.seed.tmp.db');
 
 const DAY = 86_400_000, MIN = 60_000;
 const WEEKS = Number(process.argv[2] ?? 12);
@@ -83,8 +85,13 @@ function main(): void {
   let n = 0;
   for (let week = WEEKS; week >= 1; week--) {
     SPLIT.forEach(([day, lifts], i) => {
-      // Monday / Wednesday / Friday, mid-evening.
-      const start = now - week * 7 * DAY + i * 2 * DAY;
+      // Every other day, the last one yesterday. R666: the +2 days is what keeps
+      // the coach line alive. Without it the last two push days sat 7 and 14
+      // days back, the older one on the coach's 14-day edge (coach.ts
+      // WINDOW_DAYS), so it aged out within moments of being written and the
+      // preview showed "Last time 175 × 5" instead of "try 180". Now they are
+      // 5 and 12 days back: two days of margin on a seed rewritten every start.
+      const start = now - week * 7 * DAY + (i * 2 + 2) * DAY;
       const sessionId = `seed_w${week}_${day}`;
       clock = start;                       // so started_at is when it happened
       repo.startSession(sessionId, 'lb');
