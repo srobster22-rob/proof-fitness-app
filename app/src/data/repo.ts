@@ -188,6 +188,7 @@ export class Repo {
   startSession(id: string, unit: Unit, title?: string, at?: number, updatedAt?: number): Session {
     const t = at ?? this.now();
     const u = updatedAt ?? this.now();
+    this.unitsCache = null;
     this.db.prepare(
       'INSERT INTO sessions (id, started_at, ended_at, unit, title, updated_at) VALUES (?, ?, NULL, ?, ?, ?)'
     ).run(id, t, unit, title ?? null, u);
@@ -241,17 +242,29 @@ export class Repo {
    * a DIFFERENT session's unit. Then 195 lb becomes "195 kg", and the number is
    * out by a factor of 2.2 with nothing on screen to say so.
    *
-   * Deliberately NOT memoised, unlike its neighbours. `startSession` does not
-   * call `dirty()`, so a cache keyed on the sets generation would miss the one
-   * event that adds a row — and a stale unit map is the exact bug this method
-   * exists to prevent, wearing a hat. It is one small row per session and is
-   * read when the exercise changes, not on every render.
+   * Memoised on its OWN flag (R665), not the sets generation. `startSession`
+   * does not call `dirty()`, so a cache keyed on sets would miss the one event
+   * that adds a row — and a stale unit map is the exact bug this method exists
+   * to prevent, wearing a hat. It used to be unmemoised on the belief that it
+   * was "read when the exercise changes, not on every render"; measured at 800
+   * sessions, `state()` read it twice per tap and it was the largest single
+   * cost of a repeat render.
+   *
+   * Sound because a session's unit is written exactly once, by the INSERT in
+   * `startSession`: `endSession` and `reopenSession` touch only `ended_at`,
+   * nothing soft-deletes a session, and `eraseAll` drops the lot. Those two
+   * clear the memo. Callers only read the map (checked: no `.set`/`.delete`
+   * on it anywhere), which is what makes handing out one shared instance safe.
    */
+  private unitsCache: Map<string, Unit> | null = null;
+
   sessionUnits(): Map<string, Unit> {
+    if (this.unitsCache) return this.unitsCache;
     const rows = this.db.prepare(
       'SELECT id, unit FROM sessions WHERE deleted = 0'
     ).all() as Row[];
-    return new Map(rows.map(r => [String(r.id), r.unit as Unit]));
+    this.unitsCache = new Map(rows.map(r => [String(r.id), r.unit as Unit]));
+    return this.unitsCache;
   }
 
   lastUsedUnit(): Unit | null {
@@ -463,6 +476,7 @@ export class Repo {
    */
   eraseAll(): void {
     this.dirty();
+    this.unitsCache = null;
     this.goalsDirty();
     this.measureDirty();
     this.measureGoalDirty();

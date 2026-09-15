@@ -1108,17 +1108,30 @@ export class NowModel {
     return this.byExercise.get(exerciseId) ?? [];
   }
 
+  /*
+   * Keyed on all three inputs by identity (R665): `allSets()` and
+   * `sessionUnits()` are both memos dropped on the writes that could change
+   * them, and the session's unit is a string. `state()` reads this twice per
+   * tap, and each read walked the whole history just to learn that nothing
+   * needed converting.
+   */
+  private unitHistoryKey: [LoggedSet[], Map<string, Unit>, Unit] | null = null;
+  private unitHistory: LoggedSet[] = [];
+
   private historyInSessionUnit(): LoggedSet[] {
     const all = this.repo.allSets();
     const units = this.repo.sessionUnits();
     const mine = this.session.unit;
+    const key = this.unitHistoryKey;
+    if (key && key[0] === all && key[1] === units && key[2] === mine) return this.unitHistory;
+    this.unitHistoryKey = [all, units, mine];
     // The common case by far: nothing was ever logged in another unit, so the
     // whole array passes through untouched and unallocated.
-    if (!all.some(x => (units.get(x.sessionId) ?? mine) !== mine)) return all;
-    return all.map(x => {
+    this.unitHistory = !all.some(x => (units.get(x.sessionId) ?? mine) !== mine) ? all : all.map(x => {
       const from = units.get(x.sessionId) ?? mine;
       return from === mine ? x : { ...x, weight: convertWeight(x.weight, from, mine) };
     });
+    return this.unitHistory;
   }
 
   private loadPrefill(): void {
