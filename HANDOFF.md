@@ -553,6 +553,16 @@ Small things seen and judged not worth a round yet:
   global, a debug menu, or a test. Left as-is: wiring it up would be inventing a debug surface
   nobody asked for, and deleting a working utility on a guess feels wrong too. Flagging so a human
   decision resolves which one it is, rather than the ambiguity sitting silently as it has been.
+- **Which day a hinge belongs on under UPPER / LOWER** (R673). `DAY_OF` maps `deadlift` to `pull`
+  deliberately — it is trained with the back, which is right for PUSH / PULL / LEGS — and
+  upper/lower is derived from that for free (`upper = push + pull`). Measured on the real modules:
+  the UPPER day carries 24 of the 32 built-ins INCLUDING Deadlift, while LOWER carries 8 and does
+  include Romanian Deadlift and Hip Thrust. So an upper/lower lifter is offered deadlifts on upper
+  day and never on lower. R673 made the app's own words match what the code does rather than move
+  anybody's lift, because which day a hinge belongs on is a training opinion and not mine: a
+  powerlifter deadlifts with the back, and plenty of programmes put it on lower. If it should move,
+  `PLAN_DAY_COVERS` wants a per-plan override rather than a second flat list, and
+  `test/the-split-blurb-matches-the-days.test.ts` pins today's answer so the change is deliberate.
 
 ## Still open, needing a device or people
 

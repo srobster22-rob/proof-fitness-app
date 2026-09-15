@@ -69,7 +69,7 @@ export const PLAN_LABEL: Record<SplitPlan, string> = {
  */
 export const PLAN_BLURB: Record<SplitPlan, string> = {
   ppl: 'Three days. Chest and shoulders, then back and arms, then legs.',
-  'upper-lower': 'Two days. Everything above the waist, then everything below.',
+  'upper-lower': 'Two days. Push and pull work together, then legs.',
   full: 'One day. A bit of everything, every time you train.'
 };
 
