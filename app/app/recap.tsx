@@ -121,7 +121,7 @@ export default function Recap() {
           "preview of a fixed artifact" already implies.
         */}
         <View style={s.headerRow}>
-          <Text style={s.title} allowFontScaling={false}>{payload.title}</Text>
+          <Text style={s.title} allowFontScaling={false} role="heading">{payload.title}</Text>
           <Text style={s.date} allowFontScaling={false}>{payload.date}</Text>
         </View>
         <View style={s.rule} />

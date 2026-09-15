@@ -17,7 +17,7 @@ export default function NotFound() {
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.body}>
-        <Text style={s.title}>{T('notFoundTitle')}</Text>
+        <Text style={s.title} role="heading">{T('notFoundTitle')}</Text>
         <Text style={s.text}>
           {/* "this version of the app doesn't have YET" promised something that
               may never come, and named a version number the reader cannot see.

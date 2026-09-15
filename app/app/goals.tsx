@@ -153,7 +153,7 @@ export default function Goals() {
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
-        <Text style={s.title}>{T('goals')}</Text>
+        <Text style={s.title} role="heading">{T('goals')}</Text>
         <Pressable accessibilityRole="button" onPress={leave} hitSlop={16}
           style={pressStyle(null, 'quiet', still)} accessibilityLabel={T('done')}>
           <Text style={s.close}>{T('done')}</Text>

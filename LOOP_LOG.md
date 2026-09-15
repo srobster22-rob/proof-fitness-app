@@ -4083,3 +4083,28 @@ line under the lift -- "Last time  175 x 5" before LOG SET, "175 last 2 --
 stay here and add a rep" after, changed in place. Seed restored. | next:
 R661 -- screen titles are not headings anywhere; the race test's
 open-failure counting is filed for its own round.
+
+R661 - Stage 0: OWNER.md unchanged since R647; ## Next holds only the
+owner's-eye UI note. PICK (logged first): no screen title is a heading
+anywhere -- no role="heading" or accessibilityRole="header" in the app --
+so a screen-reader user cannot jump by heading or hear which screen they
+landed on. Mark the six titles: Goals, Measure ("You"), Progress,
+Settings, not-found, and Recap's card title. React Native's Role union has
+'heading' and react-native-web passes it straight through; aria-level is
+NOT in the installed RN types (RNW would emit it), so no level is set
+rather than cast around the type check -- readers default the level. Now's
+lift name is deliberately left alone: it sits inside the button that opens
+the exercise picker, and that button's own label replaces its children, so
+a heading role there would never be read.
+BUILD: role="heading" on all six screen titles -- goals, measure, progress,
+settings, +not-found (<Text style={s.title}>) and recap's card title (kept
+allowFontScaling={false}). New test/screen-titles-are-headings.test.ts
+derives the population from source (every <Text style={s.title} ...> in
+app/) and fails below six. REVIEW: suite 2183 pass / 0 fail. Plant (all
+six pre-R661 screens) -> 'each <Text style={s.title}> carries
+role="heading"' failed by name; six fixed copies restored byte-identical.
+PRODUCT, live, reloading each route with the tab fronted: every screen
+exposes exactly one heading, rendered as H1 -- GOALS, PROGRESS, SETTINGS,
+YOU, LEGS DAY on a past recap, and "Nothing here" on an unknown route. No
+data touched. | next: ## Next holds only the owner's-eye UI note; the
+atomic-write race test's open-failure counting is still filed.

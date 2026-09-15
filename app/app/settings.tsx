@@ -113,7 +113,7 @@ export default function Settings() {
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
-        <Text style={s.title}>{t(lang, 'settings')}</Text>
+        <Text style={s.title} role="heading">{t(lang, 'settings')}</Text>
         <Pressable accessibilityRole="button" onPress={leave} hitSlop={16}
           style={pressStyle(null, 'quiet', still)} accessibilityLabel={t(lang, 'done')}>
           <Text style={s.close}>{t(lang, 'done')}</Text>

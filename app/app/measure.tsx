@@ -91,7 +91,7 @@ export default function Measure() {
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
-        <Text style={s.title}>{T('you')}</Text>
+        <Text style={s.title} role="heading">{T('you')}</Text>
         <Pressable accessibilityRole="button" onPress={leave} hitSlop={16}
           style={pressStyle(null, 'quiet', still)} accessibilityLabel={T('done')}>
           <Text style={s.close}>{T('done')}</Text>

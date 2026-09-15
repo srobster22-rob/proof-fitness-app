@@ -137,7 +137,7 @@ export default function Progress() {
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
-        <Text style={s.title}>{T('progress')}</Text>
+        <Text style={s.title} role="heading">{T('progress')}</Text>
         <Pressable accessibilityRole="button" onPress={leave} hitSlop={16}
           style={pressStyle(null, 'quiet', still)} accessibilityLabel={T('done')}>
           <Text style={s.close}>{T('done')}</Text>
