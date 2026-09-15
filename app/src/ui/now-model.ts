@@ -1633,9 +1633,19 @@ export class NowModel {
     return set;
   }
 
+  /*
+   * From an OFF-grid weight, + goes to the next weight up and - to the next one
+   * down (R670). It rounded (weight +/- step) instead, which is the same thing on
+   * the grid and skips a weight off it: 187.5 lb -- 85 kg, converted -- went to
+   * 195, so a coach line reading "try 190" sat directly above a + button that
+   * could not land on 190. Found by sweeping every coach suggestion against the
+   * weights each button reaches when pressed repeatedly.
+   */
   bumpWeight(steps: number): void {
     const step = WEIGHT_STEP[this.session.unit];
-    this.weight = Math.max(0, Math.round((this.weight + steps * step) / step) * step);
+    const at = this.weight / step;
+    const from = steps > 0 ? Math.floor(at + 1e-9) : Math.ceil(at - 1e-9);
+    this.weight = Math.max(0, (from + steps) * step);
   }
 
   bumpReps(steps: number): void {

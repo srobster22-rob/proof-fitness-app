@@ -118,3 +118,63 @@ describe('the plate buttons land on weights that exist (R550)', () => {
     assert.equal(m.state().weight, 0, 'stripping a plate off 20 lb went below zero');
   });
 });
+
+/*
+ * R670. R550 made both buttons on the weight row LAND on the grid, and never
+ * asked WHICH grid weight. The stepper rounded (weight +/- 5), so from an
+ * off-grid weight + could skip the nearest weight up: 187.5 lb -- 85 kg,
+ * converted -- went to 195, under a coach line that said "try 190".
+ *
+ * Found by sweeping all 608 coach suggestions (units x jumps x goals x
+ * branches x converted history) against what each button reaches when pressed
+ * repeatedly: 40 of the 163 that no single button could dial in were this.
+ */
+describe('from an off-grid weight the stepper goes to the next weight, not past it (R670)', () => {
+  test('+ and - land on the nearest grid weight in that direction', () => {
+    for (const [unit, from, up, down] of [
+      ['lb', 187.5, 190, 185], ['lb', 189.5, 190, 185], ['lb', 132.5, 135, 130],
+      ['kg', 81.5, 82.5, 80], ['kg', 84, 85, 82.5]
+    ] as Array<[Unit, number, number, number]>) {
+      const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+      repo.setPref('pref.unit', unit);
+      const m = onBench(repo);
+      m.setWeight(from);
+      m.bumpWeight(1);
+      assert.equal(m.state().weight, up, `+ from ${from} ${unit} went to ${m.state().weight}`);
+      m.setWeight(from);
+      m.bumpWeight(-1);
+      assert.equal(m.state().weight, down, `- from ${from} ${unit} went to ${m.state().weight}`);
+    }
+  });
+
+  test('the number the coach names is one press away', () => {
+    // Three sessions of 85 kg, opened in pounds: 187.5, and a plateau says 190.
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    for (const d of [10, 7, 4]) {
+      const id = `kg${d}`;
+      repo.startSession(id, 'kg', undefined, T0 - d * DAY);
+      repo.logSet({ id: `k${d}`, sessionId: id, exerciseId: 'bench', weight: 85, reps: 8, at: T0 - d * DAY });
+      repo.endSession(id, T0 - d * DAY + 3600_000);
+    }
+    repo.setPref('pref.unit', 'lb');
+    const m = onBench(repo);
+    assert.equal(m.state().weight, 187.5, 'fixture: 85 kg should open as 187.5 lb');
+    const line = m.state().lastTime.head;
+    assert.match(line, /try 190(?![\d.])/, `fixture stopped being a plateau at 187.5: "${line}"`);
+    m.bumpWeight(1);
+    assert.equal(m.state().weight, 190, `the coach said "${line}" and + went to ${m.state().weight}`);
+  });
+
+  test('an on-grid weight still moves exactly one step per press', () => {
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => T0);
+    repo.setPref('pref.unit', 'lb');
+    const m = onBench(repo);
+    m.setWeight(185);
+    m.bumpWeight(1);
+    assert.equal(m.state().weight, 190);
+    m.bumpWeight(1);
+    assert.equal(m.state().weight, 195);
+    m.bumpWeight(-3);
+    assert.equal(m.state().weight, 180);
+  });
+});
