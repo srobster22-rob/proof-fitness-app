@@ -41,8 +41,12 @@ const WEEKS = Number(process.argv[2] ?? 12);
 
 /** A push/pull/legs week, in the order the days are actually trained. */
 const SPLIT: Array<[string, Array<[string, number, number]>]> = [
-  ['push', [['bench', 135, 5], ['ohp', 75, 8], ['triext', 35, 12]]],
-  ['pull', [['deadlift', 185, 5], ['row', 95, 8], ['curl', 30, 10]]],
+  // Strict dips and pull-ups (a base of 0: nothing added) sit on the days they
+  // belong to, not on a fourth day. A fourth day would be dated tomorrow, and as
+  // the newest session it would become the recap, whose multiple line a
+  // bodyweight lift never gets (R675).
+  ['push', [['bench', 135, 5], ['ohp', 75, 8], ['triext', 35, 12], ['dip', 0, 10]]],
+  ['pull', [['deadlift', 185, 5], ['row', 95, 8], ['curl', 30, 10], ['pullup', 0, 8]]],
   ['legs', [['squat', 155, 5], ['legpress', 200, 10]]]
 ];
 
@@ -98,7 +102,8 @@ function main(): void {
 
       let at = start;
       for (const [exerciseId, base, reps] of lifts) {
-        const step = base >= 135 ? 5 : 2.5;
+        // A base of 0 is a strict bodyweight movement, which never gains added weight.
+        const step = base >= 135 ? 5 : base > 0 ? 2.5 : 0;
         const weight = weightFor(base, WEEKS - week + 1, step);
         for (let set = 0; set < 3; set++) {
           repo.logSet({
@@ -118,6 +123,20 @@ function main(): void {
   repo.saveGoal({
     id: 'seed_goal', exerciseId: 'squat', targetWeight: 225, targetReps: 5,
     createdAt: now - 30 * DAY, targetDate: now + 60 * DAY, unit: 'lb'
+  });
+
+  /*
+   * One bodyweight reading, dated the day before the first session (R675).
+   *
+   * Without it the preview could not show what a pull-up actually weighs, the
+   * "x bodyweight" multiple on Progress, or the multiple line on the recap card:
+   * the sample the owner is told to open held no bodyweight work at all. It has
+   * to PREDATE the sets, because a reading only prices sets logged at or after
+   * it -- one dated today would light up nothing.
+   */
+  repo.saveMeasurement({
+    id: 'seed_bodyweight', kind: 'bodyweight', value: 190, unit: 'lb',
+    at: now - (WEEKS * 7 + 1) * DAY
   });
 
   // Prove the fixture before writing it (R559).

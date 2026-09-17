@@ -10,12 +10,13 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { progressRows, recentSessions, weeklyProgress } from '../src/ui/progress-model.ts';
 import { latestRecap } from '../src/ui/recap-model.ts';
+import { CARRIES_BODYWEIGHT } from '../src/domain/measure.ts';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /*
  * R674. Every model in this suite is tested against fixtures written by hand for
- * the case under test. The app's OWN sample data -- the 288 sets `npm run web`
+ * the case under test. The app's OWN sample data -- the months of sets `npm run web`
  * generates and the owner opens the preview to look at -- was exercised in
  * exactly one place: the coach line on Now (R666). That is where R666's defect
  * lived, and nothing checked the other screens against it at all.
@@ -54,6 +55,28 @@ after(() => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+type Reading = { value: number; unit: string; at: number };
+const readings = db.prepare(
+  "SELECT value, unit, at FROM measurements WHERE deleted = 0 AND kind = 'bodyweight' ORDER BY at"
+).all() as unknown as Reading[];
+
+/**
+ * A set's real load, recomputed from the rows rather than asked of the app (R675).
+ *
+ * A pull-up or a dip weighs what the lifter weighs plus what they added, using
+ * the reading in force AT that set; with no such reading the total is only a
+ * floor, which is what `null` means here. Every other lift is its stored weight.
+ * No unit conversion: the sanity test asserts the whole sample is in pounds.
+ */
+const loadOf = (r: Row): number | null => {
+  if (!CARRIES_BODYWEIGHT.has(r.exercise_id)) return r.weight;
+  const bw = readings.filter(m => m.at <= r.at).pop();
+  return bw ? Math.round((bw.value + r.weight) * 10) / 10 : null;
+};
+const volumeOf = (sets: Row[]) =>
+  Math.round(sets.reduce((sum, r) => sum + (loadOf(r) ?? r.weight) * r.reps, 0));
+const knowable = (sets: Row[]) => sets.every(r => loadOf(r) !== null);
+
 /** Sets of one lift, heaviest first, at or above the rep floor `best` is scoped to. */
 const workingSets = (exerciseId: string) => rows.filter(r => r.exercise_id === exerciseId && r.reps >= 5);
 
@@ -62,6 +85,12 @@ describe('the sample data the owner looks at agrees with its own rows (R674)', (
     assert.ok(rows.length >= 200, `the seeder produced ${rows.length} sets; this sweep concludes nothing from that`);
     assert.ok(new Set(rows.map(r => r.session_id)).size >= 20, 'too few sessions to exercise the screens');
     assert.ok(progressRows(repo, now).length >= 6, 'Progress shows almost nothing for this history');
+    // `loadOf` adds a reading to a weight without converting either, which is only
+    // right while every session and every reading is in pounds -- so that is
+    // asserted here rather than assumed below.
+    const units = new Set((db.prepare('SELECT unit FROM sessions WHERE deleted = 0').all() as Array<{ unit: string }>).map(s => s.unit));
+    assert.deepEqual([...units], ['lb'], 'the sample now mixes units; loadOf must convert before it can be trusted');
+    assert.ok(readings.every(m => m.unit === 'lb'), 'a bodyweight reading is not in pounds; loadOf must convert it');
   });
 
   test('every Progress row names a set the lifter actually did', () => {
@@ -71,8 +100,10 @@ describe('the sample data the owner looks at agrees with its own rows (R674)', (
       const top = mine.reduce((a, b) => (b.weight > a.weight ? b : a));
       assert.equal(row.best, top.weight,
         `Progress says ${row.name}'s best is ${row.best} x ${row.bestReps}; the heaviest set at 5+ reps is ${top.weight} x ${top.reps}`);
-      assert.ok(mine.some(r => r.weight === row.best && r.reps === row.bestReps),
-        `Progress says ${row.name} ${row.best} x ${row.bestReps}, and no single set in the history is that`);
+      // R675 removed a second check here, that some stored set is exactly
+      // `best x bestReps`: `bestSetAtReps` only ever returns a stored set at 5+
+      // reps, so on a single-unit sample it could not fail. The value check above
+      // is the one that can.
     }
   });
 
@@ -81,8 +112,11 @@ describe('the sample data the owner looks at agrees with its own rows (R674)', (
       const mine = rows.filter(r => r.session_id === s.id);
       assert.ok(mine.length > 0, `the list shows session ${s.id}, which has no sets`);
       assert.equal(s.setCount, mine.length, `session ${s.id} is listed with ${s.setCount} sets and holds ${mine.length}`);
-      const volume = mine.reduce((sum, r) => sum + r.weight * r.reps, 0);
-      assert.equal(s.volume, volume, `session ${s.id} is listed at ${s.volume} volume; its rows total ${volume}`);
+      const volume = volumeOf(mine);
+      assert.equal(s.volume, volume,
+        `session ${s.id} is listed at ${s.volume} volume; its rows, each at its real load, total ${volume}`);
+      assert.equal(s.volumeKnown, knowable(mine),
+        `session ${s.id} says its total is ${s.volumeKnown ? '' : 'not '}knowable; its rows say it is${knowable(mine) ? '' : ' not'}`);
       assert.equal(s.lifts.length, new Set(mine.map(r => r.exercise_id)).size,
         `session ${s.id} lists ${s.lifts.length} lifts and holds ${new Set(mine.map(r => r.exercise_id)).size}`);
     }
@@ -90,13 +124,16 @@ describe('the sample data the owner looks at agrees with its own rows (R674)', (
 
   test("the recap's numbers are that session's own rows", () => {
     const recap = latestRecap(repo, now);
-    assert.ok(recap, 'no recap at all for a 288-set history');
+    assert.ok(recap, 'no recap at all for a months-long history');
     const mine = rows.filter(r => r.session_id === recap!.sessionId);
     assert.ok(mine.length > 0, `the recap names session ${recap!.sessionId}, which has no sets`);
     assert.equal(recap!.payload.sets, mine.length,
       `the card claims ${recap!.payload.sets} sets; the session holds ${mine.length}`);
-    assert.equal(recap!.payload.volume, mine.reduce((sum, r) => sum + r.weight * r.reps, 0),
-      'the card\'s volume is not the sum of the sets it is reporting');
+    assert.equal(recap!.payload.volume, volumeOf(mine),
+      'the card\'s volume is not the sum of the sets it is reporting, each at its real load');
+    // The payload omits the flag when the total is knowable, so absent means true.
+    assert.equal(recap!.payload.volumeKnown ?? true, knowable(mine),
+      'the card and its own rows disagree about whether the total is knowable');
     assert.equal(recap!.payload.lifts.length, new Set(mine.map(r => r.exercise_id)).size,
       'the card lists a different number of lifts than the session holds');
     const best = recap!.payload.best;
@@ -111,9 +148,23 @@ describe('the sample data the owner looks at agrees with its own rows (R674)', (
   test('the weekly line compares two weights that are in the history', () => {
     const wk = weeklyProgress(repo, now);
     if (!wk) return; // nothing to compare is a legitimate answer; R285 made it one
-    const lifted = (w: number) => rows.some(r => r.exercise_id === wk.exerciseId && r.weight === w);
+    // A bodyweight lift is compared at its real load, so either number counts as lifted.
+    const lifted = (w: number) => rows.some(r => r.exercise_id === wk.exerciseId && (r.weight === w || loadOf(r) === w));
     assert.ok(lifted(wk.now), `the weekly line's "${wk.now}" is not a set of ${wk.lift} in the history`);
     assert.ok(lifted(wk.then), `the weekly line's "${wk.then}" is not a set of ${wk.lift} in the history`);
+  });
+
+  test('the sample shows what bodyweight work really weighs, not only barbell work (R675)', () => {
+    // The owner is told to open the preview to see the app. Before R675 the
+    // sample held no pull-up, no dip and no bodyweight reading, so every one of
+    // these was null there -- shipped, and invisible in the one place anyone looks.
+    const progress = progressRows(repo, now);
+    assert.ok(progress.some(r => r.realBest != null),
+      'no Progress row carries a real load: the sample has no bodyweight lift with a reading behind it');
+    assert.ok(progress.some(r => r.bestMultiple != null),
+      'no Progress row shows a lift as a multiple of bodyweight');
+    assert.ok(latestRecap(repo, now)?.payload.multiple,
+      'the recap card carries no bodyweight multiple line');
   });
 
   test('Now opens on the weight the last set of that lift used', () => {
