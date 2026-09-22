@@ -32,12 +32,21 @@ describe('the dev server never sees test files (R672)', () => {
     assert.ok(blocked(posix(file)), `${posix(file)} reaches the dev server's watcher`);
   });
 
+  test('and so is a file under tools/ (R676)', () => {
+    // The same leak through the other folder nothing bundles: writing
+    // tools/inventory.ts under a running preview made "/../tools/inventory" a route.
+    const file = path.join(ROOT, 'tools', 'some-new-tool.ts');
+    assert.ok(blocked(file), `${file} reaches the dev server's watcher`);
+    assert.ok(blocked(posix(file)), `${posix(file)} reaches the dev server's watcher`);
+  });
+
   test('nothing the app is built from is blocked', () => {
     for (const file of [
       path.join(ROOT, 'app', 'index.tsx'),
       path.join(ROOT, 'src', 'ui', 'now-model.ts'),
-      path.join(ROOT, 'tools', 'seed-web.ts'),
+      path.join(ROOT, 'src', 'tools.ts'),
       path.join(ROOT, 'node_modules', 'some-lib', 'test', 'index.js'),
+      path.join(ROOT, 'node_modules', 'some-lib', 'tools', 'index.js'),
       path.join(ROOT, 'src', 'testing.ts')
     ]) {
       assert.ok(!blocked(file), `${path.relative(ROOT, file)} would be hidden from the bundler`);
