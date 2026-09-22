@@ -6,18 +6,18 @@ history row with `--history R<n>`.
 
 | axis | count | target | of target | what is counted |
 |---|---|---|---|---|
-| Exercise library | 32 | 60 | 53% | 32 items |
+| Exercise library | 32 | 150 | 21% | 32 items |
 | Programs | 3 | 6 | 50% | ppl, upper-lower, full |
 | Coach situations | 7 | 12 | 58% | coachDeloadFloor, coachDeload, coachHold, coachPlateau, coachIncrease, coachClimbing, coachSettle |
 | Insights | 9 | 14 | 64% | streakRecord, firstSession, bestYet, best, pr, goalLine, trendLine, multiple, weeklyLine |
 | Goal kinds | 2 | 4 | 50% | Goal, MeasureGoal |
-| Body measurements | 2 | 4 | 50% | bodyweight, height |
+| Body measurements | 2 | 6 | 33% | bodyweight, height |
 | Equipment | 4 | 6 | 67% | barbell, dumbbell, machine, bodyweight |
 | Coaching modes | 3 | 4 | 75% | consistency, size, strength |
 | Languages | 2 | 3 | 67% | en, es |
 | Screens | 6 | 6 | 100% | goals, index, measure, progress, recap, settings |
 
-Furthest below target: **Programs** (3 of 6, 50%).
+Furthest below target: **Exercise library** (32 of 150, 21%).
 
 ## History
 

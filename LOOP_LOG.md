@@ -4281,3 +4281,15 @@ Market: no MARKET.md yet (next round).
 Content: exercises 32, programs 3, coach 7, insights 9, goal kinds 2, measurements 2, equipment 4, coaching modes 3, languages 2, screens 6.
 Decisions: none
 Next: R677 MARKET SETUP — strength-training logger vs Strong, Hevy, Fitbod, Boostcamp.
+
+## R677 · MARKET SETUP · strength-training logger vs Hevy, Strong, Fitbod, Boostcamp, Knurl
+Pick: v3 market setup. 15 WebSearches (no WebFetch); anything from memory is marked (m).
+Player notices: nothing (MARKET SETUP).
+Impact: planned -/-/0 → shipped -/-/0
+Built: MARKET.md holds 5 comparables with hooks, first 10 minutes, numbers, retention, praise and complaints, all sourced. It also has a 12-row weighted parity matrix with our evidence per row, gap values, the differentiator ("a coach you can read"), an 18-item launch checklist and the score history. VISION.md targets were re-set against the comparables (exercises 60→150, measurements 4→6, and a comparables column). CONTENT.md regenerated. OWNER.md gains two open questions: the program library vs §9, and whether the coach or the output is the wedge.
+Quality: the inventory parser still reads the target as column 4 after the new column.
+Verified: suite 2226/2226, dist current. Weighted sums checked by hand: PROOF 65/125, Hevy 108, Fitbod 102, Boostcamp 93, Strong 91, Knurl 88.
+Market: 52/100; best comparable Hevy 86. Top gaps are the content library (12), platform readiness (12, mostly owner-only) and insight & progress (9).
+Content: exercise library now 32 of 150 (21%), the axis furthest below target.
+Decisions: none
+Next: R678. k=3 would be PLAYTEST, but only 0 building rounds have run since setup, so it swaps to EXPAND on the top unfrozen gap, the content library (exercises).

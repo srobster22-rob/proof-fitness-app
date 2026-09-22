@@ -227,3 +227,18 @@ a little sloppy and AI-generated.
     number. That is taste rather than defect, and changing it touches every row,
     so I have not.
 
+
+## Open questions (appended by the loop; answer under each)
+- **R677 · Program library vs §9.** MARKET.md's biggest gap is the content library, with a gap
+  value of 12 of a possible 15. Boostcamp gives away 11,000+ programs, and Hevy has 26 programs
+  plus Hevy Trainer. PROMPT.md §9 lists "program libraries" as a non-goal, so the loop is only
+  growing exercises and split plans.
+  - May it add a SMALL curated set of classic programs (5×5, GZCLP, PPL, upper/lower), about 5
+    of them, run through the existing coach?
+  - Answer yes or no here.
+- **R677 · Which differentiator.** PROMPT.md §2 says the postable output is the one wedge.
+  Research shows Hevy already ships shareable PR, volume and streak images, plus overlays for
+  your own photos and video.
+  - MARKET.md therefore names the coach as the differentiator: free, local, plain-sentence
+    advice that only names weights your plates can make.
+  - Say so here if the recap/clip should stay the wedge instead.
