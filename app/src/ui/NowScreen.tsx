@@ -12,7 +12,7 @@ import {
 , RAIL_CHIP, PREF_SKIP_MACHINE
 } from './now-model.ts';
 import { restSince } from '../domain/rest.ts';
-import { EQUIPMENT, loadLabel, type Equipment, type LoggedSet, type Unit } from '../domain/types.ts';
+import { EQUIPMENT, loadLabel, type Equipment, type Exercise, type LoggedSet, type Unit } from '../domain/types.ts';
 import {
   SPLIT_PLANS, PLAN_DAYS,
   type SplitPlan, type PlanDay
@@ -1359,6 +1359,7 @@ export function NowScreen({
           sync();
           feedback(() => Haptics.selectionAsync());
         }}
+        search={query => model.searchExercises(query)}
         onAdd={name => {
           const id = model.addCustomExercise(name);
           if (!id) return false;
@@ -1634,10 +1635,11 @@ function EditSetSheet({
 }
 
 function ExercisePicker({
-  state, onPick, onAdd, onClose, onRemove
+  state, onPick, search, onAdd, onClose, onRemove
 }: {
   state: NowState;
   onPick: (id: string) => void;
+  search: (query: string) => Exercise[];
   onAdd: (name: string) => boolean;
   onClose: () => void;
   onRemove: (id: string) => boolean;
@@ -1694,6 +1696,8 @@ function ExercisePicker({
    * kept it out of the exit-animation pass everywhere else.
    */
   const submit = () => { if (name.trim()) leave(() => onAdd(name)); };
+  // What the typed name matches, anywhere in the library (R683).
+  const matches = adding ? search(name) : [];
 
   return (
     // `animationType="none"`, and it is not a style preference.
@@ -1831,6 +1835,21 @@ function ExercisePicker({
               stays as quiet as §7 wants it to be.
               */}
             {removeError && <Text style={s.removeError} accessibilityRole="alert">{removeError}</Text>}
+            {/* The movements the typed name matches, right above the field,
+                where a lifter looks while typing. A tap picks one; ADD is left
+                for a movement the library does not have (R683). The sheet has
+                no keyboard avoidance yet, which a native build will need. */}
+            {matches.length > 0 && <Text style={s.groupLabel}>{T('matchesHeading')}</Text>}
+            {matches.map(ex => (
+              <Pressable accessibilityRole="button" key={`match-${ex.id}`} accessibilityLabel={ex.name}
+                {...onState(ex.id === state.exercise.id)}
+                onPress={() => pick(ex.id)}
+                style={({ pressed }) => [s.pickRow, pressed && { backgroundColor: '#12161A' }]}>
+                <Text style={[s.pickName, ex.id === state.exercise.id && s.pickCurrent]} numberOfLines={1}>
+                  {ex.name}
+                </Text>
+              </Pressable>
+            ))}
             {adding ? (
               <View style={s.addRow}>
                 <TextInput

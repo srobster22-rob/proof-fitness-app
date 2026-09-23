@@ -746,6 +746,14 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**Search on the add path (R683).** Typing in the picker's "+ Something else" lists up to five
+movements from the whole library and the lifter's own, under MATCHES, just above the field; a tap
+picks one. `find-exercise.ts` matches by name, then an alias ("RDL", "OHP", "skullcrusher"),
+then a prefix, the start of each word, and last a substring, with plurals, hyphens and
+"dumbbell"/"DB" folded together, in other scripts too. ADD picks an existing movement instead of making
+a duplicate: the name exactly as typed first, then any spelling of a name, then an alias. An alias
+names ONE movement only: "shoulder press" and "flyes" are not one.
+
 **The coach's call holds, and says when it is made (R682).** `coachSuggestion` takes `live`, the
 session the call is for, and never reads that session's sets, so a set that makes "try 210" no
 longer turns it into "try 215" (PT1 Broken 1). Every call but a deload carries `reps`, and

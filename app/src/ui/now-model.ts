@@ -15,6 +15,7 @@ import {
   type SplitDay, type SplitGroup, type SplitPlan, type PlanDay
 } from '../domain/split.ts';
 import { coachSuggestion, callMade, type Suggestion } from '../domain/coach.ts';
+import { findExercises, exactExercise } from '../domain/find-exercise.ts';
 import { trainingGoal } from './training-goal.ts';
 import { PHONE_MAX } from './column.ts';
 import { loadLabel, convertWeight } from '../domain/types.ts';
@@ -940,8 +941,9 @@ function slugify(name: string): string {
 /**
  * A free slug.
  *
- * Necessary because slugification is lossy: "Hack-Squat" and "Hack Squat" both
- * reduce to `hack_squat`. Without this, the second one would collide and
+ * Necessary because slugification is lossy: "Caf Row" and "Café Row" both
+ * reduce to `caf_row` (since R683 ADD picks "Hack Squat" for "Hack-Squat"
+ * instead of creating it). Without this, the second one would collide and
  * `addExercise`'s upsert would silently RENAME the first — quietly merging two
  * different movements' history into one.
  */
@@ -2012,7 +2014,9 @@ export class NowModel {
     if (!clean) return null;
 
     const all = [...this.repo.exercises().values()];
-    const existing = all.find(e => e.name.toLowerCase() === clean.toLowerCase());
+    // Its own name, or one that means one movement: "RDL" is Romanian
+    // Deadlift, not a second lift without its history (R683).
+    const existing = exactExercise(clean, all);
     if (existing) {                       // don't create a second "Hack Squat"
       this.selectExercise(existing.id);
       return existing.id;
@@ -2022,6 +2026,14 @@ export class NowModel {
     this.repo.addExercise(id, clean);
     this.selectExercise(id);
     return id;
+  }
+
+  /**
+   * What the add field shows as the lifter types (R683): the whole library and
+   * their own lifts, not only the ones the picker predicts.
+   */
+  searchExercises(query: string): Exercise[] {
+    return findExercises(query, [...this.repo.exercises().values()]);
   }
 
   /**

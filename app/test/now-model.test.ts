@@ -324,12 +324,19 @@ describe('Now screen — adding a custom exercise (§7)', () => {
   test('a lossy slug collision does not rename the original', () => {
     const repo = trained();
     const m = new NowModel(repo, () => T0);
-    m.addCustomExercise('Sissy Squat');
-    const second = m.addCustomExercise('Sissy-Squat');
-    assert.notEqual(second, 'sissy_squat', 'must not reuse the taken slug');
-    assert.equal(repo.exercises().get('sissy_squat')!.name, 'Sissy Squat',
+    // Two different names, one slug: `slugify` drops the "é" that
+    // `normalizeName` reads as an "e", so R683's search keeps them apart.
+    m.addCustomExercise('Caf Row');
+    const second = m.addCustomExercise('Café Row');
+    assert.notEqual(second, 'caf_row', 'must not reuse the taken slug');
+    assert.equal(repo.exercises().get('caf_row')!.name, 'Caf Row',
       'the original keeps its name — two movements must never merge history');
-    assert.equal(repo.exercises().get(second!)!.name, 'Sissy-Squat');
+    assert.equal(repo.exercises().get(second!)!.name, 'Café Row');
+    // One movement typed two ways is not a collision at all: since R683 the
+    // second spelling picks the first, and nothing is renamed or duplicated.
+    const sissy = m.addCustomExercise('Sissy Squat');
+    assert.equal(m.addCustomExercise('Sissy-Squat'), sissy);
+    assert.equal(repo.exercises().get(sissy!)!.name, 'Sissy Squat');
   });
 
   test('removing it undoes the mistake, but never the lift currently open', () => {

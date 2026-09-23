@@ -72,6 +72,7 @@ from outside its loop. Rules are in AGENT_LOOP.md v3.1, sections 1 and 6.
   - First slice: type-ahead over library and custom names with an alias table; top 5 matches as rows.
   - Est: **+1.2–2.4**.
   -> R679: ranked (gap 9, row 3).
+  -> R683: taken. Type-ahead over the library and the lifter's own lifts, with an alias table; the top 5 sit under MATCHES above the field, and ADD picks by name or alias. PT1's three personas all asked for it.
 - **S4 The store kit the loop owns, plus one cheap owner ask** — row 11, the top gap (12).
   - First slice: procedural vector icon and splash (§4), en/es listing copy, a privacy page in link/, 6.9" screenshots, the C9 cleanups.
   - Then ask one question in OWNER.md: a free Expo login lets EAS build an Android preview APK — the app's first native run — with no Apple or Google account. Ask rather than build, since §9 makes Android testing a non-goal.

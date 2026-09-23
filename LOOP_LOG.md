@@ -4373,3 +4373,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R683 EXPAND, search on the add path (row 3, gap 9; PT1 backlog 1; COACH S3). The PLAYTEST slot swaps: 1 building round since PT1.
+
+## R683 · EXPAND · search on the add path
+Pick: search on the add path — gap value 9 (MARKET row 3) / PT1 backlog 1 / COACH S3 · impact planned 2/3/+1. The derived PLAYTEST swapped: 1 building round (R682) since PT1.
+Player notices: Typing in "+ Something else" lists the movements it matches from the whole library ("rdl" finds Romanian Deadlift), and ADD no longer duplicates one the app knows.
+Impact: planned 2/3/+1 → shipped 2/3/+1 (biggest file NowScreen.tsx 2611→2630; now-model.ts 2227→2239; find-exercise.ts new, 124)
+Built: find-exercise.ts: normalizeName (any script, marks kept), singular, stem, ALIASES that name one movement each, findExercises (as typed, name, alias, prefix, word prefix, substring of 3+; top 5), exactExercise. NowModel.searchExercises; addCustomExercise picks by it. The picker's MATCHES rows sit above the field. i18n matchesHeading (en, es).
+Quality: self-review moved a method that had split a doc from its function, and caught "-es" plurals matching nothing. Reviewer APPROVE twice with no finding at 2×2; the below-bar ones fixed anyway, since ADD's silent pick can put sets on the wrong lift: the name as typed now wins, "flyes"/"stiff leg deadlift" aliases dropped, names in other scripts kept apart. Backlog: keyboard avoidance for the sheet on native; "machine" found by "chin"; the picker test is source-pinned.
+Verified: suite 2314/2314, tsc, dist and MARKET.md current. 17 plants (no aliases, no plurals twice, alias beats own name, ADD ignores aliases, match not wired, no matches, short fragments, dumbbell≠DB, picker-only search, no label, typed name loses, Latin only, marks split, numbers joined, no "-es", flye≠fly) each fail a named test and restore sha256-identical. No two of the 60 movements share a stem. Phone size, fresh install: "rdl" lists Romanian Deadlift under MATCHES and a tap opens it (shots/R683/).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 0→0 · H5 1.50→1.50 (the first-timer never types a name)
+Market: unchanged at 46. Row 3 stays 2: the library is reachable now, but no larger (60 against Fitbod's 200+), with no programs or videos.
+Content: unchanged
+Coach: S3 taken
+Decisions: none
+Next: R684 FIX, PT1's layout defects: the first set's row under CLEAR / FINISH (Broken 2), the half-visible rail chip (3), and the cut-off coach line (6).
