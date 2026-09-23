@@ -24,7 +24,12 @@
 - STOP · **A source-text regex as a screen's only test.** R682's haptic pin passed two mutants (an
   inverted choice, a stale state read) until the reviewer tightened it, and R683's picker test is
   still four regexes. Pair each pin with a model test or a live probe that fails when it is wrong.
-- TRY · **Build the next round's patch in scratch while a playtest or a review runs.** R682 and R683
-  were written and plant-tested on a scratch copy during PT1 and R682's review, then applied in one
-  step. Judge at the next RETRO: no round sat idle on a subagent, and no prepared patch needed
-  rework after it landed.
+- KEEP · **Build the next round's patch in scratch while a playtest or a review runs** (R685's TRY,
+  judged at R690). R682, R683 and R689's bodyweight rows were written and dry-run on a scratch copy
+  during PT1, a review and PT2, and each applied in one step. Only review findings reworked them.
+- STOP · **Scoring a row up in the round that built it.** R687 moved coaching 2 → 3 and its reviewer
+  pulled it back; R685's blind re-score cut data trust 4 → 3; PT2 cut insight 3 → 2. Leave an up-score
+  to the next playtest or blind re-score.
+- TRY · **Commit each FIX round's reproduction as a playtest script** (as R686 did with
+  latest-set-sweep.mjs) and re-run them all at the next PLAYTEST. Judge at the next RETRO: did any
+  fixed bug come back, and did a script catch it before a persona did?

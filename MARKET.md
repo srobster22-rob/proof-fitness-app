@@ -137,7 +137,7 @@ the loop now requires, keeping the lower score in each row.
 | 7 | Design polish | 2 | **2** | OWNER.md, owner's words: "looks a little sloppy and AI-generated". The look at phone size is the owner's open question. PT1 (scores 3, 2): the first set's row sits under CLEAR / FINISH, rail chips are clipped, a recap has a blank gap, and only 3 of 5 store shots are clean (`shots/PT1/critic-fresh-s04-end.png`). R684 fixed the cut-off coach line (`shots/R684/`); its set-row fix held only for some set counts (R685 blind re-score, `shots/R685/blind-three-sets-show-no-set.png`) until R686, which keeps the latest set beside its UNDO and + for every count from 1 to 7 (`shots/R686/`). The "dead" chips were the harness. | 4 | 4 | 5 | 4 | 4 (m) |
 | 8 | Performance and offline | 2 | **3** | All data is local. A Now render takes 0.6–0.7 ms at 3,600 sets (R678, measured in node). It has never run natively (HANDOFF: "expect real bugs"), and the app-open time is a desktop-web figure, not a phone one (C4). | 4 | 5 | 3 (m) | 4 (m) | 3 (wants a connection) |
 | 9 | Accessibility | 1 | **3** | PT0 dump: every one of the 37 controls on Now carries an accessible name; R655–R663 added roles, states and live regions. VoiceOver on a device is device-blocked. | 3 (m) | 3 (m) | 3 (m) | 3 (m) | 3 (m) |
-| 10 | Data trust and export | 1 | **3** | R685 blind re-score 3, kept (the lower): no import from Strong or Hevy, no sync, and PT1's recap promised a bodyweight fix that does not come. `shots/PT0/12-progress-day1.png`: EXPORT, RESTORE, ERASE. No account and no network; the share link carries the workout in the URL fragment. There is no sync (§11 is unbuilt). | 4 (CSV out, Strong CSV in) | 4 | 3 (m) | 3 (m) | 4 (CSV, optional sync) |
+| 10 | Data trust and export | 1 | **2** | R690 blind re-score 2, kept (the lower): export and restore are plain JSON, but no CSV, no import from Strong or Hevy, no sync, and the coach's recap can state a raise after a miss (`shots/R690/blind-raise-after-a-miss.png`). R685: no import from Strong or Hevy, no sync, and PT1's recap promised a bodyweight fix that does not come. `shots/PT0/12-progress-day1.png`: EXPORT, RESTORE, ERASE. No account and no network; the share link carries the workout in the URL fragment. There is no sync (§11 is unbuilt). | 4 (CSV out, Strong CSV in) | 4 | 3 (m) | 3 (m) | 4 (CSV, optional sync) |
 | 11 | Platform readiness | 3 | **1** | HANDOFF: "First native build has never happened"; app.json `com.example.proof`; placeholder icons. | 5 | 5 | 5 | 5 | 5 |
 | 12 | Social | 1 | **1** | SHARE_BASE is `https://example.app/r` (share-url.ts), no card image or clip file is shared (HANDOFF), and PT0 never saw a share. A feed is a §9 non-goal. | 5 | 2 | 2 | 3 | 2 (plan sharing) |
 | 13 | Watch and health sync | 2 | **0** | Frozen: PROMPT.md §9 lists "wearable integration, Apple Health sync" as non-goals. Asked in OWNER.md. | 5 (Watch; Apple Health, Health Connect) | 4 (Watch logs weights and reps) | 5 (m) | 1 (no Watch) | 3 (Apple Health) |
@@ -149,8 +149,8 @@ from the matrix (`node tools/market.ts`, in app/); never edit them by hand.
 <!-- market:scores -->
 | | PROOF | Hevy | Fitbod | Alpha Progression | Strong | Boostcamp |
 |---|---|---|---|---|---|---|
-| weighted sum | 58 | 119 | 112 | 104 | 102 | 98 |
-| **market score** | **43** | **88** | **83** | **77** | **76** | **73** |
+| weighted sum | 57 | 119 | 112 | 104 | 102 | 98 |
+| **market score** | **42** | **88** | **83** | **77** | **76** | **73** |
 
 Best comparable: **Hevy, 88**. The weights sum to 27, so the maximum weighted sum is 135.
 <!-- /market:scores -->
@@ -179,7 +179,7 @@ Best comparable: **Hevy, 88**. The weights sum to 27, so the maximum weighted su
 | 12 Social | 1 × (5 − 1) = **4** | A feed is a §9 non-goal; a working share link needs the owner's domain. |
 | 2 Speed of the core action | 3 × (5 − 4) = **3** | The Live Activity is native and device-blocked. |
 | 1 Onboarding | 2 × (4 − 3) = **2** | no |
-| 10 Data trust and export | 1 × (4 − 3) = **1** | no |
+| 10 Data trust and export | 1 × (4 − 2) = **2** | no |
 | 9 Accessibility | 1 × (3 − 3) = **0** | no |
 <!-- /market:gaps -->
 
@@ -258,3 +258,4 @@ ever names a weight your own plates and buttons can make.
 | R687 | 45 | Hevy 88 | a call from one session, named on the first recap (H3 0 → 2); coaching held at 2 until a playtest |
 | R688 | 43 | Hevy 88 | PT2: insight and progress 3 → 2 on its evidence; coaching held at 2 (1, 2, 2) |
 | R689 | 43 | Hevy 88 | FIX: bodyweight rows read BW, a recap keeps its known total; row 4 held at 2 until a playtest |
+| R690 | 42 | Hevy 88 | RETRO with a blind re-score, lower kept: data trust 3 → 2; the blind scorer was higher on rows 4, 6, 7 and 8 |

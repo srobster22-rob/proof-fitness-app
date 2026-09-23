@@ -4471,3 +4471,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R690 RETRO: 3 building rounds since R685 (R686, R687, R689), and PT2 is newer than it.
+
+## R690 · RETRO · the second v3 retro: 43 → 42 on a blind re-score; H3 moved, the market did not
+Pick: RETRO — 3 building rounds since R685 (R686, R687, R689), and PT2 is newer than it · no score (RETRO)
+Player notices: nothing (PLAYTEST/RETRO)
+Impact: none planned or shipped (RETRO)
+Built: Scorecard R686–R689: R686 FIX, R687 EXPAND and R689 FIX, all player-visible and shipped as planned (5, 6, 5); R688 PT2. No weak or lost round; R686 repeated R684's claimed fix. Taken: R685's blind finding (R686), H3 (R687), PT2 Broken 1 and 2 and the harness (R689). Health: largest file NowScreen.tsx 2646→2674; the NowScreen component 1288→1314 lines; tests 200→203 files, 1517→1533 KB; suite 16.3 s; no linter. PLAYBOOK: R685's TRY is now a KEEP (R682, R683 and R689 were built in scratch during subagent waits and each applied in one step); STOP scoring a row up in the round that built it (R687's 2→3 was pulled back); TRY commit each FIX's reproduction as a playtest script. LOOP_LESSONS.md: 2 lessons.
+Quality: the blind re-scorer read scrubbed copies under an allow-list; the `## Never` audit is clean (no network call added since R685, no git undo).
+Verified: CONTENT.md history row R690; market.ts --check at 42.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→2 · H4 0→0 · H5 1.50→1.50 (R685 → now)
+Market: 43→42. Row 10 3→2 (blind 2, mine 3). The blind scorer was higher on rows 4, 6, 7 and 8; the lower is kept. Targets: 3 of the last 5 rounds player-visible (miss: a RETRO and a PLAYTEST sat inside the window); content grew (coach 7→8); H3 moved right; the market score fell, 45→42, on outside evidence (PT2 row 4, blind row 10) (miss); PT2's #1 acted on in part; every COACH note dispositioned; 0 lost; 0 weak.
+Content: coach situations 7→8 since R685
+Coach: none new
+Decisions: none
+Next: R691 BIG SWING (691 mod 10 = 1), chosen by a three-draft design panel. Vision check: the last ten rounds moved H3 but lost 4 market points to outside re-scores of rows the playtests found broken (insight, data trust). The raise after a miss (PT2 Broken 3, confirmed live by the blind scorer, shots/R690/) is the coach's top defect, so the panel is briefed with it first.
