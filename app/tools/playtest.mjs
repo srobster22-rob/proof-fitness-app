@@ -47,6 +47,20 @@ const CLOCK_SHIFT = `(() => {
   globalThis.Date = ShiftedDate;
 })();`;
 
+/*
+ * The page's own record of when the first control a thumb could use appeared (COACH.md C4).
+ * `open` used to time its own polling: a 500 ms loop and an 800 ms settle sat inside the span,
+ * so every open read about 1.3 s whatever the app did. performance.now() counts from the
+ * navigation itself, so nothing the harness does can land inside it.
+ */
+const FIRST_CONTROL = `(() => {
+  new MutationObserver((_, obs) => {
+    if (!document.querySelector('[role=button]')) return;
+    window.__ptFirstControlAt = Math.round(performance.now());
+    obs.disconnect();
+  }).observe(document, { childList: true, subtree: true });
+})();`;
+
 async function json(url, tries = 60) {
   for (let i = 0; i < tries; i++) {
     try {
@@ -70,14 +84,18 @@ export class Session {
     return r.result.value;
   }
 
-  /** Load the app and wait until it has rendered controls a user could touch. */
+  /**
+   * Load the app and wait until it has rendered controls a user could touch. Returns the time
+   * from navigation to the first control by the page's own clock (see FIRST_CONTROL): desktop
+   * Chrome against the dev server, not a phone.
+   */
   async open(url = APP_URL, timeoutMs = 120_000) {
     await this.send('Page.navigate', { url });
     const t0 = Date.now();
     while (Date.now() - t0 < timeoutMs) {
       await sleep(500);
-      const n = await this.eval(`document.querySelectorAll('[role=button]').length`).catch(() => 0);
-      if (n > 0) { await sleep(800); return Date.now() - t0; }
+      const at = await this.eval(`window.__ptFirstControlAt ?? null`).catch(() => null);
+      if (at !== null) { await sleep(800); return at; }
     }
     throw new Error('playtest: the app never rendered a control');
   }
@@ -188,6 +206,7 @@ export async function launch({ profile, debugPort = 9333 } = {}) {
   await send('Emulation.setDeviceMetricsOverride', PHONE);
   await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
   await send('Page.addScriptToEvaluateOnNewDocument', { source: CLOCK_SHIFT });
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: FIRST_CONTROL });
   return new Session(send, ws, chrome, dir, ownsProfile);
 }
 
@@ -200,7 +219,7 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}` || proc
       const ms = await s.open();
       const offsetAt = process.argv.indexOf('--offset-days');
       if (offsetAt >= 0) await s.offsetDays(Number(process.argv[offsetAt + 1]));
-      console.log(`opened in ${ms} ms; screenshot ${await s.shot(out, 'explore')}`);
+      console.log(`first control ${ms} ms after navigation (desktop Chrome); screenshot ${await s.shot(out, 'explore')}`);
       for (const c of await s.controls()) {
         console.log(`  [${c.role}] ${c.label ? `"${c.label}"` : ''} ${c.text ? `text="${c.text}"` : ''} at ${Math.round(c.x)},${Math.round(c.y)}${c.disabled ? ' (disabled)' : ''}`);
       }

@@ -48,7 +48,7 @@ column says where each one comes from. `(m)` marks a number from memory rather t
 | programs | Programs | split plans the app builds days from (`SPLIT_PLANS`) | 6 | Hevy 26 programs, Boostcamp 11,000+ | owner-approved splits (R266–R269); common 4- and 5-day shapes are missing. A program *library* is a §9 non-goal, asked in OWNER.md (R677) |
 | coach | Coach situations | distinct coach lines (`coach*` keys) | 12 | Hevy Trainer: 1 rule (top of rep range); Fitbod: generates the session | the differentiator; each new situation is a new piece of advice |
 | insights | Insights | recap narrative claims, plus the weekly comparison line | 14 | Hevy shareables: PRs, volume, muscle split, streak, comparisons | §10: something worth saying on a rest day |
-| goals | Goal kinds | kinds of goal a user can set | 4 | none of the four offers target goals like ours (m) | owner: improve every lift; today there are only lift and body targets |
+| goals | Goal kinds | kinds of goal a user can set | 4 | Knurl measures goals against logged lifts (PROMPT.md §2); none found among the five scored comparables (m) | owner: improve every lift; today there are only lift and body targets |
 | measurements | Body measurements | measurement kinds (`KINDS`) | 6 | Strong, Hevy: body-part measurements (m) | bodyweight and height today |
 | equipment | Equipment | kinds of kit a set is logged on | 6 | Fitbod: a detailed equipment list | cables and kettlebells are missing |
 | trainingGoals | Coaching modes | training goals the coach tunes to | 4 | Fitbod: 6 goals | strength, size and consistency today |
@@ -78,7 +78,7 @@ SKIP taps that report's script had to make.
 - **§9 non-goals still bind.** The owner has overruled Settings (R111), Measure (R140), the
   three-goal cap, and a coach that is a local rule engine (R517). Nothing here adds accounts,
   a social feed, nutrition, cardio, or a networked AI.
-- **The look at phone size is the owner's open question** (`OWNER.md` `## Next`). It is never
-  decided here, and it never blocks growth on another axis.
+- **The look at phone size is the owner's open question** (`OWNER.md`, open questions). It is
+  never decided here, and it never blocks growth on another axis.
 - **§3's tiebreakers still order conflicts:** logging speed, then zero-friction start, then
   postable output, then beauty.

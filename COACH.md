@@ -20,9 +20,12 @@ from outside its loop. Rules are in AGENT_LOOP.md v3.1, sections 1 and 6.
   -> R678: taken. Hevy 400+ exercises and 16M+ athletes, Fitbod 1,600+, in MARKET.md, VISION.md, coldstart.ts and a test comment, with sources.
 - **C2 The differentiator's "no comparable does this" (MARKET.md:136-140) is true only inside the chosen five.** Alpha Progression already recommends weight and reps per set from "your available weights", bar and owned plates, falls back to "the next lower achievable weight", and keeps a profile per gym. Liftosaur (open source) runs progression as plain-text scripts — literally "a coach you can read".
   - Fix: add Alpha Progression as the coaching comparable, and narrow the claim to free, offline, no account, one sentence with the reason (and, after S1, from session one).
+  -> R679: taken. Alpha Progression added as the per-set coaching comparable. The differentiator is narrowed to free, offline, no account, the reason in plain words. Arvo and Liftosaur are named.
 - **C3 Knurl should not be the scored "small team" pick.** MARKET.md:81-86 has no first 10 minutes, retention, praise or numbers ("not found"), all required by §2b step 3; 6 of its 12 cells are (m) and it is iPhone-only. Missing instead: Alpha Progression (C2) and JEFIT (1,400+ exercises) as the volume incumbent. Hevy, Strong, Fitbod and Boostcamp are the right core four.
+  -> R679: taken. Alpha Progression replaces Knurl among the five scored. JEFIT (volume) and Arvo (released March 2026) are recorded unscored. Knurl stays as PROMPT.md §2's architecture to beat.
 - **C4 "App opened in 1.3 s" measures the harness, not the app.** playtest.mjs:78-80 polls every 500 ms, then sleeps 800 ms *before* returning the elapsed time, so the first successful poll always reports ≈1.3 s — on a warm desktop dev server. Cited at PLAYTESTS.md:17 and as evidence for rows 1 and 8.
   - Fix: time navigate → first control with no sleep inside the span, label it "desktop web", and stop citing it as phone performance.
+  -> R679: taken. playtest.mjs now times navigation to the first control by the page's own clock (desktop web, dev server), and nothing cites 1.3 s as phone performance.
 - **C5 Inflated rows — the evidence exists but does not support the score.**
   - Row 1 Onboarding 4→3: PT0's own first-10-minutes list has 4 confusions, incl. DONE trapping the tab bar under the next day sheet (PLAYTESTS.md:36-45); one scripted persona, and a script cannot get lost.
   - Row 5 Coaching 3→2: PT0 saw 0 of 7 coach lines in two weeks (PLAYTESTS.md:22) — silent until day 8 on PPL, no sets×reps. The 448-suggestion sweep proves weights are dialable, not that the coaching is capable; Boostcamp's full programmed progressions also score 3.
@@ -30,19 +33,26 @@ from outside its loop. Rules are in AGENT_LOOP.md v3.1, sections 1 and 6.
   - Row 8 Performance 4→3: never run natively (HANDOFF.md:585-588, "Expect real bugs"); the only timings are Node and C4.
   - Row 12 Social 2→1: SHARE_BASE is `https://example.app/r` (share-url.ts:179), no card image or clip file is shared (HANDOFF.md:607-611), and PT0 never observed a share.
   - Row 4 wording only: "No per-lift chart" (MARKET.md:98) is wrong — every row has a 10-session sparkline (progress-model.ts:57, progress.tsx:385); what is missing is a row that opens its history. The 2 stands.
+  -> R679: taken. Rows 1, 5, 6, 8 and 12 were re-scored to your values, keeping the lower of the two scores in each row. Row 4 now reads "no row opens its history".
 - **C6 Two comparable cells are inconsistent.** Strong ships a Live Activity / Dynamic Island rest timer (App Store listing) yet gets 4 on row 2 while Hevy gets 5 "(Live Activity)" → Strong 5. Hevy's row 10 "3 (m)" ignores its CSV export and Strong-CSV import (Hevy help centre) → 4. Result: Hevy 87, Strong 75.
+  -> R679: taken. Strong row 2 → 5 (App Store: Live Activity rest timer); Hevy row 10 → 4 (CSV export, Strong CSV import).
 - **C7 A category-standard dimension was left out because it is frozen.** Hevy, Strong and Fitbod sync Apple Health (Hevy also Health Connect) and ship Watch apps; PROMPT.md:215 makes "wearable integration, Apple Health sync" non-goals, and AGENT_LOOP §7 says a frozen gap is scored and escalated, not dropped.
   - Fix: add a "Watch & health sync" row (w2, PROOF 0, gap 10), take the Watch out of row 11, and add the owner question.
   - Also missing, in PROOF's favour: free-tier generosity (Hevy free caps 4 routines, Strong 3 templates, Fitbod 3 workouts; PROOF has no caps).
+  -> R679: taken. Row 13 "Watch and health sync" (w2, PROOF 0, gap 10) is frozen by §9 and asked in OWNER.md. The Watch is out of row 11.
 - **C8 The category contradicts the spec.** MARKET.md:3 says "iOS/Android" and the checklist has Play items, but PROMPT.md:215 makes "Android testing" a non-goal and :255 says "iOS first". Fix: scope to iOS-first, or ask the owner.
+  -> R679: taken. The category is iOS first; Play Store items are listed as out of scope (§9).
 - **C9 Launch checklist (MARKET.md:147-168).**
   - Wrong: "playtest.mjs can capture 375×812" — it shoots 750×1624 (playtest.mjs:26); App Store Connect needs a 6.9" set (1320×2868, 1290×2796 or 1260×2736), e.g. a 440×956 viewport at 3×.
   - Missing: Play Data safety form; Play Health apps declaration (every app files it); Play's 12-tester × 14-day closed test for personal accounts made after 13 Nov 2023; App Store Support URL; age-rating questionnaire.
   - Also: app.json:30-31 declares photo-library and Live Activity keys for unbuilt features — remove until built. `@napi-rs/canvas` (tools/tests only) sits in `dependencies` (package.json:25) — move it before the first EAS build. "Localisation ✅" is partial: movement names are English-only by design.
+  -> R679: taken. The checklist now has the 6.9" screenshot sizes, Support URL, age rating and the Play items marked out of scope. app.json drops the photo-library and Live Activity keys, and @napi-rs/canvas moves to devDependencies.
 - **C10 VISION.md:51** says "none of the four offers target goals like ours"; there are five comparables, and PROMPT.md:34 says Knurl ships "goals measured against logged lifts".
+  -> R679: taken. VISION.md's goals row names Knurl's goals (PROMPT.md §2) and says none was found among the five scored.
 - **C11 Broken rules.**
   - OWNER.md:23-55 `## Next` holds the loop's own message to the owner. §1 lets the loop only move Next→Done and append questions, and R665–R675 each logged Next as "blocked". Fix: move it to Open questions; leave Next to the owner.
   - The screenshots MARKET cites (e.g. `18-week2-progress.png`) exist only in another session's temp scratchpad (`…/eeb53346-…/scratchpad/pt1/`), where a RETRO blind re-scorer cannot open them. Fix: commit them under `shots/PT0/` and cite repo paths.
+  -> R679: taken. OWNER.md: open questions at the top (5, closed-form), `## Next` is left to you, and Done entries are at most 2 lines. PT0's screenshots are committed under shots/PT0/ and cited by path.
 
 ## Suggestions (ranked by expected market-score gain per round)
 
@@ -50,26 +60,32 @@ from outside its loop. Rules are in AGENT_LOOP.md v3.1, sections 1 and 6.
   - Why: PT0 saw 0 of 7 coach lines, so the differentiator is invisible in the week §6 says decides retention; it is also the owner's R586 ask and PT0 backlog #1–#2.
   - First slice: on a no-history day the rail header reads "Today: Bench 3×8 · OHP 3×8 · Fly 3×12" (existing companion/recommendNext order + R678's calibrated startingWeight), and "First time — 45 is a starting point" becomes "3 × 8 at 45 — add 5 next time if all 8 move".
   - Est: +1 on each row = **+3.2**. The natural R681 BIG SWING.
+  -> R679: ranked (gap 6, row 5; plus row 1, gap 2). It is the likely core of the next BIG SWING: the panel's differentiator draft ("The Call") makes the coach speak from session two and on the recap. Under v3.3, its first slice lands in R682, after R681's postponed playtest.
 - **S2 A history sheet per lift** — row 4 (w3, gap 9).
   - Why: Progress rows cannot be tapped, and PT0's week-two Progress was 5 identical one-dot rows; Strong, Hevy and Knurl all have per-exercise history and charts. §4's screen cap means a sheet.
   - First slice: tap a row → each session's best set as a plain-View line (like Spark), its PRs (pr.ts), and the goal gap — wiring the orphaned `goalE1rmGap` (HANDOFF.md:518).
   - Est: 2→3 = **+2.4**; a later calendar strip also lifts row 6.
+  -> R679: ranked (gap 9, row 4), taken as R680's EXPAND.
 - **S3 Library search on the add path — in no backlog** — row 3, and every future library addition.
   - Why: below 3 sessions the picker returns only the starting twelve (coldstart.ts:357), and the add field (NowScreen.tsx:1823-1841) selects a built-in only on an exact name (now-model.ts:1992). So R678's 48 new movements are reachable in session one only by exact typing, and "RDL", "Skullcrusher" or "Front Squats" become duplicate customs that R678's exact-name shadow rule misses. §7 already allows search on the add path.
   - First slice: type-ahead over library and custom names with an alias table; top 5 matches as rows.
   - Est: **+1.2–2.4**.
+  -> R679: ranked (gap 9, row 3).
 - **S4 The store kit the loop owns, plus one cheap owner ask** — row 11, the top gap (12).
   - First slice: procedural vector icon and splash (§4), en/es listing copy, a privacy page in link/, 6.9" screenshots, the C9 cleanups.
   - Then ask one question in OWNER.md: a free Expo login lets EAS build an Android preview APK — the app's first native run — with no Apple or Google account. Ask rather than build, since §9 makes Android testing a non-goal.
   - Est: 1→2 = **+2.4** (+1.2 until a native build runs).
+  -> R679: ranked (gap 12, row 11). Mostly owner-gated (accounts, bundle id, domain); the store copy and screenshots are ours.
 - **S5 Import history from Strong/Hevy CSV — in no backlog** — rows 10, plus 4 and 5 for switchers.
   - Why: Hevy's own importer reads Strong CSV, and Gript, Gainflow, Reps and Arvo all advertise the same. It is how a challenger wins the veteran switching apps, and imported history makes the coach and Progress work on day one.
   - First slice: RESTORE accepts a Strong CSV (one row per set: Date, Workout Name, Exercise Name, Set Order, Weight, Reps, Notes, RPE; no unit) through backup.ts's existing DocumentPicker path; names map through S3's alias table; ask lb/kg once.
   - Est: **+0.8** direct — worth far more than the matrix credits.
+  -> R679: ranked (gap 0 on row 10 after C6). Its worth is to switchers, on rows 4 and 5.
 - **S6 Turn the phone-size look question into an A/B/C choice** — row 7 (w2, gap 6).
   - Why: "circle what looks off" (OWNER.md:46-55) is unanswered since R586, and PT0 `05-four-sets.png` shows 8 round buttons in one card with TODAY chips cut mid-glyph by the footer.
   - First slice: render 3 variants at 375×812 behind a dev flag, side by side in `shots/`, and ask "A, B or C?". The owner decides.
   - Est: **+1.6** once picked.
+  -> R679: taken. The look question in OWNER.md is now A/B/C, and option A offers three rendered variants.
 
 ## Direction check
 

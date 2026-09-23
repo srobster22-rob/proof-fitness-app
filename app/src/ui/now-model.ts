@@ -3,7 +3,7 @@ import { Repo } from '../data/repo.ts';
 import { prefillFor, pickerFor, unitForNewSession, EQUIPMENT_BASE, type Prefill } from '../domain/coldstart.ts';
 import { railPool, railOrder } from './rail-order.ts';
 import { nextCandidates, openingLift } from '../domain/predict.ts';
-import { autoEnd, isStale, lastSetAt, sessionStats } from '../domain/session.ts';
+import { autoEnd, isStale, lastSetAt, sessionStats, justFinished } from '../domain/session.ts';
 import { findPRs } from '../domain/pr.ts';
 import type { Measurement } from '../domain/measure.ts';
 import { restSince, type RestState } from '../domain/rest.ts';
@@ -809,6 +809,11 @@ export interface NowState {
   dayChosen: boolean;
   /** Whether they have been put in front of the day question for this workout. */
   dayAsked: boolean;
+  /**
+   * A workout ended moments ago and the next has not started (`justFinished` in
+   * session.ts). The day question for the next workout waits until then.
+   */
+  justFinished: boolean;
   /** What this lift is being done on, carried over from last time. */
   equipment: Equipment | null;
   /** Which machine, when `equipment` is 'machine'. */
@@ -1315,6 +1320,7 @@ export class NowModel {
       planDay,
       dayChosen: this.chosenDay() !== null,
       dayAsked: this.chosenDay() !== null || this.repo.getPref(`split.asked.${this.session.id}`) === '1',
+      justFinished: justFinished(this.repo.allSets(), sessionSets, this.now()),
       equipment: this.equipment,
       machine: this.machine,
       knownMachines: this.repo.knownMachines(this.exerciseId),

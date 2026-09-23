@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
+import { IDLE_END_MS } from '../src/domain/session.ts';
 import { region } from './helpers/source.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -25,15 +26,17 @@ const fresh = () => new Repo(new DatabaseSync(':memory:') as any, () => T);
  * prevent. The comment above the state claimed "once per workout, not once per
  * launch"; the code did the opposite.
  *
- * The condition the screen renders on is `!dayAsked && loggedThisSession === 0`,
- * both of which come from the model, so it is the model that has to be right
- * across a finish — and then the screen has to keep deriving rather than
- * remembering.
+ * The condition the screen renders on is `!dayAsked && !justFinished &&
+ * loggedThisSession === 0`, all of which come from the model, so it is the
+ * model that has to be right across a finish — and then the screen has to keep
+ * deriving rather than remembering. `justFinished` (R679) holds the question
+ * back for the minutes right after DONE; finishing-leaves-the-tabs-reachable
+ * .test.ts is about that half.
  */
 describe('the day question follows the workout, not the app launch', () => {
   const asks = (m: NowModel) => {
     const st = m.state();
-    return !st.dayAsked && st.loggedThisSession.length === 0;
+    return !st.dayAsked && !st.justFinished && st.loggedThisSession.length === 0;
   };
 
   test('a fresh session is asked', () => {
@@ -56,8 +59,9 @@ describe('the day question follows the workout, not the app launch', () => {
    * The bug, stated as the invariant it broke.
    */
   test('the NEXT workout is asked again', () => {
-    const repo = fresh();
-    const m = new NowModel(repo, () => T, 'en-US');
+    const clock = { now: T };
+    const repo = new Repo(new DatabaseSync(':memory:') as any, () => clock.now);
+    const m = new NowModel(repo, () => clock.now, 'en-US');
     m.setDay('push');
     m.selectExercise('bench');
     m.log();
@@ -65,6 +69,8 @@ describe('the day question follows the workout, not the app launch', () => {
 
     m.finish();
     assert.equal(m.startNextIfFinished(), true, 'DONE on the recap starts the next workout');
+    // Not in the minutes after DONE (R679), but when they come back to train.
+    clock.now += IDLE_END_MS + 60_000;
     assert.equal(asks(m), true,
       'a new workout is a new day, and the answer is stored per session on purpose');
   });
@@ -103,7 +109,7 @@ describe('the screen derives the question rather than remembering it', () => {
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
 
   test('dayOpen is computed every render', () => {
-    assert.match(code, /const dayOpen = !state\.dayAsked && state\.loggedThisSession\.length === 0;/,
+    assert.match(code, /const dayOpen = !state\.dayAsked && !state\.justFinished && state\.loggedThisSession\.length === 0;/,
       'a stored copy cannot be re-evaluated when the session changes underneath it');
   });
 

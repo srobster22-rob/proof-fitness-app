@@ -22,7 +22,6 @@
     "@expo/metro-config": "54.0.17",
     "@expo/metro-runtime": "6.1.2",
     "@expo/vector-icons": "15.0.3",
-    "@napi-rs/canvas": "^1.0.3",
     "@react-native/virtualized-lists": "0.81.5",
     "babel-preset-expo": "54.0.12",
     "expo": "~54.0.0",
@@ -46,6 +45,7 @@
     "react-native-web": "0.21.0"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^1.0.3",
     "@types/node": "^26.1.2",
     "@types/react": "~19.1.0",
     "@types/sql.js": "^1.4.11",

@@ -20,6 +20,27 @@ export function lastSetAt(sets: LoggedSet[]): number | null {
 }
 
 /**
+ * A workout ended moments ago and the next has not started (R679): nothing is
+ * logged in the live session, and the last set anywhere is under `IDLE_END_MS`
+ * old, the span after which a workout already counts as over.
+ *
+ * DONE on the recap begins the next session at once, and its "TODAY IS" sheet
+ * covered the tab bar: someone who had just finished and wanted Progress or
+ * Goals had to answer for a workout they had not started (PT0). The next
+ * workout is still asked, when they come back to train.
+ *
+ * `allSets` is oldest first, as `Repo.allSets()` returns it, so this reads one
+ * set rather than scanning a year of them on every render.
+ */
+export function justFinished(
+  allSets: readonly LoggedSet[], sessionSets: readonly LoggedSet[], now: number
+): boolean {
+  if (sessionSets.length) return false;
+  const last = allSets[allSets.length - 1];
+  return last !== undefined && now - last.at < IDLE_END_MS;
+}
+
+/**
  * The moment to measure idleness FROM — the last set, or the row's own last
  * touch, whichever is later.
  *

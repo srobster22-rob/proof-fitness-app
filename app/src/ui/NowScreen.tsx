@@ -140,8 +140,13 @@ export function NowScreen({
    * the next workout), so there was never anything for the component to
    * remember. Deriving it means the question follows the session rather than
    * the mount, and there is no second copy of the answer to keep in step.
+   *
+   * Not in the minutes after DONE (`justFinished`, R679). DONE begins the next
+   * session at once, and the sheet then covered the tab bar: someone who had
+   * just finished and wanted Progress or Goals had to answer for a workout they
+   * had not started. It is asked when they come back to train.
    */
-  const dayOpen = !state.dayAsked && state.loggedThisSession.length === 0;
+  const dayOpen = !state.dayAsked && !state.justFinished && state.loggedThisSession.length === 0;
   /*
    * The screen stays lit while a workout is on.
    *

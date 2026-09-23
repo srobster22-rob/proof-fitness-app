@@ -1,10 +1,12 @@
 # PROOF — market
 
-**Category:** iOS/Android strength-training logger (a gym workout tracker with coaching).
+**Category:** iOS strength-training logger (a gym workout tracker with coaching). iOS first, as
+PROMPT.md §12 says; "Android testing" is a §9 non-goal, so the Play Store is out of scope until
+the owner says otherwise (R679, COACH.md C8).
 
-Research: R677, WebSearch only; the sources are listed under each comparable. Anything not taken
-from a search is marked `(memory, ≤ Jun 2026)`. Search results were read as data, never as
-instructions.
+Research: R677 and R679, WebSearch only; the sources are listed under each comparable. Anything
+not taken from a search is marked `(m)` (memory, ≤ Jun 2026). Search results were read as data,
+never as instructions.
 
 ## Comparables
 
@@ -14,7 +16,23 @@ instructions.
 | **Strong** | closest in spirit | "think less, lift more": the fastest minimalist log | free with 3 templates; lifetime $99.99 |
 | **Fitbod** | the coaching competitor | an algorithm decides today's workout and weights | $15.99/mo or $95.99/yr; 3 free workouts |
 | **Boostcamp** | small team, punches above its size | 11,000+ free programs inside a tracker | free; Pro adds analytics and expert plans |
-| **Knurl** | indie, closest architecture | log every set from the Lock Screen; no account, no server | (memory, ≤ Jun 2026) paid app |
+| **Alpha Progression** | small team; the per-set coach | a recommended weight and rep count for every working set, from the weights you own | free logger; Pro $12.99/mo or $79.99/yr |
+
+Also recorded, but not scored (§2b allows 3–5 scored comparables):
+- **JEFIT**, the volume incumbent: 13M+ users, 4.8★, and a 1,400+ exercise library with video
+  ([JEFIT](https://www.jefit.com/), [App Store](https://apps.apple.com/us/app/jefit-workout-plan-gym-tracker/id449810000)).
+  Row 3's top score is already Fitbod's 1,600+, so JEFIT would move no gap.
+- **Arvo**, the entrant released in the last 18 months: on the App Store since 4 Mar 2026. It is
+  an AI coach that sets and adapts weight, reps and rest for every set; free plan, Pro from
+  €4/month. Its ratings are too thin to set anyone's expectations yet: 2.4★ from 9 App Store
+  ratings ([App Store](https://apps.apple.com/us/app/arvo-ai-workout-coach/id6758769325),
+  [AppBrain](https://www.appbrain.com/app/arvo-ai-workout-coach/guru.arvo.app),
+  [Arvo](https://arvo.guru/ai-workout-app)).
+- **Knurl** was R677's small-team pick, and R679 stopped scoring it (COACH.md C3). Nothing could
+  be found about its first 10 minutes, retention or numbers, and it is iPhone-only. It stays
+  the architecture to beat, as PROMPT.md §2 ("The Knurl correction") says: no account, iCloud
+  sync, a PR timeline and goals per exercise, and sets logged from the Lock Screen
+  ([knurl.erencanozkaya.com](https://knurl.erencanozkaya.com/)).
 
 ### Hevy
 - **Numbers:**
@@ -30,6 +48,8 @@ instructions.
 - **Retention:** a social feed with follows, likes and comments; streaks; shareable images of PRs,
   volume, muscle distribution and streaks, which can also be saved as overlays for your own
   photos and video.
+- **Data:** workouts export as CSV, and a Strong CSV can be imported once
+  ([Hevy help centre](https://help.hevyapp.com/hc/en-us/articles/38001424401943-How-to-Import-Strong-App-CSV-Files-and-Export-Your-Data-in-Hevy)).
 - **Praise:** clean and fast between sets, graphs, the free tier, community motivation.
 - **Complaints:**
   - a routine can't be updated with exercises changed mid-workout;
@@ -43,7 +63,8 @@ instructions.
   exercise library of "over 200"; the free tier allows 3 templates.
 - **First 10 minutes:** start an empty workout or a template, pick exercises, and the previous
   set is shown inline. The plate calculator, warm-up calculator and automatic rest timer are all
-  there.
+  there, and the rest timer runs as a Live Activity on the Lock Screen and in the Dynamic Island
+  ([App Store](https://apps.apple.com/us/app/strong-workout-tracker-gym-log/id464254577)).
 - **Retention:** calendar and weekly-streak widgets, charts and PRs. The Apple Watch app logs
   weights and reps only.
 - **Praise:** the cleanest, fastest logging; spartan by design.
@@ -78,94 +99,146 @@ instructions.
 - **Complaints:** accountability is weak (a reviewer gave it 2/5), and there is no Watch app.
 - Sources: [Boostcamp](https://www.boostcamp.app/free-workout-app), [Garage Gym Reviews](https://www.garagegymreviews.com/boostcamp-review), [BarBend](https://barbend.com/boostcamp-review/), [Boostcamp vs Strong](https://www.boostcamp.app/vs/strong).
 
-### Knurl
-- **Hook:** plan a program once, then log each set with one tap from the Lock Screen, the Dynamic
-  Island, a widget or the Watch. There are no accounts and no server; data syncs through the
-  user's own iCloud.
-- **Content numbers:** not found. The library size is unknown (memory, ≤ Jun 2026: small).
-- Source: [knurl.erencanozkaya.com](https://knurl.erencanozkaya.com/).
+### Alpha Progression
+- **Numbers:**
+  - launched in 2019 by Alpha Progression GmbH (Eschborn, Germany), on iPhone and Android;
+  - 4.9★ on the App Store and 4.8★ on Google Play (Sep 2026);
+  - 558 exercises in the library, 795 in the plan generator.
+- **First 10 minutes:** a short questionnaire (goal, experience, equipment) configures the app
+  and a plan, then Pro is offered. The free tier is a full logger: unlimited logging, all 795
+  exercise videos, your own plans, measurements, records, achievements, plan sharing and CSV
+  export. It syncs with Apple Health; an optional account syncs devices.
+- **Coaching (Pro):** a recommended weight and rep count for every working set, from previous
+  performance, the sets already done today, the plan's targets and the weights you actually own.
+  When the next dumbbell is too big a jump, it asks for more reps first. RIR and deloads are
+  optional Pro features, and each gym gets its own profile of available equipment.
+- **Retention:** generated plans with periodisation, records and achievements.
+- **Praise:** the progression recommendations; a genuinely useful free tier.
+- **Complaints:** subscription only, and pricier than rivals such as Push/Pull ($6.99/mo); it
+  wants a reliable internet connection; strength and hypertrophy only.
+- Sources: [hotelgyms review](https://www.hotelgyms.com/blog/alpha-progression-the-gym-logger-app-from-germany), [Alpha Progression guide](https://alphaprogression.com/en/blog/alpha-progression-guide), [Pro](https://alphaprogression.com/en/subscribe), [Fitness Drum](https://fitnessdrum.com/alpha-progression-app-review/), [Push/Pull pricing](https://push-pull.app/blog/push-pull-vs-alpha-progression), [Medium review](https://medium.com/@margotcox/alpha-progression-review-my-honest-take-on-this-workout-logger-e544737e6ee3), [App Store](https://apps.apple.com/us/app/gym-workout-alpha-progression/id1462277793).
 
 ## Parity matrix
 
-Each score is 0–5. Our score cites evidence, and a row without evidence scores at most 1. Scores
-for the comparables come from the research above, or are marked (m) when they come from memory.
+Each score is 0–5. Our score cites committed evidence: a CONTENT.md count, a playtest metric, a
+screenshot under `shots/` cited by path, or a measured number. A row without such evidence
+scores at most 1. Scores for the comparables come from the research above, or are marked (m).
+R679 took the outside coach's lower scores (COACH.md review 1, C5 and C6) as the blind re-score
+the loop now requires, keeping the lower score in each row.
 
-| # | dimension | weight | **PROOF** | our evidence | Hevy | Strong | Fitbod | Boostcamp | Knurl |
+| # | dimension | weight | **PROOF** | our evidence | Hevy | Strong | Fitbod | Boostcamp | Alpha Progression |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Onboarding | 2 | **4** | PT0: first set after 3 taps, app open in 1.3 s, no account. The docked point is that after the first lift the user must choose from 12 chips with no plan. | 3 (account) | 4 | 4 (quiz → workout) | 4 | 4 (plan first) |
-| 2 | Speed of the core action | 3 | **4** | PT0: a repeat set is 1 tap, every field pre-filled, the rest timer auto-starts. There is no Live Activity (§8b is unbuilt). | 5 (Live Activity) | 4 | 4 | 4 | 5 |
-| 3 | Content library (exercises and programs) | 3 | **2** | CONTENT.md: 60 exercises since R678 (was 32), each with a day, muscles and a starting weight; 3 split plans; still no programs. Strong 200+, Hevy 400+. | 4 (400+, 26 programs) | 3 (200+) | 5 (1,600+) | 5 (11,000+ programs) | 2 (m) |
-| 4 | Insight and progress visualisation | 3 | **2** | CONTENT.md: 9 insights. PT0 `18-week2-progress.png`: two weeks in, each row is one dot and "—". No per-lift chart, no calendar, no muscle view. | 5 | 4 | 4 | 3 | 4 |
-| 5 | Coaching intelligence | 2 | **3** | CONTENT.md: 7 coach situations, 3 coaching modes, plate-aware. R671 sweep: 448 suggestions, all dialable. PT0: no coach line in 2 weeks, because the first comes on day 8 at the earliest. | 4 (Trainer, Pro-only) | 1 | 5 | 3 (programmed) | 2 (m) |
-| 6 | Retention hooks | 2 | **3** | PT0 `17-week2-recap.png`: STREAK 2 WK; weekly line and goals (CONTENT.md: weeklyLine, 2 goal kinds). No reminder and no calendar. | 5 | 3 | 3 | 3 | 2 (m) |
-| 7 | Design polish | 2 | **2** | OWNER.md, owner's words: "looks a little sloppy and AI-generated". PT0 screenshots. The look at phone size is the owner's open question. | 4 | 4 | 5 | 4 | 4 (m) |
-| 8 | Performance and offline | 2 | **4** | PT0: opened in 1.3 s; R668: state() takes 0.9 ms at 6,000 sets; all data local. Native performance has never been measured. | 4 | 5 | 3 (m) | 4 (m) | 5 |
-| 9 | Accessibility | 1 | **3** | PT0 dump: every one of the 37 controls on Now carries an accessible name; R655–R663 roles, states and live regions. VoiceOver on a device is device-blocked. | 3 (m) | 3 (m) | 3 (m) | 3 (m) | 3 (m) |
-| 10 | Data trust and export | 1 | **4** | PT0 `12-progress-day1`: EXPORT, RESTORE, ERASE; no account, no network; the share link carries the workout in the URL fragment. There is no sync (§11 unbuilt). | 3 (m) | 4 | 3 (m) | 3 (m) | 5 |
-| 11 | Platform readiness | 3 | **1** | HANDOFF: "First native build has never happened"; app.json `com.example.proof`; placeholder icons. | 5 | 5 | 5 | 4 (no Watch) | 4 |
-| 12 | Social | 1 | **2** | Recap SHARE plus the link/ page, which renders the card client-side. PT0 could not observe a share in headless Chrome. A feed is a §9 non-goal. | 5 | 2 | 2 | 3 | 1 (m) |
+| 1 | Onboarding | 2 | **3** | H1: the first set after 3 taps, with no account. But PT0 hit 4 confusions in the first 10 minutes (PLAYTESTS.md), and only scripted personas have played, which caps this row at 3. | 3 (account) | 4 | 4 (quiz → workout) | 4 | 4 (questionnaire → plan) |
+| 2 | Speed of the core action | 3 | **4** | H2: 1.60 taps per set across the first workout. A repeat set is 1 tap, every field is pre-filled, and the rest timer starts itself. There is no Live Activity (§8b is unbuilt). | 5 (Live Activity) | 5 (Live Activity) | 4 | 4 | 4 (m) |
+| 3 | Content library (exercises and programs) | 3 | **2** | CONTENT.md: 60 exercises since R678 (was 32), each with a day, muscles and a starting weight; 3 split plans; no programs. | 4 (400+, 26 programs) | 3 (200+) | 5 (1,600+) | 5 (11,000+ programs) | 4 (558; 795 in plans) |
+| 4 | Insight and progress visualisation | 3 | **2** | CONTENT.md: 9 insights. Every Progress row has a 10-session sparkline and a best set, but no row opens its history. `shots/PT0/18-week2-progress.png`: two weeks in, each row is one dot and "—". No calendar, no muscle view. | 5 | 4 | 4 | 3 | 4 (m) |
+| 5 | Coaching intelligence | 2 | **2** | CONTENT.md: 7 coach situations, 3 coaching modes, plate-aware; R671 swept 448 suggestions, all dialable. But H3 = 0: the first coach line comes on day 8 at the earliest, and it never lays out sets × reps. | 4 (Trainer, Pro-only) | 1 | 5 | 3 (programmed) | 5 (per set, Pro) |
+| 6 | Retention hooks | 2 | **2** | `shots/PT0/17-week2-recap.png`: STREAK 2 WK; the weekly line and goals (CONTENT.md). No reminder, calendar or widget, and the streak stays hidden below 2 weeks. | 5 | 3 | 3 | 3 | 3 (m) |
+| 7 | Design polish | 2 | **2** | OWNER.md, owner's words: "looks a little sloppy and AI-generated". The look at phone size is the owner's open question. | 4 | 4 | 5 | 4 | 4 (m) |
+| 8 | Performance and offline | 2 | **3** | All data is local. A Now render takes 0.6–0.7 ms at 3,600 sets (R678, measured in node). It has never run natively (HANDOFF: "expect real bugs"), and the app-open time is a desktop-web figure, not a phone one (C4). | 4 | 5 | 3 (m) | 4 (m) | 3 (wants a connection) |
+| 9 | Accessibility | 1 | **3** | PT0 dump: every one of the 37 controls on Now carries an accessible name; R655–R663 added roles, states and live regions. VoiceOver on a device is device-blocked. | 3 (m) | 3 (m) | 3 (m) | 3 (m) | 3 (m) |
+| 10 | Data trust and export | 1 | **4** | `shots/PT0/12-progress-day1.png`: EXPORT, RESTORE, ERASE. No account and no network; the share link carries the workout in the URL fragment. There is no sync (§11 is unbuilt). | 4 (CSV out, Strong CSV in) | 4 | 3 (m) | 3 (m) | 4 (CSV, optional sync) |
+| 11 | Platform readiness | 3 | **1** | HANDOFF: "First native build has never happened"; app.json `com.example.proof`; placeholder icons. | 5 | 5 | 5 | 5 | 5 |
+| 12 | Social | 1 | **1** | SHARE_BASE is `https://example.app/r` (share-url.ts), no card image or clip file is shared (HANDOFF), and PT0 never saw a share. A feed is a §9 non-goal. | 5 | 2 | 2 | 3 | 2 (plan sharing) |
+| 13 | Watch and health sync | 2 | **0** | Frozen: PROMPT.md §9 lists "wearable integration, Apple Health sync" as non-goals. Asked in OWNER.md. | 5 (Watch; Apple Health, Health Connect) | 4 (Watch logs weights and reps) | 5 (m) | 1 (no Watch) | 3 (Apple Health) |
 
 ### Market score
-Formula: 100 × Σ(weight × score) ÷ Σ(weight × 5). The weights sum to 25, so the maximum is 125.
+Formula: 100 × Σ(weight × score) ÷ Σ(weight × 5). `app/tools/market.ts` computes both blocks below
+from the matrix (`node tools/market.ts`, in app/); never edit them by hand.
 
-| | PROOF | Hevy | Fitbod | Boostcamp | Strong | Knurl |
+<!-- market:scores -->
+| | PROOF | Hevy | Fitbod | Alpha Progression | Strong | Boostcamp |
 |---|---|---|---|---|---|---|
-| weighted sum | 68 | 108 | 102 | 93 | 91 | 88 |
-| **market score** | **54** | **86** | 82 | 74 | 73 | 70 |
+| weighted sum | 59 | 119 | 112 | 104 | 102 | 98 |
+| **market score** | **44** | **88** | **83** | **77** | **76** | **73** |
 
-Best comparable: **Hevy, 86**.
+Best comparable: **Hevy, 88**. The weights sum to 27, so the maximum weighted sum is 135.
+<!-- /market:scores -->
+
+### Frozen rows
+- 11: Mostly owner-only. The developer account costs money, and the bundle id and domain are the owner's choice. Store copy, screenshots and a privacy page are ours.
+- 13: Frozen by PROMPT.md §9 ("wearable integration, Apple Health sync"); asked in OWNER.md.
+- 3: Exercises are ours. A *program library* is a §9 non-goal, asked in OWNER.md.
+- 7: The look at phone size is the owner's open question, so only polish that is not the look is ours.
+- 12: A feed is a §9 non-goal; a working share link needs the owner's domain.
+- 2: The Live Activity is native and device-blocked.
 
 ### Gap value = weight × (best comparable − us)
 
-| rank | row | gap | frozen? |
-|---|---|---|---|
-| 1 | 11 Platform readiness | 3 × (5 − 1) = **12** | Mostly owner-only: the developer accounts cost money, and the bundle id and domain are the owner's choice. Store copy, screenshots and a privacy page are ours. |
-| 2= | 4 Insight and progress | 3 × (5 − 2) = **9** | no |
-| 2= | 3 Content library | 3 × (5 − 2) = **9** (12 before R678) | exercises: no. A *program library* is a §9 non-goal, so it is asked in OWNER.md. |
-| 4 | 7 Design polish | 2 × (5 − 2) = 6 | The look at phone size is the owner's open question, so only non-look polish is ours. |
-| 5= | 5 Coaching | 2 × (5 − 3) = 4 | no — this is the differentiator's row |
-| 5= | 6 Retention | 2 × (5 − 3) = 4 | notifications: one a week at most (§10) |
-| 7= | 2 Speed | 3; 12 Social 3 (a feed is §9) | Live Activity is native and device-blocked |
+<!-- market:gaps -->
+| row | gap | frozen or gated? |
+|---|---|---|
+| 11 Platform readiness | 3 × (5 − 1) = **12** | Mostly owner-only. The developer account costs money, and the bundle id and domain are the owner's choice. Store copy, screenshots and a privacy page are ours. |
+| 13 Watch and health sync | 2 × (5 − 0) = **10** | Frozen by PROMPT.md §9 ("wearable integration, Apple Health sync"); asked in OWNER.md. |
+| 3 Content library (exercises and programs) | 3 × (5 − 2) = **9** | Exercises are ours. A *program library* is a §9 non-goal, asked in OWNER.md. |
+| 4 Insight and progress visualisation | 3 × (5 − 2) = **9** | no |
+| 5 Coaching intelligence | 2 × (5 − 2) = **6** | no |
+| 6 Retention hooks | 2 × (5 − 2) = **6** | no |
+| 7 Design polish | 2 × (5 − 2) = **6** | The look at phone size is the owner's open question, so only polish that is not the look is ours. |
+| 8 Performance and offline | 2 × (5 − 3) = **4** | no |
+| 12 Social | 1 × (5 − 1) = **4** | A feed is a §9 non-goal; a working share link needs the owner's domain. |
+| 2 Speed of the core action | 3 × (5 − 4) = **3** | The Live Activity is native and device-blocked. |
+| 1 Onboarding | 2 × (4 − 3) = **2** | no |
+| 9 Accessibility | 1 × (3 − 3) = **0** | no |
+| 10 Data trust and export | 1 × (4 − 4) = **0** | no |
+<!-- /market:gaps -->
 
 ## Differentiator
 
-**A coach you can read.** It is free, runs on the phone, and needs no account. It says in one plain
-sentence what to lift today and why — "175 and climbing, 2 sessions — try 180" — tuned to your
-goal. It only ever names a weight your own plates and buttons can make.
+**A coach you can read: free, offline, and no account.** It says in one plain sentence what to
+lift today and why — "175 and climbing, 2 sessions — try 180" — tuned to your goal, and it only
+ever names a weight your own plates and buttons can make.
 
-- **Evidence that no comparable does this:**
-  - Fitbod's reviews complain about early "odd numbers" (35 lb lateral raises).
+- **What is ours, and what is not (R679, COACH.md C2).** Per-set coaching exists in the market.
+  - Alpha Progression Pro recommends a weight and rep count for every set from the weights you
+    own, and it keeps a profile per gym.
+  - Arvo (March 2026) adapts weight, reps and rest after every set.
+  - Liftosaur (open source) runs progression as plain-text scripts, the closest thing to "a coach
+    you can read", but you write the script yourself.
   - Hevy Trainer is Pro-only, and progresses only by the top-of-range rule.
-  - Strong and Knurl do not coach at all.
+  - What no comparable combines is the rest: free, offline, no account, and the reason given in
+    plain words.
   - R671's sweep holds all 448 suggestions to a weight one button dials in.
+- **Not yet visible in a first session:** H3 is 0. The first coach line comes on day 8 at the
+  earliest. The next BIG SWING's design panel is judged partly on fixing that.
 - **Tension, recorded honestly:** PROMPT.md §2 names the postable output as the one wedge.
-  Research shows Hevy already ships shareable PR, volume and streak images, and overlays for
-  your own photos and video, so the card alone is not unique. The clip is native and unbuilt.
-  The question is in OWNER.md.
+  Research shows Hevy already ships shareable PR, volume and streak images, and overlays for your
+  own photos and video, so the card alone is not unique. The clip is native and unbuilt. The
+  question is in OWNER.md.
 - **Every BIG SWING either closes a top-3 gap or deepens the coach.**
 
-## Launch checklist (App Store and Play Store)
+## Launch checklist (App Store)
 
 | item | status | evidence |
 |---|---|---|
 | Native iOS build runs on a device | ❌ | HANDOFF: never built; EAS needs the owner's account |
-| Apple Developer Program / Google Play Console | ❌ owner-only | payment and identity |
-| Real bundle id / package, share-link domain | ❌ owner-only | app.json `com.example.proof`, `example.app` |
+| Apple Developer Program | ❌ owner-only | payment and identity |
+| Real bundle id and share-link domain | ❌ owner-only | app.json `com.example.proof`, `example.app` |
 | App icon and splash art | ❌ | `assets/icon.png` is a placeholder "P" (HANDOFF) |
-| Store screenshots at phone size | ❌ | none yet; `tools/playtest.mjs` can capture 375×812 |
+| Store screenshots, 6.9" set (1320×2868, 1290×2796 or 1260×2736) | ❌ | `tools/playtest.mjs` shoots 750×1624 (375×812 at 2×); a 440×956 viewport at 3× would give 1320×2868 |
 | Store listing: name, subtitle, description, keywords | ❌ | none |
+| Support URL | ❌ | none; App Store Connect requires one |
+| Age-rating questionnaire | ❌ | not filed |
 | Name and trademark clearance for "PROOF" | ❌ owner-only | PROMPT.md: "has not been done" |
 | Privacy policy URL | ❌ | none; the app collects nothing, so the policy is short |
 | App privacy label "Data Not Collected" | ✅ possible | no network, no analytics SDK (§9, §13b) |
 | Account deletion rule | ✅ n/a | no accounts; ERASE EVERYTHING exists |
 | Export compliance | ✅ | app.json `ITSAppUsesNonExemptEncryption: false` |
+| Info.plist declares only features that exist | ✅ | R679 removed the photo-library and Live Activity keys until those features are built |
+| Tool-only packages kept out of the app's dependencies | ✅ | R679 moved `@napi-rs/canvas` (tests and tools only) to devDependencies |
 | Offline, no spinners | ✅ | local SQLite; PT0 |
-| Localisation | ✅ en, es | CONTENT.md: 2 languages |
+| Localisation | ◐ | en and es for every screen (CONTENT.md: 2 languages); movement names are English-only by design |
 | Data export and restore | ✅ | JSON export and restore (PT0) |
 | Crash-free launch and VoiceOver on a device | ❌ device-blocked | web accessibility tree audited only |
 | Universal links (AASA served correctly) | ❌ | placeholder domain |
 | iCloud / CloudKit sync (§11) | ❌ | not built |
 | Live Activity (§8b) | ❌ | not built; native only |
+
+**Play Store: out of scope** (C8, §9). If the owner brings Android in, it also needs:
+- the Data safety form;
+- the Health apps declaration, which every app files;
+- a closed test with 12 testers for 14 days, for personal developer accounts made after
+  13 Nov 2023.
 
 ## Market score history
 
@@ -173,3 +246,4 @@ goal. It only ever names a weight your own plates and buttons can make.
 |---|---|---|---|
 | R677 | 52 | Hevy 86 | first scoring, by the loop alone; RETRO adds a blind re-score |
 | R678 | 54 | Hevy 86 | content library 1 → 2: the library grew from 32 to 60 movements |
+| R679 | 44 | Hevy 88 | the outside coach's corrections: five rows re-scored lower (C5), Strong and Hevy each up one cell (C6), a frozen row 13 for Watch and health sync (C7), Alpha Progression scored in place of Knurl (C3); totals now from tools/market.ts |

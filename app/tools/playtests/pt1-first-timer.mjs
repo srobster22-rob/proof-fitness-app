@@ -70,7 +70,7 @@ const dump = async title => {
 
 try {
   const opened = await s.open();
-  console.log(`app opened in ${opened} ms`);
+  console.log(`first control ${opened} ms after navigation (desktop Chrome, dev server; not a phone)`);
   await see('new-user');
   await tap(/^PUSH \/ PULL \/ LEGS/);
   await see('after-choosing-split');

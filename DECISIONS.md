@@ -56,3 +56,24 @@ new work.
 - **Why:** `split.ts`'s own rule keeps floor-pulled deadlifts off leg day. Filing one variant
   differently contradicted it (R678 review).
 - **Revert:** the `'trap-bar-deadlift'` line in `DAY_OF`.
+
+## D5 · R679 · After bench, the rail keeps Overhead Press behind the isolation lifts
+- **Choice:** PT0 found Overhead Press off the right edge of the day rail. R679 leaves the
+  rail's order and its single row as they are.
+  - Measured at 375×812 in the R678 build, after 4 sets of bench, the rail reads Tricep
+    Extension (NEXT), Chest Fly, Tricep Pushdown (cut off), then Lateral Raise.
+  - Overhead Press is 5th. After the second lift it is 4th, still one swipe away. It is also
+    in the lift picker (the ▾ by the lift's name).
+- **Alternative:**
+  - rank the day's remaining compound first, which lets habit outvote the coach;
+  - wrap the rail into two rows, which is a layout change to the Now screen.
+- **Why:**
+  - The order is the coach's muscle advice working as designed. It moves a second heavy press
+    of the same muscles behind lifts that finish the work bench started; the tuning is in
+    `rail-order.ts` (`ADVICE_PLACES`).
+  - A two-row rail changes the look at phone size, which is the owner's open question. It is
+    one of the variants that question now offers.
+  - A lifter's own history outranks the advice (D1): once they have pressed overhead, it joins
+    the first tier, ahead of every lift they have never done.
+- **Revert:** order a remaining compound first in `railOrder`, or wrap `railRow` in
+  NowScreen.tsx.

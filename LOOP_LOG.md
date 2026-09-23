@@ -4307,3 +4307,27 @@ Content: exercises 32→60
 Coach: C1 taken; the weak test now pins both tiers' order; D2 re-checked, so DB lifts stay uncalibrated. Deferred: the upper-day NEXT (an owner question) and the single-registry refactor (§5).
 Decisions: D1 rail tiers, D2 calibration, D3 own name wins, D4 trap bar on pull
 Next: R679 FIX. Two PT0 defects: DONE traps the tab bar under the next day sheet, and OHP sits off-screen. Plus COACH.md C2–C11.
+
+## R679 · FIX · DONE no longer traps the tab bar, and the coach's corrections are in
+Pick: two PT0 defects: DONE raises the next workout's day sheet over the tab bar, and OHP sits off-screen on the rail — PT ref PT0 · impact planned 2/3/0. COACH.md C2–C11 fall due this round.
+Player notices: After DONE, PROGRESS and GOALS answer the first tap. The next workout is still asked what day it is, once they come back to train.
+Impact: planned 2/3/0 → shipped 2/3/0 (biggest file now-model.ts 2205→2211)
+Built:
+- The DONE fix: session.ts `justFinished` (no sets in the live session, last set under IDLE_END_MS old) holds back NowScreen's day sheet.
+- OHP stays where the coach's advice puts it (D5). A two-row rail is now one of the owner's look variants.
+- tools/market.ts computes MARKET.md's totals and gaps. The matrix carries C2/C3/C5–C9: Alpha Progression replaces Knurl; 5 rows re-scored down; Strong and Hevy +1 each; a frozen row 13 for Watch and health; iOS first; a corrected checklist.
+- C4: playtest.mjs times the first control by the page's own clock (582–642 ms on desktop, not the old 1.3 s).
+- C9: app.json drops the unbuilt photo and Live Activity keys, and @napi-rs/canvas moves to devDependencies.
+- C11: OWNER.md has 5 closed-form open questions on top, Next left to the owner, and Done entries of 2 lines at most. PT0's screenshots are committed under shots/PT0/.
+- C10: VISION.md's goals row.
+Quality:
+- Self-review moved the check out of the 2,200-line now-model.ts into session.ts as a pure function.
+- The Done headlines two tests pin were kept.
+- FIX needs no independent review (§4).
+Verified: suite 2269/2269, dist and MARKET.md current. Plants P1 never-finished, P2 no-time-limit, P3 mid-workout, P4 screen-ignores-it and P5 stale-matrix each fail a named test and restore sha256-identical. At phone size, after DONE the sheet stays closed, the first PROGRESS tap lands, and the next day asks (shots/R679/). The big-history timing test failed 3 of 5 full runs under a 24-process machine load; so did R678's code (3.78×); isolated runs pass.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 2→0 · H5 1.50→1.50
+Market: 54→44 on the corrected matrix (the coach's C5/C6/C7 re-score; Hevy 86→88). No row moved on this round's own evidence.
+Content: unchanged. Measurements, at 2 of 6, is still furthest below target.
+Coach: C2–C11 taken. S1–S6 ranked by gap value: S2 is R680's pick, and S1 feeds the BIG SWING.
+Decisions: D5 (after bench, OHP stays behind the isolation lifts)
+Next: R680 EXPAND, a lift's own history on Progress (row 4, gap value 9, S2). The derived RETRO swaps: 2 building rounds since setup.
