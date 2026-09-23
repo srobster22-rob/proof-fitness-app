@@ -7,6 +7,8 @@ import { progressRows, hiddenRowCount } from '../src/ui/progress-model.ts';
 import { headlineGoal } from '../src/domain/goals.ts';
 import type { Goal } from '../src/domain/goals.ts';
 import type { LoggedSet, Exercise } from '../src/domain/types.ts';
+import { BUILTIN } from '../src/domain/coldstart.ts';
+import { dayOf } from '../src/domain/split.ts';
 
 const DAY = 86_400_000, MIN = 60_000;
 const T0 = Date.UTC(2026, 6, 29, 18);
@@ -69,8 +71,10 @@ describe('the day rail under pressure', () => {
     const { m } = model();
     m.setPlan('ppl');
     m.setDay('push');
-    // Train everything the rail offers.
-    for (const r of [...m.state().dayRail]) { m.selectExercise(r.id); m.log(); }
+    // Train every push movement the app has. Since R678 a push day is larger
+    // than the rail, so training only what the rail first offers no longer
+    // trains the day: the wider library takes the room the finished lifts leave.
+    for (const e of BUILTIN.filter(x => dayOf(x.id) === 'push')) { m.selectExercise(e.id); m.log(); }
     const rail = m.state().dayRail;
     assert.ok(rail.every(r => r.done || r.current));
     assert.equal(rail.filter(r => r.suggested).length, 0,

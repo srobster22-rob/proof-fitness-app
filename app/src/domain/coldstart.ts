@@ -42,14 +42,25 @@ export interface SeedExercise extends Exercise {
    * dumbbell and the number the user types.
    */
   factor: number;
+  /**
+   * Whether a set of this movement says how strong the lifter is (R678).
+   *
+   * `strengthIndex` divides a set's weight by `factor` to get a bench-press
+   * equivalent. That only holds for a movement whose load tracks whole-body
+   * strength the same way for everybody, which means the barbell compounds. An
+   * isolation lift does not: one 120 lb hip abduction made a first squat open at
+   * 290. Neither does a machine, whose numbers change from one gym to the next.
+   * Absent means no.
+   */
+  calibrates?: boolean;
 }
 
 export const STARTING_TWELVE: SeedExercise[] = [
-  { id: 'bench',    name: 'Bench Press',      seedLb: 95,  seedKg: 40,  reps: 8, kit: 'barbell', factor: 1.0 },
-  { id: 'squat',    name: 'Squat',            seedLb: 95,  seedKg: 40,  reps: 8, kit: 'barbell', factor: 1.2 },
-  { id: 'deadlift', name: 'Deadlift',         seedLb: 135, seedKg: 60,  reps: 5, kit: 'barbell', factor: 1.45 },
-  { id: 'ohp',      name: 'Overhead Press',   seedLb: 65,  seedKg: 30,  reps: 8, kit: 'barbell', factor: 0.43 },
-  { id: 'row',      name: 'Barbell Row',      seedLb: 85,  seedKg: 35,  reps: 8, kit: 'barbell', factor: 0.65 },
+  { id: 'bench',    name: 'Bench Press',      seedLb: 95,  seedKg: 40,  reps: 8, kit: 'barbell', factor: 1.0, calibrates: true },
+  { id: 'squat',    name: 'Squat',            seedLb: 95,  seedKg: 40,  reps: 8, kit: 'barbell', factor: 1.2, calibrates: true },
+  { id: 'deadlift', name: 'Deadlift',         seedLb: 135, seedKg: 60,  reps: 5, kit: 'barbell', factor: 1.45, calibrates: true },
+  { id: 'ohp',      name: 'Overhead Press',   seedLb: 65,  seedKg: 30,  reps: 8, kit: 'barbell', factor: 0.43, calibrates: true },
+  { id: 'row',      name: 'Barbell Row',      seedLb: 85,  seedKg: 35,  reps: 8, kit: 'barbell', factor: 0.65, calibrates: true },
   { id: 'pulldown', name: 'Lat Pulldown',     seedLb: 80,  seedKg: 35,  reps: 10, kit: 'machine', factor: 0.55 },
   { id: 'dbpress',  name: 'DB Bench Press',   seedLb: 35,  seedKg: 15,  reps: 10, kit: 'dumbbell', factor: 0.35 },
   { id: 'dbrow',    name: 'DB Row',           seedLb: 35,  seedKg: 15,  reps: 10, kit: 'dumbbell', factor: 0.28 },
@@ -65,21 +76,18 @@ export const STARTING_TWELVE: SeedExercise[] = [
  * `STARTING_TWELVE` stays exactly twelve because §6 promises a **short** list on
  * first launch — a beginner facing thirty movements is the setup maze §5 exists
  * to avoid. These are what everyone else needs once they know what they are
- * doing, and they only appear after the picker has history to rank.
+ * doing, and they only reach the first-launch picker once it has history to
+ * rank. A day's rail offers them sooner, in this order (see `buildRail`).
  *
  * Chosen for how common they are, not for coverage: every one of these is in
- * an ordinary commercial gym and in most beginner programmes. Deliberately NOT
- * here are the movements that would need a data model the app does not have —
- * pull-ups, dips and push-ups are bodyweight, and logging them as `0 x 8` would
- * put a zero into volume, PR detection and the shareable. That is a feature,
- * not a list entry.
- *
- * The legs group was the thin one: two movements against five a side for push
- * and pull, on the day most people find hardest to fill.
+ * an ordinary commercial gym. The bodyweight four (pull-up, chin-up, dip,
+ * push-up) are here now that a set's real load counts the lifter's bodyweight
+ * (`realLoad`); nothing else is marked bodyweight, because that mark means the
+ * whole body is the load.
  */
 export const MORE_MOVEMENTS: SeedExercise[] = [
   // push
-  { id: 'incline',   name: 'Incline Bench Press', seedLb: 65,  seedKg: 30,   reps: 8, kit: 'barbell', factor: 0.85 },
+  { id: 'incline',   name: 'Incline Bench Press', seedLb: 65,  seedKg: 30,   reps: 8, kit: 'barbell', factor: 0.85, calibrates: true },
   { id: 'dbohp',     name: 'DB Shoulder Press',   seedLb: 25,  seedKg: 10,   reps: 10, kit: 'dumbbell', factor: 0.18 },
   { id: 'chestpress',name: 'Machine Chest Press', seedLb: 70,  seedKg: 30,   reps: 10, kit: 'machine', factor: 0.95 },
   { id: 'fly',       name: 'Chest Fly',           seedLb: 25,  seedKg: 10,   reps: 12, kit: 'machine', factor: 0.25 },
@@ -102,7 +110,7 @@ export const MORE_MOVEMENTS: SeedExercise[] = [
   { id: 'shrug',     name: 'Shrug',               seedLb: 95,  seedKg: 40,   reps: 12, kit: 'barbell', factor: 0.8 },
 
   // legs
-  { id: 'rdl',       name: 'Romanian Deadlift',   seedLb: 95,  seedKg: 40,   reps: 8, kit: 'barbell', factor: 1.1 },
+  { id: 'rdl',       name: 'Romanian Deadlift',   seedLb: 95,  seedKg: 40,   reps: 8, kit: 'barbell', factor: 1.1, calibrates: true },
   { id: 'hipthrust', name: 'Hip Thrust',          seedLb: 135, seedKg: 60,   reps: 10, kit: 'barbell', factor: 1.3 },
   { id: 'legcurl',   name: 'Leg Curl',            seedLb: 50,  seedKg: 25,   reps: 12, kit: 'machine', factor: 0.4 },
   { id: 'legext',    name: 'Leg Extension',       seedLb: 50,  seedKg: 25,   reps: 12, kit: 'machine', factor: 0.45 },
@@ -110,8 +118,64 @@ export const MORE_MOVEMENTS: SeedExercise[] = [
   { id: 'calf',      name: 'Calf Raise',          seedLb: 90,  seedKg: 40,   reps: 12, kit: 'machine', factor: 0.6 }
 ];
 
+/*
+ * The rest of what an ordinary commercial gym has (R678).
+ *
+ * Strong ships 200+ movements and Hevy 400+ (MARKET.md), and a lifter whose
+ * program calls for a front squat or a skull crusher had to invent it: no
+ * starting weight, no day, no muscles for the coach to reason with. These
+ * come LAST on purpose. `BUILTIN`'s order is the order a lifter with no
+ * history meets the day's lifts on the rail, and the rail offers this tier only
+ * in the room the core leaves: a push or pull day's twelve stays whole, and leg
+ * day, which has fewer core lifts than the rail holds, fills the rest from here.
+ * Once a lifter trains one of them it ranks like any lift they do.
+ *
+ * Ids are hyphenated on purpose. A custom exercise's id is a slug of
+ * `[a-z0-9_]`, so none a lifter already made can hold one of these.
+ */
+export const WIDER_LIBRARY: SeedExercise[] = [
+  // push
+  { id: 'close-grip-bench', name: 'Close-Grip Bench Press', seedLb: 65,  seedKg: 30,   reps: 8,  kit: 'barbell',  factor: 0.85, calibrates: true },
+  { id: 'incline-db-press', name: 'Incline DB Press',       seedLb: 30,  seedKg: 12.5, reps: 10, kit: 'dumbbell', factor: 0.3 },
+  { id: 'machine-shoulder-press', name: 'Machine Shoulder Press', seedLb: 50,  seedKg: 22.5, reps: 10, kit: 'machine',  factor: 0.45 },
+  { id: 'arnold-press',  name: 'Arnold Press',           seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
+  { id: 'skull-crusher', name: 'Skull Crusher',          seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
+  { id: 'cable-fly',     name: 'Cable Fly',              seedLb: 15,  seedKg: 7.5,  reps: 12, kit: 'machine',  factor: 0.15 },
+  { id: 'db-fly',        name: 'DB Fly',                 seedLb: 15,  seedKg: 7.5,  reps: 12, kit: 'dumbbell', factor: 0.1 },
+  { id: 'front-raise',   name: 'Front Raise',            seedLb: 15,  seedKg: 7.5,  reps: 12, kit: 'dumbbell', factor: 0.08 },
+  { id: 'cable-lateral-raise', name: 'Cable Lateral Raise',    seedLb: 10,  seedKg: 5,    reps: 12, kit: 'machine',  factor: 0.08 },
+
+  // pull
+  { id: 't-bar-row',     name: 'T-Bar Row',              seedLb: 70,  seedKg: 30,   reps: 8,  kit: 'barbell',  factor: 0.6 },
+  { id: 'machine-row',   name: 'Machine Row',            seedLb: 70,  seedKg: 30,   reps: 10, kit: 'machine',  factor: 0.55 },
+  { id: 'sumo-deadlift', name: 'Sumo Deadlift',          seedLb: 135, seedKg: 60,   reps: 5,  kit: 'barbell',  factor: 1.4, calibrates: true },
+  { id: 'rack-pull',     name: 'Rack Pull',              seedLb: 135, seedKg: 60,   reps: 5,  kit: 'barbell',  factor: 1.5 },
+  { id: 'straight-arm-pulldown', name: 'Straight-Arm Pulldown',  seedLb: 30,  seedKg: 12.5, reps: 12, kit: 'machine',  factor: 0.2 },
+  { id: 'barbell-curl',  name: 'Barbell Curl',           seedLb: 45,  seedKg: 20,   reps: 10, kit: 'barbell',  factor: 0.25 },
+  { id: 'cable-curl',    name: 'Cable Curl',             seedLb: 30,  seedKg: 12.5, reps: 12, kit: 'machine',  factor: 0.2 },
+  { id: 'preacher-curl', name: 'Preacher Curl',          seedLb: 30,  seedKg: 12.5, reps: 10, kit: 'machine',  factor: 0.18 },
+
+  // legs
+  { id: 'front-squat',   name: 'Front Squat',            seedLb: 75,  seedKg: 35,   reps: 5,  kit: 'barbell',  factor: 0.85, calibrates: true },
+  { id: 'hack-squat',    name: 'Hack Squat',             seedLb: 90,  seedKg: 40,   reps: 10, kit: 'machine',  factor: 1.0 },
+  { id: 'trap-bar-deadlift', name: 'Trap Bar Deadlift',      seedLb: 135, seedKg: 60,   reps: 5,  kit: 'barbell',  factor: 1.45, calibrates: true },
+  { id: 'goblet-squat',  name: 'Goblet Squat',           seedLb: 35,  seedKg: 15,   reps: 10, kit: 'dumbbell', factor: 0.25 },
+  { id: 'bulgarian-split-squat', name: 'Bulgarian Split Squat',  seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
+  { id: 'good-morning',  name: 'Good Morning',           seedLb: 65,  seedKg: 30,   reps: 10, kit: 'barbell',  factor: 0.5 },
+  { id: 'step-up',       name: 'Step-Up',                seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
+  // One bell held in both hands. The nearest kit the app models is a dumbbell,
+  // whose 5 lb / 2.5 kg floor is a real kettlebell too.
+  { id: 'kettlebell-swing', name: 'Kettlebell Swing',       seedLb: 35,  seedKg: 15,   reps: 12, kit: 'dumbbell', factor: 0.25 },
+  { id: 'seated-calf-raise', name: 'Seated Calf Raise',      seedLb: 45,  seedKg: 20,   reps: 12, kit: 'machine',  factor: 0.4 },
+  { id: 'hip-abduction', name: 'Hip Abduction',          seedLb: 70,  seedKg: 30,   reps: 12, kit: 'machine',  factor: 0.5 },
+  { id: 'cable-crunch',  name: 'Cable Crunch',           seedLb: 50,  seedKg: 22.5, reps: 12, kit: 'machine',  factor: 0.3 }
+];
+
 /** Everything the app ships knowing about. Seeded into the database. */
-export const BUILTIN: SeedExercise[] = [...STARTING_TWELVE, ...MORE_MOVEMENTS];
+export const BUILTIN: SeedExercise[] = [...STARTING_TWELVE, ...MORE_MOVEMENTS, ...WIDER_LIBRARY];
+
+/** Each built-in by id, for lookups that run once per logged set. */
+const BY_ID = new Map(BUILTIN.map(e => [e.id, e]));
 
 export interface Prefill { weight: number; reps: number; source: 'history' | 'seed' | 'fallback'; }
 
@@ -158,20 +222,39 @@ const ROUND_TO: Record<Unit, number> = { lb: 5, kg: 2.5 };
 /**
  * How strong this person is, expressed as the bench press they would do.
  *
- * Every movement carries a `factor` relative to a bench, so any lift they HAVE
+ * Every movement carries a `factor` relative to a bench, so a lift they HAVE
  * trained can be read backwards into a bench-equivalent — a 405 squat implies
  * roughly a 340 bench. Taking the strongest such reading means one heavy lift
  * is enough to calibrate everything else, which is the point: somebody who
  * benches 315 should not be handed an empty bar for their first overhead press.
  *
+ * Two kinds of set are not readings (R678), and both inflated the answer, which
+ * is the worse direction because the result opens a lift they have never done:
+ *   - a movement that does not `calibrate`: one 120 lb hip abduction read as a
+ *     290 squat;
+ *   - a set at the empty implement's own weight. PT0's first-timer pressed the
+ *     bare 45 lb bar, which read as a 105 bench, and was then handed a 150 lb
+ *     first deadlift.
+ *
+ * And a set just above the bar reads as the smaller of two numbers (R678
+ * review). Dividing the whole weight by the factor made 50 lb of overhead press
+ * a 116 lb bench, and opened a 170 lb first deadlift for someone benching 50.
+ * Near the bar most of the weight IS the bar, so the second reading scales only
+ * the plates on it. For a lift weaker than the bench that one is smaller; for a
+ * stronger lift the whole-weight reading is. Taking the smaller never makes a
+ * first set heavier than either would.
+ *
+ * `history` is in `unit`, which the caller has already converted it to.
  * Returns 0 when they have trained nothing the app can measure against.
  */
-export function strengthIndex(history: LoggedSet[]): number {
+export function strengthIndex(history: LoggedSet[], unit: Unit): number {
   let best = 0;
   for (const set of history) {
-    const move = BUILTIN.find(e => e.id === set.exerciseId);
-    if (!move || move.factor <= 0) continue;
-    const asBench = set.weight / move.factor;
+    const move = BY_ID.get(set.exerciseId);
+    if (!move?.calibrates) continue;
+    const bar = EQUIPMENT_BASE[move.kit][unit];
+    if (set.weight <= bar) continue;
+    const asBench = Math.min(set.weight / move.factor, bar + (set.weight - bar) / move.factor);
     if (asBench > best) best = asBench;
   }
   return best;
@@ -199,7 +282,7 @@ export function startingWeight(
   const kit: Equipment = move?.kit ?? 'barbell';
   const floor = EQUIPMENT_BASE[kit][unit];
 
-  const index = strengthIndex(history);
+  const index = strengthIndex(history, unit);
   if (!move || index <= 0) return floor;
 
   const step = ROUND_TO[unit];
@@ -270,7 +353,7 @@ export function pickerFor(
   library: Exercise[] = []
 ): Exercise[] {
   // BUILTIN, not STARTING_TWELVE: anything the app ships is library, and
-  // treating the sixteen newer movements as user-invented put them in the
+  // treating the newer movements as user-invented put them in the
   // YOURS group and at the front of a first-run sheet promised to be short.
   const builtin = new Set(BUILTIN.map(e => e.id));
   const names = new Map<string, string>([
@@ -279,9 +362,17 @@ export function pickerFor(
   ]);
   /** Movements the user added themselves. These are never dropped. */
   const mine = library.filter(e => !builtin.has(e.id)).map(({ id, name }) => ({ id, name }));
+  /*
+   * The built-ins this lifter has, when the caller says. `Repo.exercises()` leaves
+   * out one their own same-named movement stands in for (R678, D3), and the
+   * picker must not offer it back: the second "Front Squat" would split their
+   * history in two the first time they logged on it.
+   */
+  const live = library.length ? new Set(library.map(e => e.id)) : null;
+  const offered = (e: { id: string }) => !live || live.has(e.id);
 
   if (sessionCount(history) < MIN_SESSIONS_FOR_PREDICTION) {
-    return [...mine, ...STARTING_TWELVE.map(({ id, name }) => ({ id, name }))];
+    return [...mine, ...STARTING_TWELVE.filter(offered).map(({ id, name }) => ({ id, name }))];
   }
 
   const ranked = rankExercises(history, now, weekday)
@@ -306,7 +397,7 @@ export function pickerFor(
    * even on screen until you ask for another day.
    */
   const untrained = BUILTIN
-    .filter(e => !listed.has(e.id) && !mine.some(m => m.id === e.id))
+    .filter(e => offered(e) && !listed.has(e.id) && !mine.some(m => m.id === e.id))
     .map(({ id, name }) => ({ id, name }));
 
   return [...ranked, ...mine.filter(e => !listed.has(e.id)), ...untrained];

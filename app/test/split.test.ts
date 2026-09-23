@@ -25,7 +25,7 @@ describe('splits — what goes with what (§6, §7)', () => {
   });
 
   test('a movement the user invented has no day, rather than a guessed one', () => {
-    assert.equal(dayOf('hack_squat'), null);
+    assert.equal(dayOf('sissy_squat'), null);
   });
 
   test('the assignments are the conventional ones', () => {
@@ -41,7 +41,7 @@ describe('splits — what goes with what (§6, §7)', () => {
 describe('which day the workout is', () => {
   test('unknowable until something recognisable is logged', () => {
     assert.equal(sessionDay([]), null);
-    assert.equal(sessionDay(['hack_squat']), null, 'a custom lift must not name the day');
+    assert.equal(sessionDay(['sissy_squat']), null, 'a custom lift must not name the day');
   });
 
   test('one lift is enough', () => {
@@ -76,7 +76,7 @@ describe('which day the workout is', () => {
   });
 
   test('custom lifts are ignored rather than breaking the count', () => {
-    assert.equal(sessionDay(['bench', 'hack_squat', 'ohp']), 'push');
+    assert.equal(sessionDay(['bench', 'sissy_squat', 'ohp']), 'push');
   });
 });
 
@@ -107,11 +107,11 @@ describe('the grouped picker', () => {
   });
 
   test('movements the user made get their own group, at the end', () => {
-    const groups = groupBySplit([...LIB, { id: 'hack_squat', name: 'Hack Squat' }], 'push');
+    const groups = groupBySplit([...LIB, { id: 'sissy_squat', name: 'Sissy Squat' }], 'push');
     const last = groups[groups.length - 1];
     assert.equal(last.day, null);
     assert.equal(last.label, 'YOURS');
-    assert.deepEqual(last.exercises.map(e => e.id), ['hack_squat']);
+    assert.deepEqual(last.exercises.map(e => e.id), ['sissy_squat']);
   });
 
   test('an empty day is not given a heading', () => {
@@ -145,16 +145,17 @@ describe('what to train next when there is no history at all', () => {
 
 // The group you are IN has to lead, and a movement the user invented has no
 // day — so it lands in YOURS, at the bottom. Opening the picker while training
-// "Hack Squat" put the selected row at y 1098 on an 812px screen: below the
+// "Hack Squat" (a custom movement then, built in since R678) put the selected
+// row at y 1098 on an 812px screen: below the
 // fold, with nothing visible marked as current.
 describe('leading with YOURS', () => {
-  const MINE = { id: 'hack_squat', name: 'Hack Squat' };
+  const MINE = { id: 'sissy_squat', name: 'Sissy Squat' };
   const WITH_MINE = [...LIB, MINE];
 
   test('the custom group comes first when that is where you are', () => {
     const groups = groupBySplit(WITH_MINE, 'yours');
     assert.equal(groups[0].label, 'YOURS');
-    assert.deepEqual(groups[0].exercises.map(e => e.id), ['hack_squat']);
+    assert.deepEqual(groups[0].exercises.map(e => e.id), ['sissy_squat']);
   });
 
   test('and last when you are on a movement with a day', () => {

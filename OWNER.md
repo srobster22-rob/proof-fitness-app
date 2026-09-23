@@ -242,3 +242,11 @@ a little sloppy and AI-generated.
   - MARKET.md therefore names the coach as the differentiator: free, local, plain-sentence
     advice that only names weights your plates can make.
   - Say so here if the recap/clip should stay the wedge instead.
+- **R678 · On an UPPER / LOWER plan, which day do the deadlifts go on?** Gap value 4 (row 5,
+  coaching).
+  - **A (recommended): LOWER.** That is how upper/lower programs are written. A new lifter's
+    suggestion after bench becomes Barbell Row.
+  - **B: UPPER, as today.** They file with pull, and a new lifter's first suggestion after
+    bench is Deadlift. Before R678 it was Barbell Row, only because the list was alphabetical.
+  - Background: HANDOFF.md (R673) describes the per-plan override that A needs.
+    DECISIONS.md D4 records the current call for Sumo and Trap Bar Deadlift.

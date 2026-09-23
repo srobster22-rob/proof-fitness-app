@@ -4293,3 +4293,17 @@ Market: 52/100; best comparable Hevy 86. Top gaps are the content library (12), 
 Content: exercise library now 32 of 150 (21%), the axis furthest below target.
 Decisions: none
 Next: R678. k=3 would be PLAYTEST, but only 0 building rounds have run since setup, so it swaps to EXPAND on the top unfrozen gap, the content library (exercises).
+
+## R678 · EXPAND · the exercise library grows 32 → 60, in every lifter's database
+Pick: the content library — gap value 12 (MARKET row 3, joint top) · impact planned 2/2/0. The derived PLAYTEST (0 building rounds since setup) became this EXPAND; v3.3 postpones that playtest rather than skipping it.
+Player notices: 28 more movements, each on its day with a starting weight and muscles. A new lifter's NEXT chip is the coach's pick with its reason, not the alphabet's. First lifts open lighter (PT0's 150 lb first deadlift is now 75; a 50 lb press no longer opens a 170). Reach is partial: session one shows 7 of the 28 on the rail, and the picker offers them from session three (S3, library search, is ranked).
+Impact: planned 2/2/0 → shipped 2/2/+1 (biggest file now-model.ts 2228→2205)
+Built: WIDER_LIBRARY (28), with DAY_OF and MUSCLES entries. seedBuiltins writes only missing rows, all or nothing, on every open, and a full disk no longer locks out an existing lifter. A lifter's own same-named movement hides the built-in in the library, both pickers, the goal sheet and the opening lift. rail-order.ts ranks history → core → wider, in library order. strengthIndex reads 11 barbell compounds, skips the empty bar, and takes the smaller of the whole-weight and plates readings. VISION.md gains headline metrics H1–H5, printed by pt1-first-timer.mjs.
+Quality: Two REJECT cycles, both fixed. v1 had 16 findings, including a 290 lb first squat. v3 found the hidden built-in back in the picker and goal sheet, plus 4 should-fixes. v2's reviewer found the full-disk lockout, then hung on a forbidden rm -rf. v4's re-review died with the session, but its finished mutation run caught 17 of 19 mutants (survivors: an equivalent early return and the Arnold/Skull order). No third cycle (§4). buildRail went 129→99 lines.
+Verified: suite 2260/2260, dist current; 32 plants each fail a named test and restore sha256-identical. Seeding's BEGIN/COMMIT/ROLLBACK run on the JS thread, passed unchanged through node:sqlite, sql.js and expo-sqlite execSync. Screenshots: shots/R678/.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 2→2 · H5 3.00→1.50 (PT0 values derived from its report)
+Market: row 3 1→2 (CONTENT.md: 60 exercises); 52→54 on the R677 matrix, summed by hand (R679 moves the sums into tools/market.ts)
+Content: exercises 32→60
+Coach: C1 taken; the weak test now pins both tiers' order; D2 re-checked, so DB lifts stay uncalibrated. Deferred: the upper-day NEXT (an owner question) and the single-registry refactor (§5).
+Decisions: D1 rail tiers, D2 calibration, D3 own name wins, D4 trap bar on pull
+Next: R679 FIX. Two PT0 defects: DONE traps the tab bar under the next day sheet, and OHP sits off-screen. Plus COACH.md C2–C11.

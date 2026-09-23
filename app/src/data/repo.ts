@@ -96,25 +96,95 @@ export class Repo {
       this.db.prepare('INSERT INTO meta (key, value) VALUES (?, ?) ' +
         'ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .run('schema_version', String(SCHEMA_VERSION));
+    }
+    /*
+     * On every open, not only on a schema upgrade (R678). The library grows
+     * without the schema changing, and a database already at the current
+     * version never ran this again, so a lifter who updated the app would never
+     * see a movement added after their first launch. Only a fresh install
+     * would.
+     *
+     * New movements must not cost a lifter the app. Before R678 an ordinary
+     * launch wrote nothing, so a phone with a full disk still opened, showed
+     * the history and could export it. When the rows cannot be written, the
+     * app opens with the library it has and adds them on a later launch. A
+     * first launch has no library to fall back on, so it still fails, with
+     * the real error.
+     */
+    const fresh = !this.db.prepare('SELECT 1 FROM exercises WHERE builtin = 1 LIMIT 1').get();
+    try {
       this.seedBuiltins();
+    } catch (err) {
+      if (fresh) throw err;
+      console.warn(`[proof/db] new movements not added yet: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
-  /** §6 — the starting twelve exist before the user has done anything. */
+  /**
+   * Every built-in movement exists as a row, from the first launch on and after
+   * every update that adds one (R678).
+   *
+   * Only missing rows are written, so an ordinary launch writes nothing. A row
+   * that exists is left alone, deleted or not. The app never deletes a
+   * built-in (`removeExercise` refuses them), and the new movements'
+   * hyphenated ids cannot be a custom exercise's slug. One transaction, so a
+   * first launch or an update writes once instead of once per movement.
+   */
   private seedBuiltins(): void {
+    const have = new Set((this.db.prepare('SELECT id FROM exercises').all() as Row[]).map(r => String(r.id)));
+    const missing = BUILTIN.filter(e => !have.has(e.id));
+    if (!missing.length) return;
     const stmt = this.db.prepare(
-      'INSERT INTO exercises (id, name, builtin, updated_at) VALUES (?, ?, 1, ?) ' +
-      'ON CONFLICT(id) DO NOTHING'
+      'INSERT INTO exercises (id, name, builtin, updated_at) VALUES (?, ?, 1, ?)'
     );
     const t = this.now();
-    for (const e of BUILTIN) stmt.run(e.id, e.name, t);
+    this.db.exec('BEGIN');
+    try {
+      for (const e of missing) stmt.run(e.id, e.name, t);
+      this.db.exec('COMMIT');
+    } catch (err) {
+      // Some failures roll SQLite back by themselves (a full disk usually does),
+      // and a second ROLLBACK would then throw "no transaction is active" in
+      // place of the error that says what went wrong. Others leave the
+      // transaction open, and this is what closes it, so the lifter's next set
+      // is not written into a transaction nobody commits.
+      try { this.db.exec('ROLLBACK'); } catch { /* already rolled back */ }
+      throw err;
+    }
   }
 
   // ---- exercises ----------------------------------------------------------
 
+  /**
+   * The lifter's library: every live movement, less any built-in they have
+   * already made their own (R678).
+   *
+   * Someone who invented "Front Squat" before the library had one keeps THEIR
+   * entry, which carries their history, instead of seeing a second one beside
+   * it. That holds however the two met: an update, a backup restored onto a new
+   * phone, or erase and restore. So the rule is applied here, where the library
+   * is read, not when rows are written. A built-in stays listed once it has
+   * sets of its own, and nothing is deleted, so removing their own entry brings
+   * the built-in back.
+   */
   exercises(): Map<string, Exercise> {
-    const rows = this.db.prepare('SELECT id, name FROM exercises WHERE deleted = 0').all() as Row[];
-    return new Map(rows.map(r => [r.id as string, { id: r.id, name: r.name } as Exercise]));
+    const rows = this.db.prepare('SELECT id, name, builtin FROM exercises WHERE deleted = 0').all() as Row[];
+    const own = new Set(rows.filter(r => !r.builtin).map(r => String(r.name).toLowerCase()));
+    const shadowed = own.size
+      ? rows.filter(r => r.builtin && own.has(String(r.name).toLowerCase())).map(r => String(r.id))
+      : [];
+    const used = shadowed.length ? this.idsWithSets(shadowed) : new Set<string>();
+    const hidden = new Set(shadowed.filter(id => !used.has(id)));
+    return new Map(rows.filter(r => !hidden.has(String(r.id)))
+      .map(r => [r.id as string, { id: r.id, name: r.name } as Exercise]));
+  }
+
+  /** Which of these movements have at least one live set. */
+  private idsWithSets(ids: string[]): Set<string> {
+    const rows = this.db.prepare(
+      `SELECT DISTINCT exercise_id FROM sets WHERE deleted = 0 AND exercise_id IN (${ids.map(() => '?').join(', ')})`
+    ).all(...ids) as Row[];
+    return new Set(rows.map(r => String(r.exercise_id)));
   }
 
   /**
@@ -465,7 +535,7 @@ export class Repo {
    * "deleted" and calling that erased would be a lie told for a sync feature
    * that does not exist yet.
    *
-   * The twelve built-in movements are re-seeded rather than dropped: they are
+   * The built-in movements are re-seeded rather than dropped: they are
    * library, not user data, and without them the next launch has nothing to
    * offer. What goes is every set, session, goal, and any movement the user
    * invented.
@@ -532,7 +602,7 @@ export class Repo {
   }
 
   /**
-   * Exercises the user named themselves — not the starting twelve `seedBuiltins`
+   * Exercises the user named themselves — not the built-in library `seedBuiltins`
    * installs before they have done anything, which `eraseAll` puts straight back.
    * A custom exercise does not come back: it is the user's own naming work, the
    * same way their jump amounts and their language choice are theirs. See

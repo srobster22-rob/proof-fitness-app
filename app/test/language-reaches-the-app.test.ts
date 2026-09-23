@@ -420,8 +420,17 @@ describe('the exercise recommender speaks the chosen language', () => {
   });
 
   test('the one caller outside the domain layer passes the current language', () => {
-    const now = code(read('src/ui/now-model.ts'));
-    assert.match(now, /recommendNext\(candidates, sessionSets, this\.lang\(\)\)/);
+    // By behaviour rather than by matching now-model.ts (R678 review): a Spanish
+    // lifter's NEXT chip after bench gives its reason in Spanish.
+    const at = Date.UTC(2026, 8, 22, 12);
+    const repo = new Repo(new DatabaseSync(':memory:') as never, () => at);
+    repo.setPref(PREF_LANG, 'es');
+    const m = new NowModel(repo, () => at, 'es-ES');
+    m.setPlan('ppl');
+    m.setDay('push');
+    m.log();
+    const next = m.state().dayRail.find(l => l.suggested);
+    assert.equal(next?.reason, t('es', 'reasonFinishesCompound'));
   });
 });
 

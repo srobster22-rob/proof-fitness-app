@@ -363,11 +363,11 @@ describe('the goal sheet offers your lifts before the library', () => {
 
   test('a movement they invented counts as theirs once trained', () => {
     const repo = new Repo(new DatabaseSync(':memory:') as any, () => T0);
-    repo.addExercise('hack_squat', 'Hack Squat');
+    repo.addExercise('sissy_squat', 'Sissy Squat');
     repo.startSession('s1', 'lb');
-    repo.logSet({ id: 'a', sessionId: 's1', exerciseId: 'hack_squat', weight: 200, reps: 8, at: T0 });
+    repo.logSet({ id: 'a', sessionId: 's1', exerciseId: 'sissy_squat', weight: 200, reps: 8, at: T0 });
     const { trained } = goalLifts(repo, T0 + 1000);
-    assert.deepEqual(trained.map(e => e.name), ['Hack Squat']);
+    assert.deepEqual(trained.map(e => e.name), ['Sissy Squat']);
   });
 });
 

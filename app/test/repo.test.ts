@@ -94,8 +94,8 @@ describe('persistence', () => {
 
   test('custom exercises coexist with the built-ins', () => {
     const repo = fresh();
-    repo.addExercise('gm', 'Good Morning');
-    assert.equal(repo.exercises().get('gm')!.name, 'Good Morning');
+    repo.addExercise('gk', 'Glute Kickback');
+    assert.equal(repo.exercises().get('gk')!.name, 'Glute Kickback');
     assert.equal(repo.exercises().size, BUILTIN.length + 1);
   });
 
@@ -107,9 +107,9 @@ describe('persistence', () => {
    */
   test('a fresh custom exercise, never logged against, can be removed', () => {
     const repo = fresh();
-    repo.addExercise('gm', 'Good Morning');
-    assert.equal(repo.removeExercise('gm'), true);
-    assert.equal(repo.exercises().has('gm'), false);
+    repo.addExercise('gk', 'Glute Kickback');
+    assert.equal(repo.removeExercise('gk'), true);
+    assert.equal(repo.exercises().has('gk'), false);
   });
 
   test('a built-in cannot be removed', () => {
@@ -120,16 +120,16 @@ describe('persistence', () => {
 
   test('a custom exercise with a set logged against it is refused, even if that set was undone', () => {
     const repo = fresh();
-    repo.addExercise('gm', 'Good Morning');
+    repo.addExercise('gk', 'Glute Kickback');
     repo.startSession('s1', 'lb');
-    const s = setIn('s1', 'gm', 95, 5, T0);
+    const s = setIn('s1', 'gk', 95, 5, T0);
     repo.logSet(s);
-    assert.equal(repo.removeExercise('gm'), false, 'a real set exists — refuse');
+    assert.equal(repo.removeExercise('gk'), false, 'a real set exists — refuse');
 
     repo.deleteSet(s.id);
-    assert.equal(repo.removeExercise('gm'), false,
+    assert.equal(repo.removeExercise('gk'), false,
       'undone, not erased — the row still points at this exercise, so it must still refuse');
-    assert.equal(repo.exercises().has('gm'), true);
+    assert.equal(repo.exercises().has('gk'), true);
   });
 
   test('an unknown id is refused, not thrown on', () => {
@@ -252,11 +252,11 @@ describe('erasing everything (§11)', () => {
   // Library, not user data — without them the next launch has nothing to offer.
   test('the built-in movements come back, so the app still works', () => {
     const repo = fresh();
-    repo.addExercise('hack_squat', 'Hack Squat');
+    repo.addExercise('sissy_squat', 'Sissy Squat');
     repo.eraseAll();
     const left = repo.exercises();
     assert.ok(left.size >= 12, 'the starting twelve are re-seeded');
-    assert.equal(left.has('hack_squat'), false, 'but a movement the user invented is user data');
+    assert.equal(left.has('sissy_squat'), false, 'but a movement the user invented is user data');
     assert.ok(left.has('bench'), 'and a real one is there to log against');
   });
 

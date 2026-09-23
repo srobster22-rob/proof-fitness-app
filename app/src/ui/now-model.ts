@@ -1,6 +1,7 @@
 import type { LoggedSet, Session, Exercise, Unit, Equipment } from '../domain/types.ts';
 import { Repo } from '../data/repo.ts';
 import { prefillFor, pickerFor, unitForNewSession, EQUIPMENT_BASE, type Prefill } from '../domain/coldstart.ts';
+import { railPool, railOrder } from './rail-order.ts';
 import { nextCandidates, openingLift } from '../domain/predict.ts';
 import { autoEnd, isStale, lastSetAt, sessionStats } from '../domain/session.ts';
 import { findPRs } from '../domain/pr.ts';
@@ -358,7 +359,12 @@ export function layoutFor(width: number, height: number, heroChars = 3): NowLayo
  * day and cut Tricep Extension and Tricep Pushdown — two of the three the user
  * named when they asked for this. The number that needs capping is a FULL BODY
  * plan, which covers push, pull and legs at once and offers all 28. Twelve
- * clears every single day whole and still refuses to be a library.
+ * cleared every single day whole and still refused to be a library.
+ *
+ * Since R678 a day runs to about twenty movements, so the cap now keeps the
+ * twelve the ranking puts first. Every lift the user has trained ranks ahead
+ * of every one they have not (see `railOrder`), and the rest are one tap away
+ * in the picker.
  */
 export const RAIL_MAX = 12;
 
@@ -1018,7 +1024,7 @@ export class NowModel {
 
     const history = this.repo.allSets();
     return openingLift(history, this.now(), new Date(this.now()).getDay())
-      ?? pickerFor(history, this.now())[0].id;
+      ?? pickerFor(history, this.now(), undefined, 12, [...this.repo.exercises().values()])[0].id;
   }
 
   /**
@@ -1733,16 +1739,17 @@ export class NowModel {
   /**
    * The day's lifts, ordered so the useful ones are reachable without scrolling.
    *
-   * Order is: the lift you are on, then the predictor's ranking, then everything
-   * else that belongs to the day. Lifts already trained this session stay on the
-   * rail rather than dropping off it — you often come back for a second round,
-   * and a chip that vanishes the moment you use it makes the rail feel like it
-   * is losing your work.
+   * `railOrder` decides the order (R678): lifts with history, then the day's core
+   * library, then the wider library, each tier moved by the coach's muscle
+   * advice, and lifts already trained this session last. Those stay on the rail
+   * rather than dropping off it — you often come back for a second round, and a
+   * chip that vanishes the moment you use it makes the rail feel like it is
+   * losing your work.
    *
    * `planDay` not `day`, so an upper/lower lifter gets the whole upper body and
    * not just the push half. When there is no day at all — no plan, nothing
-   * inferred — the rail is empty rather than a list of everything, because "all
-   * 28 movements" is the picker's job and §7 is explicit that the logging path
+   * inferred — the rail is empty rather than a list of everything, because the whole
+   * library is the picker's job and §7 is explicit that the logging path
    * never shows a library.
    */
   private buildRail(
@@ -1768,66 +1775,36 @@ export class NowModel {
     /*
      * Only about three chips fit across a phone before the row has to scroll,
      * so the first three have to be the three worth having. Measured with the
-     * first ordering — current lift first, then the predictor's ranking — the
+     * first ordering (current lift first, then the predictor's ranking), the
      * visible three were the lift already on screen and two alphabetical
      * accidents, while the app's own recommendation sat off the right edge
      * where nobody would find it.
      *
      * So the order is what you would actually reach for: the suggestion, then
      * the rest of the day by how likely you are to want it, then the ones you
-     * have already trained, then the one you are standing on. The last two
-     * groups stay on the rail — you often come back for a second round — they
-     * just do not spend the space that gets seen without scrolling.
-     */
-    /*
-     * Order is deliberately blind to which lift is selected.
+     * have already trained today. Those stay on the rail, because you often come
+     * back for a second round, but they do not spend the space seen first.
      *
-     * The first version scored the current lift last, to stop it spending the
-     * one slot that is visible without scrolling. That worked, and it also made
-     * the rail rearrange itself every time you touched it: tapping a chip made
-     * that chip current, which threw it to the back, which slid every other chip
-     * left under your finger. A row that moves when you use it is worse than a
-     * row in the wrong order.
-     *
-     * Both properties are available at once, because the rail only exists once a
-     * set is logged (`canFinish`) and at that moment the lift you are on is by
-     * definition DONE — so it sorts to the back anyway, without `current` ever
-     * entering the comparison. `done` and `candidates` change only when you LOG,
-     * never when you tap, so the order is stable exactly as long as it should be.
-     */
-    /*
      * The predictor says what this user usually does next; `recommendNext` says
-     * what makes sense to do next given what they have ALREADY done today. Both
-     * are needed and they answer different questions — habit will happily hand
-     * you a second heavy horizontal press straight after the first, because
-     * that is what you did last week too.
+     * what makes sense given what they have ALREADY done today. Both are needed:
+     * habit will happily hand you a second heavy horizontal press straight after
+     * the first. The pool's order is the base and the advice shifts it (see
+     * `railPool` and `railOrder`). A movement with no muscle profile scores 0,
+     * which is right for something the user invented.
      *
-     * They are blended rather than one overriding the other: the predictor's
-     * position is the base, and the recommendation shifts it. A movement the
-     * app has no muscle profile for scores 0 and therefore does not move, which
-     * is the right behaviour for something the user invented — see `MUSCLES`.
+     * The order is blind to which lift is selected. Scoring the current lift
+     * last made the row rearrange under your finger on every tap. The rail only
+     * exists once a set is logged, and at that moment the lift you are on is
+     * DONE, so it sorts to the back anyway. `done` changes only when you LOG. A
+     * lift you merely tap does leave the predictor's list, so it can move within
+     * its tier, but a lift with history never falls behind one without (R678).
      */
+    const pool = railPool(onDay, candidates);
     const advice = new Map(
-      recommendNext(candidates, sessionSets, this.lang()).map(r => [r.exerciseId, r])
+      recommendNext(pool, sessionSets, this.lang()).map(r => [r.exerciseId, r])
     );
-    const rank = new Map<string, number>();
-    candidates.forEach((id, i) => {
-      /*
-       * 6 places per point. Measured at 3 and it was not enough: after a bench
-       * press the rail still opened on OVERHEAD PRESS — habit outvoting the
-       * recommendation by a nose, on the exact pairing the evidence argues
-       * against. Enough to move a good next choice past several habitual ones,
-       * not enough to bury a lift they always do.
-       */
-      rank.set(id, i - (advice.get(id)?.score ?? 0) * 6);
-    });
-    const UNRANKED = 500, DONE = 800;
-    const score = (e: Exercise) =>
-      done.has(e.id) ? DONE : rank.has(e.id) ? rank.get(e.id)! : UNRANKED;
-
-    const ordered = onDay.sort(
-      (a, b) => score(a) - score(b) || a.name.localeCompare(b.name)
-    );
+    const ordered = railOrder(onDay, pool, new Map([...advice].map(([id, r]) => [id, r.score])),
+      id => this.setsFor(id).length > 0, done);
 
     /*
      * §7: the logging path never shows a library. Without a cap it did — a FULL

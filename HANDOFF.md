@@ -384,8 +384,8 @@ Every migrated column is nullable: a set logged
 before the columns existed has no answer, and inventing one would be a made-up fact.
 
 CLEAR (this workout) and ERASE EVERYTHING (all of it) both ask first, through `ConfirmSheet`.
-The jump amounts are user-settable from Settings. The library is 32 movements (`BUILTIN` —
-12 in `STARTING_TWELVE`, 20 more), and
+The jump amounts are user-settable from Settings. The library is 60 movements (`BUILTIN` —
+12 in `STARTING_TWELVE`, 20 in `MORE_MOVEMENTS`, 28 in `WIDER_LIBRARY` since R678), and
 the picker opens on the day being trained with the other days one tap away.
 
 UP NEXT is gone from the footer (the picker already does it, more precisely), and the bottom

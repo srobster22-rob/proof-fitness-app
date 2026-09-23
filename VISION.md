@@ -44,7 +44,7 @@ column says where each one comes from. `(m)` marks a number from memory rather t
 
 | id | axis | what counts | target | comparables | why this target |
 |---|---|---|---|---|---|
-| exercises | Exercise library | built-in movements (`BUILTIN`) | 150 | Strong 200+, Hevy 300+, Fitbod 1,000+ | R677 raised it from 60. A lifter uses 15–25 movements (§7), but the library is what a first-timer judges, and 32 is a sixth of Strong's. Prediction keeps a big library off the logging path. |
+| exercises | Exercise library | built-in movements (`BUILTIN`) | 150 | Strong 200+, Hevy 400+, Fitbod 1,600+ | R677 raised it from 60. A lifter uses 15–25 movements (§7), but the library is what a first-timer judges, and 32 is a sixth of Strong's. Prediction keeps a big library off the logging path. |
 | programs | Programs | split plans the app builds days from (`SPLIT_PLANS`) | 6 | Hevy 26 programs, Boostcamp 11,000+ | owner-approved splits (R266–R269); common 4- and 5-day shapes are missing. A program *library* is a §9 non-goal, asked in OWNER.md (R677) |
 | coach | Coach situations | distinct coach lines (`coach*` keys) | 12 | Hevy Trainer: 1 rule (top of rep range); Fitbod: generates the session | the differentiator; each new situation is a new piece of advice |
 | insights | Insights | recap narrative claims, plus the weekly comparison line | 14 | Hevy shareables: PRs, volume, muscle split, streak, comparisons | §10: something worth saying on a rest day |
@@ -54,6 +54,24 @@ column says where each one comes from. `(m)` marks a number from memory rather t
 | trainingGoals | Coaching modes | training goals the coach tunes to | 4 | Fitbod: 6 goals | strength, size and consistency today |
 | languages | Languages | UI languages (`LANGUAGES`) | 3 | Hevy, Strong: many (m) | en and es today |
 | screens | Screens | top-level screens | 6 | Hevy, Strong: about 5 tabs (m) | §4 caps this at six; grow flows inside screens, not new screens |
+
+## Headline metrics
+
+The numbers that say whether PROOF is good for a lifter, logged before → after by every building
+round (AGENT_LOOP v3.2). They come from one persona's two weeks: a first-timer who trains PUSH,
+then PULL a week later, played for real at phone size by
+`app/tools/playtests/pt1-first-timer.mjs`, which prints them as `HEADLINE` lines. They were
+defined at R678, when v3.2 arrived. The PT0 column (build 1b8f259) is derived from PT0's own
+report in PLAYTESTS.md, because the script did not print these then. H4 is inferred from the two
+SKIP taps that report's script had to make.
+
+| id | metric | PT0 | better | why it matters |
+|---|---|---|---|---|
+| H1 | taps from a fresh install to the first logged set | 3 | lower (§4: ≤ 3) | zero-friction start |
+| H2 | taps per logged set across the first workout | 1.60 (16/10) | lower | logging speed, §3's first tiebreaker |
+| H3 | coach lines on the screens the persona stops to look at, over the two weeks | 0 | higher | the differentiator only exists once it is seen |
+| H4 | detour taps: taps spent getting something out of the way | 2 | lower | "never needs outside help" |
+| H5 | heaviest first-time starting weight ÷ best bench | 3.00 (150/50) | nearer the lift's real ratio | a first set the lifter can trust |
 
 ## Guardrails
 

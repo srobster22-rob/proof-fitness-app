@@ -188,7 +188,43 @@ const DAY_OF: Record<string, SplitDay> = {
   legcurl: 'legs',
   legext: 'legs',
   lunge: 'legs',
-  calf: 'legs'
+  calf: 'legs',
+
+  // R678's additions, filed the way the list above already files their kind.
+  'close-grip-bench': 'push',
+  'incline-db-press': 'push',
+  'machine-shoulder-press': 'push',
+  'arnold-press': 'push',
+  'skull-crusher': 'push',
+  'cable-fly': 'push',
+  'db-fly': 'push',
+  'front-raise': 'push',
+  'cable-lateral-raise': 'push',
+
+  't-bar-row': 'pull',
+  'machine-row': 'pull',
+  // Floor-pulled deadlifts are pull day with the conventional one above, sumo
+  // and trap bar alike. See the deadlift note on why they are not on leg day.
+  'sumo-deadlift': 'pull',
+  'trap-bar-deadlift': 'pull',
+  'rack-pull': 'pull',
+  'straight-arm-pulldown': 'pull',
+  'barbell-curl': 'pull',
+  'cable-curl': 'pull',
+  'preacher-curl': 'pull',
+
+  'front-squat': 'legs',
+  'hack-squat': 'legs',
+  'goblet-squat': 'legs',
+  'bulgarian-split-squat': 'legs',
+  'good-morning': 'legs',
+  'step-up': 'legs',
+  'kettlebell-swing': 'legs',
+  'seated-calf-raise': 'legs',
+  'hip-abduction': 'legs',
+  // Direct core work has no pushing or pulling day, and leg day is where most
+  // push/pull/legs programmes put it.
+  'cable-crunch': 'legs'
 };
 
 /** Which day a movement belongs to, or null for one the user invented. */

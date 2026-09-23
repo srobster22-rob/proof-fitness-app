@@ -71,7 +71,7 @@ describe('cold start (§6)', () => {
 
   test('any trained lift can calibrate the others, not just the bench', () => {
     const h = [mk('squat', 405, 5, NOW, 's1')];
-    assert.ok(strengthIndex(h) > 300, 'a 405 squat implies a serious bench');
+    assert.ok(strengthIndex(h, 'lb') > 300, 'a 405 squat implies a serious bench');
     assert.ok(startingWeight('bench', h, 'lb') > 250);
   });
 
@@ -200,16 +200,16 @@ describe('cold start, end to end (§6)', () => {
 // and the ranked branch only knows lifts with history — so adding a lift and
 // switching away lost it, and the only way back was to retype its exact name.
 describe('the picker never loses a movement the user made (§7)', () => {
-  const HACK = { id: 'hack_squat', name: 'Hack Squat' };
+  const HACK = { id: 'sissy_squat', name: 'Sissy Squat' };
   const LIBRARY = [...STARTING_TWELVE.map(({ id, name }) => ({ id, name })), HACK];
 
   test('a custom lift with no history is still offered', () => {
     const ids = pickerFor([], NOW, undefined, 12, LIBRARY).map(e => e.id);
-    assert.ok(ids.includes('hack_squat'), 'created it, then could never select it again');
+    assert.ok(ids.includes('sissy_squat'), 'created it, then could never select it again');
   });
 
   test('and it is offered FIRST — their own movement above the generic list', () => {
-    assert.equal(pickerFor([], NOW, undefined, 12, LIBRARY)[0].id, 'hack_squat');
+    assert.equal(pickerFor([], NOW, undefined, 12, LIBRARY)[0].id, 'sissy_squat');
   });
 
   test('it survives once there is enough history to rank', () => {
@@ -218,21 +218,21 @@ describe('the picker never loses a movement the user made (§7)', () => {
       mk('row', 155, 8, NOW - d * DAY, `s${d}`)
     ]);
     const ids = pickerFor(history, NOW, undefined, 12, LIBRARY).map(e => e.id);
-    assert.deepEqual(ids.slice(0, 3), ['squat', 'row', 'hack_squat'],
+    assert.deepEqual(ids.slice(0, 3), ['squat', 'row', 'sissy_squat'],
       'trained lifts ranked, then what they made but have not trained');
     assert.ok(ids.length > 3, 'then the rest of the library');
-    assert.equal(ids.indexOf('hack_squat') < ids.indexOf('bench'), true,
+    assert.equal(ids.indexOf('sissy_squat') < ids.indexOf('bench'), true,
       'their own movement still outranks one the app merely ships');
   });
 
   test('a trained custom lift shows its NAME, not its slug', () => {
-    const history = [0, 7, 14, 21].map(d => mk('hack_squat', 200, 8, NOW - d * DAY, `s${d}`));
-    const row = pickerFor(history, NOW, undefined, 12, LIBRARY).find(e => e.id === 'hack_squat');
-    assert.equal(row!.name, 'Hack Squat', 'the sheet read "hack_squat" at the user');
+    const history = [0, 7, 14, 21].map(d => mk('sissy_squat', 200, 8, NOW - d * DAY, `s${d}`));
+    const row = pickerFor(history, NOW, undefined, 12, LIBRARY).find(e => e.id === 'sissy_squat');
+    assert.equal(row!.name, 'Sissy Squat', 'the sheet read "sissy_squat" at the user');
   });
 
   test('it is never listed twice', () => {
-    const history = [0, 7, 14, 21].map(d => mk('hack_squat', 200, 8, NOW - d * DAY, `s${d}`));
+    const history = [0, 7, 14, 21].map(d => mk('sissy_squat', 200, 8, NOW - d * DAY, `s${d}`));
     const ids = pickerFor(history, NOW, undefined, 12, LIBRARY).map(e => e.id);
     assert.equal(new Set(ids).size, ids.length);
   });

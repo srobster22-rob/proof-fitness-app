@@ -22,7 +22,7 @@ function populate(repo: Repo) {
     repo.logSet({ id: `x${uid++}`, sessionId: sid, exerciseId: 'bench', weight: 150, reps: 8, at: at + 20 * MIN });
     repo.endSession(sid, at + 45 * MIN);
   }
-  repo.addExercise('hack_squat', 'Hack Squat');
+  repo.addExercise('sissy_squat', 'Sissy Squat');
   repo.saveGoal({
     id: 'g1', exerciseId: 'squat', targetWeight: 315, targetReps: 5,
     targetDate: T0 + 90 * DAY, unit: 'lb', createdAt: T0 - 30 * DAY
@@ -46,7 +46,7 @@ describe('export', () => {
 
   test('includes custom exercises, not just the built-ins', () => {
     const f = exportAll(populate(fresh()), T0);
-    assert.ok(f.exercises.some(e => e.id === 'hack_squat'));
+    assert.ok(f.exercises.some(e => e.id === 'sissy_squat'));
   });
 
   test('sessions come out in chronological order', () => {
@@ -108,7 +108,7 @@ describe('restore', () => {
     assert.deepEqual(r.skipped, []);
     assert.equal(target.allSets().length, source.allSets().length);
     assert.equal(target.goals().length, 1);
-    assert.equal(target.exercises().get('hack_squat')!.name, 'Hack Squat');
+    assert.equal(target.exercises().get('sissy_squat')!.name, 'Sissy Squat');
     assert.equal(target.lastSetOf('squat')!.weight, source.lastSetOf('squat')!.weight);
   });
 
@@ -158,13 +158,13 @@ describe('restore', () => {
     const source = populate(fresh());
     source.startSession('custom', 'lb');
     source.logSet({
-      id: 'hs1', sessionId: 'custom', exerciseId: 'hack_squat', weight: 300, reps: 8, at: T0
+      id: 'hs1', sessionId: 'custom', exerciseId: 'sissy_squat', weight: 300, reps: 8, at: T0
     });
     const f = parse(serialize(exportAll(source, T0))).file!;
-    f.exercises = f.exercises.filter(e => e.id !== 'hack_squat');
+    f.exercises = f.exercises.filter(e => e.id !== 'sissy_squat');
 
     const r = restore(fresh(), f);
-    assert.ok(r.skipped.some(x => /exercise hack_squat not in file/.test(x.reason)),
+    assert.ok(r.skipped.some(x => /exercise sissy_squat not in file/.test(x.reason)),
       `skipped: ${JSON.stringify(r.skipped)}`);
   });
 

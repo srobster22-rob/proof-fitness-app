@@ -297,10 +297,10 @@ describe('Now screen — adding a custom exercise (§7)', () => {
   test('creates it, registers it, and switches to it', () => {
     const repo = trained();
     const m = new NowModel(repo, () => T0);
-    const id = m.addCustomExercise('Hack Squat');
-    assert.equal(id, 'hack_squat');
-    assert.equal(repo.exercises().get('hack_squat')!.name, 'Hack Squat');
-    assert.equal(m.state().exercise.name, 'Hack Squat');
+    const id = m.addCustomExercise('Sissy Squat');
+    assert.equal(id, 'sissy_squat');
+    assert.equal(repo.exercises().get('sissy_squat')!.name, 'Sissy Squat');
+    assert.equal(m.state().exercise.name, 'Sissy Squat');
   });
 
   test('the new exercise can immediately be logged against', () => {
@@ -324,18 +324,18 @@ describe('Now screen — adding a custom exercise (§7)', () => {
   test('a lossy slug collision does not rename the original', () => {
     const repo = trained();
     const m = new NowModel(repo, () => T0);
-    m.addCustomExercise('Hack Squat');
-    const second = m.addCustomExercise('Hack-Squat');
-    assert.notEqual(second, 'hack_squat', 'must not reuse the taken slug');
-    assert.equal(repo.exercises().get('hack_squat')!.name, 'Hack Squat',
+    m.addCustomExercise('Sissy Squat');
+    const second = m.addCustomExercise('Sissy-Squat');
+    assert.notEqual(second, 'sissy_squat', 'must not reuse the taken slug');
+    assert.equal(repo.exercises().get('sissy_squat')!.name, 'Sissy Squat',
       'the original keeps its name — two movements must never merge history');
-    assert.equal(repo.exercises().get(second!)!.name, 'Hack-Squat');
+    assert.equal(repo.exercises().get(second!)!.name, 'Sissy-Squat');
   });
 
   test('removing it undoes the mistake, but never the lift currently open', () => {
     const repo = trained();
     const m = new NowModel(repo, () => T0);
-    const id = m.addCustomExercise('Hack Squat')!;
+    const id = m.addCustomExercise('Sissy Squat')!;
 
     // Still the open lift — refused, so the screen never has to decide what
     // to show in its place.
@@ -966,13 +966,13 @@ describe('Now screen — the split fills in what history cannot (§7)', () => {
   test('a movement they invented is offered, and does not name the day', () => {
     const repo = repoWith();
     const m = new NowModel(repo, () => T0);
-    m.addCustomExercise('Hack Squat');
+    m.addCustomExercise('Sissy Squat');
     m.log();
     const s = m.state();
     assert.equal(s.day, null, 'the app cannot know which day a lift it has never heard of is');
     const yours = s.pickerGroups.find(g => g.day === null);
     assert.ok(yours, 'it still has to be selectable');
-    assert.ok(yours!.exercises.some(e => e.name === 'Hack Squat'));
+    assert.ok(yours!.exercises.some(e => e.name === 'Sissy Squat'));
   });
 
   test('real history beats the convention', () => {
@@ -1032,23 +1032,23 @@ describe('Now screen — the picker opens on where you are', () => {
   test('training a movement you invented leads with YOURS', () => {
     const m = new NowModel(repoWith(), () => T0);
     m.log();                                       // a push set first, so the day is push
-    m.addCustomExercise('Hack Squat');
+    m.addCustomExercise('Sissy Squat');
     const groups = m.state().pickerGroups;
     assert.equal(groups[0].label, 'YOURS', 'the lift you are on was below the fold and unmarked');
-    assert.ok(groups[0].exercises.some(e => e.name === 'Hack Squat'));
+    assert.ok(groups[0].exercises.some(e => e.name === 'Sissy Squat'));
   });
 
   test('and the workout is still named by what was actually trained', () => {
     const m = new NowModel(repoWith(), () => T0);
     m.log();
-    m.addCustomExercise('Hack Squat');
+    m.addCustomExercise('Sissy Squat');
     assert.equal(m.state().day, 'push', 'a custom lift must not rename the day');
   });
 
   test('going back to a normal lift restores the day order', () => {
     const m = new NowModel(repoWith(), () => T0);
     m.log();
-    m.addCustomExercise('Hack Squat');
+    m.addCustomExercise('Sissy Squat');
     m.selectExercise('squat');
     assert.equal(m.state().pickerGroups[0].day, 'legs');
   });
@@ -1294,7 +1294,7 @@ describe('Now screen — the line under the lift name is never blank (§4)', () 
    */
   test('a lift the user invented gets a line too, before anything is logged', () => {
     const m = new NowModel(repoWith(), () => T0);
-    assert.ok(m.addCustomExercise('Hack Squat'), 'the custom lift must be created');
+    assert.ok(m.addCustomExercise('Sissy Squat'), 'the custom lift must be created');
     const s = m.state();
     assert.equal(s.prefillSource, 'fallback', 'no seed exists for an invented movement');
     assert.equal(s.lastTime.head + s.lastTime.tail, `First time — ${s.weight} is a starting point`);
@@ -1848,7 +1848,7 @@ describe('Now screen — the picker opens on the day you are training (§7)', ()
    * one — and burying it would punish exactly the effort of adding it.
    */
   test('movements the user invented are never hidden', () => {
-    const withMine = [...PPL, ...groups([null, 'YOURS', ['hack_squat']])];
+    const withMine = [...PPL, ...groups([null, 'YOURS', ['sissy_squat']])];
     const { thisDay, others } = splitPickerGroups(withMine, 'push');
     assert.deepEqual(thisDay.map(g => g.label), ['PUSH', 'YOURS']);
     assert.equal(others.some(g => g.label === 'YOURS'), false);
@@ -1862,7 +1862,7 @@ describe('Now screen — the picker opens on the day you are training (§7)', ()
   });
 
   test('a user with only custom movements still sees them', () => {
-    const onlyMine = groups([null, 'YOURS', ['hack_squat', 'sled']]);
+    const onlyMine = groups([null, 'YOURS', ['sissy_squat', 'sled']]);
     const { thisDay, others } = splitPickerGroups(onlyMine, null);
     assert.deepEqual(thisDay.map(g => g.label), ['YOURS']);
     assert.deepEqual(others, []);

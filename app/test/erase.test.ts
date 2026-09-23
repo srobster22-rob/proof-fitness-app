@@ -61,7 +61,7 @@ describe('the erase warning names everything erase deletes', () => {
     // R446: live-verified live in the running app, the same way the R290-class
     // fix at the top of this file was — a custom exercise and a changed
     // setting, both erased for real, neither ever named in the sentence.
-    repo.addExercise('custom-lunge', 'Bulgarian Split Squat');
+    repo.addExercise('custom-lunge', 'Walking Lunge');
     repo.setPref('jump.lb', '77');
 
     const before = {
@@ -102,7 +102,7 @@ describe('the erase warning names everything erase deletes', () => {
   test('a custom exercise is counted, because it does not come back', () => {
     const repo = fresh();
     trained(repo);
-    repo.addExercise('custom-lunge', 'Bulgarian Split Squat');
+    repo.addExercise('custom-lunge', 'Walking Lunge');
     assert.match(erasureLine(repo), /1 custom exercise\b/);
   });
 

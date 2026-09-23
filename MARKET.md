@@ -19,8 +19,8 @@ instructions.
 ### Hevy
 - **Numbers:**
   - 4.9★ from about 94k US App Store reviews and about 268k Google Play reviews (21 Sep 2026);
-  - over 1M users;
-  - 300+ exercises with animations;
+  - 16M+ athletes ([hevyapp.com](https://www.hevyapp.com/), Sep 2026);
+  - 400+ exercises with animations ([Hevy help centre](https://help.hevyapp.com/hc/en-us/articles/35688251991575-Hevy-Exercise-Library-400-Exercises-and-Custom-Exercises));
   - 26 complete programs plus a routine library;
   - Hevy Trainer, launched 18 Feb 2026, generates programs and auto-progresses the weight. It
     raises the weight only after the top of the rep range is hit on every set, and it is Pro-only.
@@ -52,7 +52,7 @@ instructions.
 - Sources: [RepReturn](https://repreturn.com/strong-app-review/), [SensAI Hevy vs Strong](https://www.sensai.fit/blog/hevy-vs-strong-2026), [Strong templates](https://help.strongapp.io/article/105-about-templates), [findyouredge](https://www.findyouredge.app/news/best-strength-training-apps-apple-watch-2026).
 
 ### Fitbod
-- **Numbers:** 1,000+ exercises, each with a video; 4.8★ on the App Store; six training goals.
+- **Numbers:** 1,600+ exercises, each with a video ([Fitbod](https://fitbod.me/about-fitbod-exercises/)); 4.8★ on the App Store; six training goals.
 - **First 10 minutes:** a short quiz (goal, experience, equipment in real detail) leads to a
   suggested first workout. The paywall arrives after 3 workouts.
 - **Retention:** a new workout every day, a muscle-recovery model, and progressive overload.
@@ -94,7 +94,7 @@ for the comparables come from the research above, or are marked (m) when they co
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | Onboarding | 2 | **4** | PT0: first set after 3 taps, app open in 1.3 s, no account. The docked point is that after the first lift the user must choose from 12 chips with no plan. | 3 (account) | 4 | 4 (quiz → workout) | 4 | 4 (plan first) |
 | 2 | Speed of the core action | 3 | **4** | PT0: a repeat set is 1 tap, every field pre-filled, the rest timer auto-starts. There is no Live Activity (§8b is unbuilt). | 5 (Live Activity) | 4 | 4 | 4 | 5 |
-| 3 | Content library (exercises and programs) | 3 | **1** | CONTENT.md: 32 exercises and 3 split plans, no programs. | 4 (300+, 26 programs) | 3 (200+) | 5 (1,000+) | 5 (11,000+ programs) | 2 (m) |
+| 3 | Content library (exercises and programs) | 3 | **2** | CONTENT.md: 60 exercises since R678 (was 32), each with a day, muscles and a starting weight; 3 split plans; still no programs. Strong 200+, Hevy 400+. | 4 (400+, 26 programs) | 3 (200+) | 5 (1,600+) | 5 (11,000+ programs) | 2 (m) |
 | 4 | Insight and progress visualisation | 3 | **2** | CONTENT.md: 9 insights. PT0 `18-week2-progress.png`: two weeks in, each row is one dot and "—". No per-lift chart, no calendar, no muscle view. | 5 | 4 | 4 | 3 | 4 |
 | 5 | Coaching intelligence | 2 | **3** | CONTENT.md: 7 coach situations, 3 coaching modes, plate-aware. R671 sweep: 448 suggestions, all dialable. PT0: no coach line in 2 weeks, because the first comes on day 8 at the earliest. | 4 (Trainer, Pro-only) | 1 | 5 | 3 (programmed) | 2 (m) |
 | 6 | Retention hooks | 2 | **3** | PT0 `17-week2-recap.png`: STREAK 2 WK; weekly line and goals (CONTENT.md: weeklyLine, 2 goal kinds). No reminder and no calendar. | 5 | 3 | 3 | 3 | 2 (m) |
@@ -110,8 +110,8 @@ Formula: 100 × Σ(weight × score) ÷ Σ(weight × 5). The weights sum to 25, s
 
 | | PROOF | Hevy | Fitbod | Boostcamp | Strong | Knurl |
 |---|---|---|---|---|---|---|
-| weighted sum | 65 | 108 | 102 | 93 | 91 | 88 |
-| **market score** | **52** | **86** | 82 | 74 | 73 | 70 |
+| weighted sum | 68 | 108 | 102 | 93 | 91 | 88 |
+| **market score** | **54** | **86** | 82 | 74 | 73 | 70 |
 
 Best comparable: **Hevy, 86**.
 
@@ -119,9 +119,9 @@ Best comparable: **Hevy, 86**.
 
 | rank | row | gap | frozen? |
 |---|---|---|---|
-| 1= | 3 Content library | 3 × (5 − 1) = **12** | exercises: no. A *program library* is a §9 non-goal, so it is asked in OWNER.md. |
-| 1= | 11 Platform readiness | 3 × (5 − 1) = **12** | Mostly owner-only: the developer accounts cost money, and the bundle id and domain are the owner's choice. Store copy, screenshots and a privacy page are ours. |
-| 3 | 4 Insight and progress | 3 × (5 − 2) = **9** | no |
+| 1 | 11 Platform readiness | 3 × (5 − 1) = **12** | Mostly owner-only: the developer accounts cost money, and the bundle id and domain are the owner's choice. Store copy, screenshots and a privacy page are ours. |
+| 2= | 4 Insight and progress | 3 × (5 − 2) = **9** | no |
+| 2= | 3 Content library | 3 × (5 − 2) = **9** (12 before R678) | exercises: no. A *program library* is a §9 non-goal, so it is asked in OWNER.md. |
 | 4 | 7 Design polish | 2 × (5 − 2) = 6 | The look at phone size is the owner's open question, so only non-look polish is ours. |
 | 5= | 5 Coaching | 2 × (5 − 3) = 4 | no — this is the differentiator's row |
 | 5= | 6 Retention | 2 × (5 − 3) = 4 | notifications: one a week at most (§10) |
@@ -172,3 +172,4 @@ goal. It only ever names a weight your own plates and buttons can make.
 | round | PROOF | best comparable | note |
 |---|---|---|---|
 | R677 | 52 | Hevy 86 | first scoring, by the loop alone; RETRO adds a blind re-score |
+| R678 | 54 | Hevy 86 | content library 1 → 2: the library grew from 32 to 60 movements |
