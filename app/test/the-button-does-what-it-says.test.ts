@@ -85,7 +85,8 @@ describe('the plate button moves what its label promises (R563)', () => {
     // which pushed `base:` past the old window and made this test stop
     // seeing it at all -- silently checking three keys instead of four and
     // still reporting green. Widened to the real distance plus headroom.
-    const call = around(MODEL_SRC, 'coach: coachSuggestion(', 0, 1400);
+    // Since R692 the call lives in `coachCall()`, shared by the line and the dial.
+    const call = around(MODEL_SRC, 'private coachCall(): Suggestion | null {', 0, 1400);
     for (const key of ['unit:', 'goal:', 'grid:', 'base:']) {
       const times = call.split(key).length - 1;
       assert.equal(times, 1, `the coach call passes ${key} ${times} times`);

@@ -150,13 +150,16 @@ describe('a conversion is still rescued, and the coach still names reachable wei
   test('a bench last logged in pounds is put back on the 2.5 kg grid, whatever the kilo jump', () => {
     for (const [jump, expected] of [['1.5', 85], ['3', 87.5]] as Array<[string, number]>) {
       const m = lifter('lb', [[175, 5], [180, 5], [185, 5]], 'kg', jump);
-      assert.equal(m.state().weight, 84, 'fixture: 185 lb should open as 84 kg');
+      // Last time's 185 lb, converted; since R692 the dial opens on the call instead.
+      assert.equal((m as unknown as { startWeight: number }).startWeight, 84, 'fixture: 185 lb should convert to 84 kg');
+      m.setWeight(84);
       m.bumpPlate(1);
       assert.equal(m.state().weight, expected,
         `a jump of ${jump} kg from the converted 84 left ${m.state().weight}, off the 2.5 kg grid`);
     }
     const lb = lifter('kg', [[80, 5], [83, 5], [86, 5]], 'lb', '1.5');
-    assert.equal(lb.state().weight, 189.5, 'fixture: 86 kg should open as 189.5 lb');
+    assert.equal((lb as unknown as { startWeight: number }).startWeight, 189.5, 'fixture: 86 kg should convert to 189.5 lb');
+    lb.setWeight(189.5);
     lb.bumpPlate(1);
     assert.equal(lb.state().weight, 190, `a jump of 1.5 lb from the converted 189.5 left ${lb.state().weight}`);
   });
@@ -172,6 +175,7 @@ describe('a conversion is still rescued, and the coach still names reachable wei
     for (let i = 0; i < 3; i++) { m.bumpPlate(1); seen.push(m.state().weight); }
     assert.deepEqual(seen, [81.5, 83, 84.5], `a jump of 1.5 kg went ${[80, ...seen].join(' -> ')}`);
     const own = lifter('kg', [[80, 8], [81.5, 8], [83, 8]], 'kg', '1.5');
+    own.setWeight(83);                    // last time's, which the dial no longer opens on (R692)
     own.bumpPlate(1);
     assert.equal(own.state().weight, 84.5, 'their own logged 83 was snapped as if it were a conversion');
   });
@@ -210,6 +214,8 @@ describe('the coach counts the lifter\'s jumps from where they stand (R671)', ()
     const m = lifter('kg', [[85, 8], [85, 8], [85, 8]], 'kg', '1.5');
     const said = coachSaid(m);
     assert.match(said, /try 86\.5(?![\d.])/, `a 1.5 kg jump, stuck at 85: "${said}"`);
+    assert.equal(m.state().weight, 86.5, 'the dial did not open on the call (R692)');
+    m.setWeight(85);                      // and from last time's 85, one plate press
     m.bumpPlate(1);
     assert.equal(m.state().weight, 86.5, 'one press of the plate button is not the number the coach named');
   });

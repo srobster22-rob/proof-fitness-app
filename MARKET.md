@@ -260,3 +260,4 @@ ever names a weight your own plates and buttons can make.
 | R689 | 43 | Hevy 88 | FIX: bodyweight rows read BW, a recap keeps its known total; row 4 held at 2 until a playtest |
 | R690 | 42 | Hevy 88 | RETRO with a blind re-score, lower kept: data trust 3 → 2; the blind scorer was higher on rows 4, 6, 7 and 8 |
 | R691 | 42 | Hevy 88 | BIG SWING The Call Sheet, slice 1: no raise after a miss, every call on the recap; no row moved in the round that built it |
+| R692 | 42 | Hevy 88 | The Call Sheet, slice 2: the call on the dial (D8); no row moved in the round that built it |

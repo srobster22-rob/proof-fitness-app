@@ -4499,3 +4499,17 @@ Content: coach situations 8→9
 Coach: none
 Decisions: D7 (a climb needs the reps to hold; a miss is the same weight again)
 Next: R692, The Call Sheet slice 2: the call on the dial (the prototype that broke the R550/R669/R671 prefill and grid tests is in scratch, r691/now-model.with-dial.ts).
+
+## R692 · BIG SWING · The Call Sheet, slice 2: the call is on the dial
+Pick: The Call Sheet's second slice — gap value 6 (MARKET row 5) / PT2 Broken 3 and backlog 4 (the prefill was the last set, often a back-off) · slice 2 planned 2/3/+1
+Player notices: A lift the coach has a call for opens with that call already on the dial ("try 200" shows 200, not last time's 195 or a 160 back-off), so taking it is one tap on LOG SET.
+Impact: planned 2/3/+1 → shipped 2/3/+1 (biggest file now-model.ts 2244→2286)
+Built: D8. now-model `coachCall()`, the one call for the line under the lift and the dial (state() reads it); `loadPrefill` sets weight and reps from it while the lift has no set in this workout (a deload takes last time's top-set reps at the weight it backs off from). 21 tests whose premise was "the dial opens on last time's set" follow the call: R671's sweep measures reach from last time's weight (`startWeight`) and checks the dial opens on every call; R550/R669/R668 set last time's or an off-grid weight before pressing; the Now fixtures expect the call (squat 220, row 155).
+Quality: self-review found the change departs from PROMPT.md §4's "pre-filled with last session's value" for coached lifts, and recorded it as D8 with the tension and a revert rather than silently. Reviewer APPROVE (nothing at 2×2); fixed anyway: a deload took a back-off set's reps (185×12 under "back off to 185"), stale startWeight/prefillSource docs, D8's "one press" and "nothing else depends" overstatements, the sample test's hold wordings. Backlog: a reflex tap now logs and celebrates a record; a goal change mid-session leaves the dial on the old call.
+Verified: suite 2352/2352, tsc, dist and MARKET.md current. 5 plants (the dial ignores the call, the call retakes the dial after a set, reps stay last time's, one step past the call, a deload keeps the back-off's reps) each fail a named test and restore sha256-identical. Phone size on the sample: squat opens under "try 200" with the dial at 200, and one LOG SET reads "200×5 — made it" (shots/R692/; before: shots/R682/the-call-walked-in-with.png, dial 195).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (the first-timer's first workout has no call to take)
+Market: unchanged at 42. Row 5 held at 2 (no up-score in the round that built it).
+Content: unchanged
+Coach: none
+Decisions: D8 (a lift with a call opens with it on the dial; the §4 tension stated)
+Next: R693 PLAYTEST (PT3): 3 building rounds since PT2 (R689, R691, R692). The personas play The Call Sheet's first two slices.

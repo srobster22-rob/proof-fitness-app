@@ -106,7 +106,11 @@ describe('every weight the coach names, one button dials in (R671)', () => {
               const named = line.match(/(?:try|back off to)\s+(\d+(?:\.\d+)?)/);
               if (!named) continue;
               checked++;
-              const from = m.state().weight;
+              // From last time's weight, not the dial: since R692 the dial opens
+              // ON the call, and the question is still whether one button gets a
+              // lifter from where they stood to the number named.
+              const from = (m as unknown as { startWeight: number }).startWeight;
+              assert.equal(m.state().weight, Number(named[1]), `the dial did not open on the call: "${line}"`);
               if (!dialsIn(m, from, Number(named[1]))) {
                 misses.push(`jump ${jump} ${sessUnit}, ${goal ?? 'size'}, field at ${from}: "${line}"`);
               }

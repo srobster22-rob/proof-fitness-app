@@ -807,7 +807,11 @@ export interface NowState {
   /** What the steppers currently show — never blank (§4). */
   weight: number;
   reps: number;
-  /** Where those numbers came from, so the UI can only claim "last time" truthfully. */
+  /**
+   * Where last time's numbers came from, so the UI can only claim "last time"
+   * truthfully. For a lift with a coach's call the steppers open on the call
+   * instead (R692, D8), and the line under the lift names it, never "last time".
+   */
   prefillSource: Prefill['source'];
   /**
    * The line under the lift name, split at the point the colour changes.
@@ -985,12 +989,16 @@ export class NowModel {
   private weight = 0;
   private reps = 0;
   private source: Prefill['source'] = 'seed';
-  /** What `loadPrefill` put in the hero, kept so the label can name it. */
+  /**
+   * Last time's weight for the lift on screen, as `prefillFor` gave it. Since
+   * R692 the hero may open on the coach's call instead (D8); this stays last
+   * time's, and the grid and jump rules key off it.
+   */
   private startWeight = 0;
   /**
-   * Whether that prefill was a CONVERSION: the set it came from was logged in
-   * the other unit (R669). Set only by `loadPrefill`, the one path that puts a
-   * converted weight in the field; `bumpPlate` and the coach call read it.
+   * Whether last time's weight was a CONVERSION: the set it came from was
+   * logged in the other unit (R669). Set only by `loadPrefill`; `bumpPlate` and
+   * the coach call read it.
    */
   private startConverted = false;
 
@@ -1173,6 +1181,42 @@ export class NowModel {
     return this.unitHistory;
   }
 
+  /**
+   * The coach's call for the lift on screen, one computation for the line
+   * under its name and for the dial it opens on (R691). See the comment on
+   * `lastTime` in `state()` for why each option is what it is.
+   */
+  private coachCall(): Suggestion | null {
+    return coachSuggestion(
+      this.historyInSessionUnit(), this.exerciseId, this.now(),
+      {
+        unit: this.session.unit, goal: trainingGoal(this.repo),
+        live: { id: this.session.id, startedAt: this.session.startedAt },
+        // The stepper's own grid; the lifter's jump is handed over below
+        // — see the comment above this call for why (R592, R671).
+        grid: WEIGHT_STEP[this.session.unit],
+        /*
+         * The empty implement, so a deload cannot suggest a weight the
+         * rack does not have (R541). The engine defaults this to 0, so
+         * it is this line that makes the floor real.
+         *
+         * `this.equipment`, not `exercises.get(id)?.equipment` — that
+         * read a field `Exercise` has never had (equipment lives on
+         * `LoggedSet`, per-set, not per-exercise) and `tsc --noEmit` was
+         * never run to catch it. It type-checked as `any` and silently
+         * fell through to the `?? 'barbell'` default on every call, so
+         * the floor was always 45/20 regardless of what the lift was
+         * actually logged on — right for a barbell lift by coincidence,
+         * wrong and unnoticed for a dumbbell or bodyweight one.
+         */
+        base: EQUIPMENT_BASE[this.equipment ?? 'barbell'][this.session.unit],
+        // Their jump, only where the plate button moves by exactly that from
+        // this weight: not a conversion (R669), not off their own grid (R671).
+        jump: this.startConverted || !this.onPlateGrid(this.startWeight) ? undefined : this.plateJump()
+      }
+    );
+  }
+
   private loadPrefill(): void {
     const all = this.historyInSessionUnit();
     const p = prefillFor(this.exerciseId, all, this.session.unit);
@@ -1220,6 +1264,31 @@ export class NowModel {
     } else {
       this.equipment = last?.equipment ?? null;
       this.machine = last?.equipment === 'machine' ? (last.machine ?? null) : null;
+    }
+
+    /*
+     * The dial opens on the coach's call (R692, D8), weight and reps, until
+     * this lift has a set in this workout. The line already shows the call, so
+     * the dial and the line say one thing, and taking the call is one tap on
+     * LOG SET. The prefill it replaces was the last set logged, often a
+     * back-off: PT2 had 160×8 under "try 190".
+     *
+     * A call with no reps (a deload) takes the reps of last time's TOP set at
+     * the weight it backs off from, not the last set's: a 160×12 back-off put
+     * 185×12 on the dial, harder than the 205×6 being backed off from (R692
+     * review).
+     */
+    const call = this.coachCall();
+    if (call && !this.repo.setsInSession(this.session.id).some(s => s.exerciseId === this.exerciseId)) {
+      this.weight = call.weight;
+      if (call.reps !== undefined) this.reps = call.reps;
+      else {
+        let top: LoggedSet | null = null;
+        for (const s of all) {
+          if (s.exerciseId === this.exerciseId && s.weight === call.recentWeight && (!top || s.at > top.at)) top = s;
+        }
+        if (top) this.reps = top.reps;
+      }
     }
   }
 
@@ -1392,34 +1461,7 @@ export class NowModel {
         thisSession: sessionSets.filter(s => s.exerciseId === this.exerciseId),
         goal: this.goalHint(),
         start: this.source === 'history' ? null : this.startWeight,
-        coach: coachSuggestion(
-          this.historyInSessionUnit(), this.exerciseId, this.now(),
-          {
-            unit: this.session.unit, goal: trainingGoal(this.repo),
-            live: { id: this.session.id, startedAt: this.session.startedAt },
-            // The stepper's own grid; the lifter's jump is handed over below
-            // — see the comment above this call for why (R592, R671).
-            grid: WEIGHT_STEP[this.session.unit],
-            /*
-             * The empty implement, so a deload cannot suggest a weight the
-             * rack does not have (R541). The engine defaults this to 0, so
-             * it is this line that makes the floor real.
-             *
-             * `this.equipment`, not `exercises.get(id)?.equipment` — that
-             * read a field `Exercise` has never had (equipment lives on
-             * `LoggedSet`, per-set, not per-exercise) and `tsc --noEmit` was
-             * never run to catch it. It type-checked as `any` and silently
-             * fell through to the `?? 'barbell'` default on every call, so
-             * the floor was always 45/20 regardless of what the lift was
-             * actually logged on — right for a barbell lift by coincidence,
-             * wrong and unnoticed for a dumbbell or bodyweight one.
-             */
-            base: EQUIPMENT_BASE[this.equipment ?? 'barbell'][this.session.unit],
-            // Their jump, only where the plate button moves by exactly that from
-            // this weight: not a conversion (R669), not off their own grid (R671).
-            jump: this.startConverted || !this.onPlateGrid(this.startWeight) ? undefined : this.plateJump()
-          }
-        )
+        coach: this.coachCall()
       }, this.lang()),
       /*
        * Which sets logged in THIS workout are personal records (OWNER.md #5).

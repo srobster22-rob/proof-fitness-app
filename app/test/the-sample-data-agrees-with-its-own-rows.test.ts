@@ -167,13 +167,21 @@ describe('the sample data the owner looks at agrees with its own rows (R674)', (
       'the recap card carries no bodyweight multiple line');
   });
 
-  test('Now opens on the weight the last set of that lift used', () => {
+  test('Now opens on the weight the last set of that lift used, or on the call the line names', () => {
     const m = new NowModel(repo, () => now, 'en-US');
     const opened = (m as unknown as { exerciseId: string }).exerciseId;
     const mine = rows.filter(r => r.exercise_id === opened);
     if (!mine.length) return; // a lift with no history opens on a seeded guess, by design
     const last = mine.reduce((a, b) => (b.at > a.at ? b : a));
-    assert.equal(m.state().weight, last.weight,
-      `Now opens ${opened} at ${m.state().weight}; the last set of it was ${last.weight}`);
+    // Since R692 (D8), a lift with a call opens on the call the line names.
+    // A raise or a deload names its number after "try" or "back off to"; a
+    // hold names its weight first ("205 again", "200 last 2", "First time at
+    // 185×5"). With no call the line starts "Last time" and the dial is the
+    // last set's own weight, checked against the rows.
+    const head = m.state().lastTime.head;
+    const named = head.match(/(?:try|back off to)\s+(\d+(?:\.\d+)?)/) ?? head.match(/^(?:First time at )?(\d+(?:\.\d+)?)/);
+    const expected = named ? Number(named[1]) : last.weight;
+    assert.equal(m.state().weight, expected,
+      `Now opens ${opened} at ${m.state().weight}; the last set of it was ${last.weight}, the line says "${m.state().lastTime.head}"`);
   });
 });

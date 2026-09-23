@@ -73,7 +73,9 @@ describe('Now screen — launch (§4)', () => {
     const m = new NowModel(trained(), () => T0);
     const s = m.state();
     assert.equal(s.exercise.id, 'squat', 'the lift they actually start with');
-    assert.equal(s.weight, 215, 'their last squat, not a seed');
+    // Their own history, not a seed: since R692 the coach's call from it,
+    // 215 and climbing, so 220.
+    assert.equal(s.weight, 220, 'the call from their last squats, not a seed');
     assert.equal(s.prefillSource, 'history');
   });
 
@@ -208,7 +210,7 @@ describe('Now screen — moving between lifts (§7)', () => {
     // rail, and pinning a weight to it would re-couple this to today's ranking.
     const m = new NowModel(trained(), () => T0);
     m.selectExercise('row');
-    assert.equal(m.state().weight, 150, 'prefilled from their last row, not the squat');
+    assert.equal(m.state().weight, 155, 'the call from their own rows (150×8 twice), not the squat');
     assert.equal(m.state().prefillSource, 'history');
   });
 
@@ -265,7 +267,7 @@ describe('Now screen — finishing', () => {
     const repo = trained();
     const m = new NowModel(repo, () => T0);
     let taps = 0;
-    m.log(); taps++;                       // squat, same as last time
+    m.log(); taps++;                       // squat, the coach's call (R692)
     m.bumpWeight(1); taps++;
     m.log(); taps++;                       // squat, +5
     m.next(); taps++;                      // swipe to row
@@ -274,7 +276,7 @@ describe('Now screen — finishing', () => {
     const s = m.state();
     assert.equal(s.loggedThisSession.length, 4);
     assert.equal(taps, 6, 'four sets across two lifts in six actions');
-    assert.equal(s.loggedThisSession[1].weight, 220);
+    assert.equal(s.loggedThisSession[1].weight, 225);
   });
 });
 
@@ -1791,7 +1793,7 @@ describe('Now screen — clearing the workout (§11)', () => {
     m.clearWorkout();
     assert.equal(repo.allSets().length, before - 1, 'exactly the one set logged today');
     assert.ok(repo.allSets().length > 0, 'the previous sessions are untouched');
-    assert.equal(m.state().weight, 215, 'and "last time" still prefills from them');
+    assert.equal(m.state().weight, 220, 'and the call from last time still prefills (R692)');
   });
 
   /*

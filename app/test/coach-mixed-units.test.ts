@@ -86,7 +86,9 @@ describe('the coach reads a history in one unit (R537, trap 9)', () => {
     // The one line that protects it. `allSets()` here would be faster, would
     // look equivalent, and would silently reintroduce the case above.
     const model = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-model.ts'), 'utf8');
-    const call = around(model, 'coach: coachSuggestion(', 0, 200);
+    // Since R692 the call is made in one place, `coachCall()`, for the line and the dial.
+    assert.match(model, /coach: this\.coachCall\(\)/, 'the line no longer reads the one call');
+    const call = around(model, 'private coachCall(): Suggestion | null {', 0, 200);
     assert.match(call, /this\.historyInSessionUnit\(\)/,
       'the coach is being handed a history that mixes units');
     assert.doesNotMatch(call, /this\.repo\.allSets\(\)/,

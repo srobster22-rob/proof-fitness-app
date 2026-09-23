@@ -60,10 +60,16 @@ describe('a weight the lifter lifted is reported exactly (R551)', () => {
     /*
      * §4 wants the field prefilled with "same as last time", and last time was
      * 86 kg. Rounding it to 190 would silently log a set they did not do.
+     *
+     * Since R692 (D8) a lift with a call opens on the call instead, which the
+     * line names: not a silent rounding, a number the lifter can read. Last
+     * time's weight is still kept exactly, and is what the call is from.
      */
     const m = new NowModel(switchedUnits(), () => T0, 'en-US');
     m.selectExercise('bench');
-    assert.equal(m.state().weight, 189.5, 'the prefill was rounded onto the grid');
+    assert.equal((m as unknown as { startWeight: number }).startWeight, 189.5, 'last time was rounded onto the grid');
+    const named = Number(m.state().lastTime.head.match(/try (\d+(?:\.\d+)?)/)?.[1]);
+    assert.equal(m.state().weight, named, 'the dial opened on a number the line does not name');
   });
 
   test('Progress reports the best and the trend exactly', () => {

@@ -51,6 +51,10 @@ function onBench(repo: Repo): NowModel {
 describe('a personal record is marked where it happens (R522)', () => {
   test('an ordinary set is not marked', () => {
     const m = onBench(benched());
+    // The usual weight. Since R692 the dial opens on the coach's call (185 for
+    // three sessions: "stuck at 185, try 190"), so the usual set is set.
+    m.setWeight(185);
+    m.setReps(5);
     m.log();
     assert.deepEqual(m.state().prSetIds, [],
       'a set at the usual weight was marked as a record');
@@ -64,7 +68,9 @@ describe('a personal record is marked where it happens (R522)', () => {
      */
     const repo = benched();
     const m = onBench(repo);
-    m.log();   // the prefill is the previous best, 185 × 5
+    m.setWeight(185);                     // the previous best, 185 × 5; the dial opens on
+    m.setReps(5);                         // the coach's call since R692
+    m.log();
     assert.equal(m.state().loggedThisExercise.at(-1)?.weight, 185, 'the fixture did not equal the best');
     assert.deepEqual(m.state().prSetIds, []);
   });

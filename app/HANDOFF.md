@@ -601,6 +601,13 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**The Call Sheet, slice 2: the call is on the dial (R692, D8).** `NowModel.coachCall()` is the one call for
+the line under the lift and for the dial; `loadPrefill` sets weight and reps from it while the lift has no
+set in this workout (a deload keeps the reps). `startWeight` is still last time's weight, and is what the
+grid and jump rules key off. This departs from PROMPT.md §4's "pre-filled with last session's value" for
+coached lifts, deliberately (D8 has the one-block revert). 21 tests that assumed the dial opens on the last
+set now read `startWeight` or set the weight they are about, keeping what each was for.
+
 **The Call Sheet, slice 1: a miss is not a rung, and the recap names every call (R691).** A climbing
 call now needs the latest session's reps to reach the fewer of the session before's and the goal's
 target; falling short at a new weight is `coachMissed`,

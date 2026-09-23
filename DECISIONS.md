@@ -111,3 +111,24 @@ new work.
 - **Why:** the lifter's own rep scheme is the evidence. Reps falling at a new weight is the one
   signal that the step was too big, and the honest call is to make it before adding more.
 - **Revert:** remove the `coachMissed` branch before `if (rising)` in coachSuggestion (coach.ts).
+
+## D8 · R692 · A lift with a coach's call opens with the call on the dial
+- **Choice:** when the coach has a call for a lift ("try 200", "205 again — make 5", "back off to 185"), the
+  dial opens on it, weight and reps, until the lift has a set in this workout. Taking the call is one tap
+  on LOG SET, and "made it" follows. With no call, the dial opens on last session's set, as before.
+- **The tension, stated:** PROMPT.md §4 says every field is "pre-filled — with last session's value where
+  there is one", and §141 calls that the design's foundation. For a coached lift this departs from it.
+  The call is made from last session's numbers, and last time's weight stays in the line ("195 and
+  climbing"). Getting back to it can take more than one press (a 10 lb climb is two), or the keyboard for a
+  converted weight. `prefillSource` still reports where last time's numbers came from (§183), and the line,
+  not a "Last time" label, names the call.
+- **Alternative:**
+  - keep last time's set on the dial and let a tap on the line set the call: a hidden gesture, which "needs
+    explaining" (OWNER.md `## Never`);
+  - keep it as it was: PT2's min-maxer found "160×8" under "try 190", and the veteran had to tap + himself
+    to take a call the app had just made.
+- **Why:** the Call Sheet's promise is "what to lift next"; a dial that disagrees with the line beside it
+  is the one screen telling two stories.
+- **Revert:** delete the `const call = this.coachCall(); if (call && …)` block at the end of `loadPrefill`
+  (now-model.ts), and with it test/the-call-is-on-the-dial.test.ts and the "dial opens on the call"
+  expectations R692 added (now-model's 220 and 155, the R671 sweep, the plate test's 190).

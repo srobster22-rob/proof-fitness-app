@@ -97,11 +97,11 @@ describe('each consumer gets the history in the form it expects (R538)', () => {
 
   test('the two call sites still use the two different forms', () => {
     /*
-     * The one-line change that would break it, in either direction. These are
-     * eight lines apart in the same method, which is exactly why somebody
-     * would make them match.
+     * The one-line change that would break it, in either direction. They sit
+     * in the same class, which is exactly why somebody would make them match.
+     * Since R692 the coach's call is made in `coachCall()`.
      */
-    const coachCall = around(MODEL, 'coach: coachSuggestion(', 0, 200);
+    const coachCall = around(MODEL, 'private coachCall(): Suggestion | null {', 0, 200);
     assert.match(coachCall, /this\.historyInSessionUnit\(\)/,
       'the coach is being handed raw history, which mixes kilos and pounds');
 

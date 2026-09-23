@@ -49,6 +49,9 @@ function onBench(repo: Repo): NowModel {
 describe('the plate buttons land on weights that exist (R550)', () => {
   test('adding a plate from an off-grid weight lands on the grid', () => {
     const m = onBench(switchedUnits());
+    // Last time's converted weight, off the grid. Since R692 the dial opens on
+    // the coach's call, so the off-grid start is set, as a typed weight would be.
+    m.setWeight(189.5);
     assert.equal(m.state().weight, 189.5, 'the fixture is not off-grid, so this proves nothing');
     m.bumpPlate(1);
     assert.equal(m.state().weight, 235, `+45 from 189.5 gave ${m.state().weight}`);
@@ -58,6 +61,7 @@ describe('the plate buttons land on weights that exist (R550)', () => {
 
   test('and so does stripping one', () => {
     const m = onBench(switchedUnits());
+    m.setWeight(189.5);
     m.bumpPlate(-1);
     assert.equal(m.state().weight, 145, `-45 from 189.5 gave ${m.state().weight}`);
   });
@@ -158,9 +162,11 @@ describe('from an off-grid weight the stepper goes to the next weight, not past 
     }
     repo.setPref('pref.unit', 'lb');
     const m = onBench(repo);
-    assert.equal(m.state().weight, 187.5, 'fixture: 85 kg should open as 187.5 lb');
     const line = m.state().lastTime.head;
     assert.match(line, /try 190(?![\d.])/, `fixture stopped being a plateau at 187.5: "${line}"`);
+    // Since R692 the dial opens on it; from last time's 187.5 it is still one press.
+    assert.equal(m.state().weight, 190, 'the dial did not open on the call');
+    m.setWeight(187.5);
     m.bumpWeight(1);
     assert.equal(m.state().weight, 190, `the coach said "${line}" and + went to ${m.state().weight}`);
   });
