@@ -601,6 +601,12 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**A lift opens its own history (R680).** Tapping a Progress row opens `LiftSheet`, a sheet rather
+than a seventh screen. It shows the best set for each rep count and the last 12 workouts, each by
+the top set its recap names, with a ★ where that recap awarded a record. `liftHistory`
+(`src/ui/lift-history.ts`) builds it from `bestSetAtReps`, `topSetPerExercise` and `findPRs`, so
+the sheet and the recap cannot disagree. The inventory counts `LIFT_INSIGHTS`.
+
 **The share message carries a link.** `src/domain/share-url.ts` packs the recap into a URL
 fragment — never transmitted — that `link/dist` re-renders client-side. The wire format has two
 implementations, so `share-url.test.ts` encodes with the app's and decodes with the landing

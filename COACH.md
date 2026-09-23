@@ -66,6 +66,7 @@ from outside its loop. Rules are in AGENT_LOOP.md v3.1, sections 1 and 6.
   - First slice: tap a row → each session's best set as a plain-View line (like Spark), its PRs (pr.ts), and the goal gap — wiring the orphaned `goalE1rmGap` (HANDOFF.md:518).
   - Est: 2→3 = **+2.4**; a later calendar strip also lifts row 6.
   -> R679: ranked (gap 9, row 4), taken as R680's EXPAND.
+  -> R680: taken. Every Progress row opens its lift's own history: the best for each rep count and the last 12 workouts with their records (shots/R680/).
 - **S3 Library search on the add path — in no backlog** — row 3, and every future library addition.
   - Why: below 3 sessions the picker returns only the starting twelve (coldstart.ts:357), and the add field (NowScreen.tsx:1823-1841) selects a built-in only on an exact name (now-model.ts:1992). So R678's 48 new movements are reachable in session one only by exact typing, and "RDL", "Skullcrusher" or "Front Squats" become duplicate customs that R678's exact-name shadow rule misses. §7 already allows search on the add path.
   - First slice: type-ahead over library and custom names with an alias table; top 5 matches as rows.

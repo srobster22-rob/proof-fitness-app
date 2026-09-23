@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Share } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getRepo } from '../src/data/db.ts';
-import { t, fill, languageOf, dateLocale, number } from '../src/domain/i18n.ts';
+import { t, fill, languageOf, number } from '../src/domain/i18n.ts';
 
 /**
  * Every visible string on this screen, in the chosen language.
@@ -33,6 +33,8 @@ import { TYPE, SPACING } from '../src/ui/type.ts';
 import { buzz } from '../src/ui/haptics.ts';
 import { pressStyle, useReducedMotion } from '../src/ui/press.ts';
 import { Spark } from '../src/ui/Spark.tsx';
+import { LiftSheet } from '../src/ui/LiftSheet.tsx';
+import { shortDate } from '../src/ui/dates.ts';
 
 /**
  * Screen 2 — Progress. PROMPT.md §5: "one screen, not a dashboard".
@@ -73,6 +75,11 @@ export default function Progress() {
    */
   useFocusEffect(useCallback(() => { setTick(t => t + 1); }, []));
   const [busy, setBusy] = useState(false);
+  /*
+   * The lift whose own history is open over this screen (R680), or null. A
+   * sheet rather than a seventh screen: §5 keeps Progress one screen.
+   */
+  const [openLift, setOpenLift] = useState<string | null>(null);
   const rows = useMemo(() => progressRows(repo, Date.now()), [repo, tick]);
   const hidden = hiddenRowCount(repo, Date.now(), undefined, rows);
   const history = useMemo(() => recentSessions(repo), [repo, tick]);
@@ -222,7 +229,7 @@ export default function Progress() {
               {T('changeLast')} {SPARK_POINTS} {T('sessionsWord')}
             </Text>
           </View>
-          {rows.map(row => <Row key={row.exerciseId} row={row} />)}
+          {rows.map(row => <Row key={row.exerciseId} row={row} onOpen={() => setOpenLift(row.exerciseId)} />)}
 
           {/* §5 wants old lifts to fall off rather than into a scroll, which is
               right — but falling off SILENTLY is a different claim. The screen
@@ -269,6 +276,7 @@ export default function Progress() {
             revision={tick} />
         </ScrollView>
       )}
+      {openLift && <LiftSheet exerciseId={openLift} onClose={() => setOpenLift(null)} />}
       <TabBar current="progress" go={tab => goTab(router, tab)} />
     </SafeAreaView>
   );
@@ -306,22 +314,9 @@ function YouRow({ onPress, still = false }: { onPress: () => void; still?: boole
 }
 
 function PastSession({ h, onPress }: { h: SessionSummary; onPress: () => void }) {
-  /*
-   * R327: found by driving the app with an actual gap in training history —
-   * two sessions two years apart sat side by side in this list reading
-   * "Sat, Sep 14" and "Sat, Aug 15" with no year on either, which a user
-   * reads as ten months apart within the same year, not as one of them
-   * being two years stale. `recentSessions` is capped by COUNT, not by a
-   * time window, so an account with a real gap genuinely has an old and a
-   * new session sitting next to each other here. Same rule Measure's own
-   * `trendLine` already uses for the identical reason: the year only when
-   * it is not this one.
-   */
-  const startedDate = new Date(h.startedAt);
-  const when = startedDate.toLocaleDateString(dateLocale(languageOf(getRepo())), {
-    weekday: 'short', day: 'numeric', month: 'short',
-    ...(startedDate.getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {})
-  });
+  // With the year when it is not this one: `recentSessions` is capped by count,
+  // so a real gap in training puts an old and a new day side by side (R327).
+  const when = shortDate(h.startedAt, languageOf(getRepo()), { weekday: true });
   const still = useReducedMotion();
   return (
     // This summary already answers "what did I do" — it could not answer
@@ -355,71 +350,84 @@ function PastSession({ h, onPress }: { h: SessionSummary; onPress: () => void })
   );
 }
 
-function Row({ row }: { row: ProgressRow }) {
+function Row({ row, onOpen }: { row: ProgressRow; onOpen: () => void }) {
+  const lang = languageOf(getRepo());
+  const still = useReducedMotion();
   return (
-    <View style={s.row}>
-      <View style={s.rowTop}>
-        <Text style={s.name} numberOfLines={1}
-          accessibilityLabel={lastTrainedA11y(row, languageOf(getRepo()))}>{row.name}</Text>
-        <Text style={s.best} accessibilityLabel={bestSetA11y(row, languageOf(getRepo()))}>
-          {row.best > 0 || row.realBest ? `${row.best} × ${row.bestReps}` : '—'}
-          {/* What it actually weighed, for a lift whose load is the lifter. A
-              pull-up logged as "0 x 8" is not a light set, it is a set the app
-              had no bodyweight for; with one, it says so. Quiet, because the
-              number the user TYPED is still the one they will recognise. */}
-          {row.realBest !== null && (
-            <Text style={s.realBest}>  {row.realBest} {row.unit}</Text>
-          )}
-          {/* The milestone lifters actually chase and quote — same rule the
-              recap claims it with, so the two can never disagree about what
-              counts. Never alongside `realBest`: that field is already a
-              ratio (bodyweight plus what was added) for the lifts this one
-              excludes, and a multiple of a ratio is not a number anyone
-              asked for. */}
-          {row.bestMultiple !== null && (
-            <Text style={s.multipleValue}>  {row.bestMultiple}×</Text>
-          )}
-        </Text>
-      </View>
-      <View style={s.rowBottom}>
-        <Spark values={row.spark} style={s.sparkFlex} />
-        {/* The target, on the screen that tracks the lift.
-        
-            Goals are per-lift but lived only on their own screen, so a lift 20lb
-            from its target looked exactly like one with no target at all. It
-            also gives the row something true to say early on: `trend` is null
-            until two comparable sessions exist, so a new user's Progress is a
-            column of dashes, and this is a real number from the first session. */}
-        {/*
-          The slot is reserved on EVERY row, goal or not.
+    // The whole row opens the lift's own history (R680). A labelled button is
+    // read as one thing, and its children's labels are not read at all, so this
+    // one carries everything the row says, the goal included, before what the
+    // tap does.
+    <Pressable accessibilityRole="button" onPress={onOpen} style={pressStyle(s.row, 'surface', still)}
+      accessibilityLabel={[lastTrainedA11y(row, lang), bestSetA11y(row, lang), trendA11y(row, lang),
+        row.goal ? goalTag(row.goal, lang) : null,
+        fill(T('openLiftHistoryA11y'), { lift: row.name })].filter(Boolean).join('. ')}>
+      <View style={s.rowBody}>
+        <View style={s.rowTop}>
+          <Text style={s.name} numberOfLines={1}>{row.name}</Text>
+          <Text style={s.best}>
+            {row.best > 0 || row.realBest ? `${row.best} × ${row.bestReps}` : '—'}
+            {/* What it actually weighed, for a lift whose load is the lifter. A
+                pull-up logged as "0 x 8" is not a light set, it is a set the app
+                had no bodyweight for; with one, it says so. Quiet, because the
+                number the user TYPED is still the one they will recognise. */}
+            {row.realBest !== null && (
+              <Text style={s.realBest}>  {row.realBest} {row.unit}</Text>
+            )}
+            {/* The milestone lifters actually chase and quote — same rule the
+                recap claims it with, so the two can never disagree about what
+                counts. Never alongside `realBest`: that field is already a
+                ratio (bodyweight plus what was added) for the lifts this one
+                excludes, and a multiple of a ratio is not a number anyone
+                asked for. */}
+            {row.bestMultiple !== null && (
+              <Text style={s.multipleValue}>  {row.bestMultiple}×</Text>
+            )}
+          </Text>
+        </View>
+        <View style={s.rowBottom}>
+          <Spark values={row.spark} style={s.sparkFlex} />
+          {/* The target, on the screen that tracks the lift.
+          
+              Goals are per-lift but lived only on their own screen, so a lift 20lb
+              from its target looked exactly like one with no target at all. It
+              also gives the row something true to say early on: `trend` is null
+              until two comparable sessions exist, so a new user's Progress is a
+              column of dashes, and this is a real number from the first session. */}
+          {/*
+            The slot is reserved on EVERY row, goal or not.
 
-          Rendered only when a goal existed, the spark on a goal-less row grew
-          into the space the tag would have taken — so on a 320pt phone the
-          charts came out at two different bar widths on one screen: 14pt on
-          rows without a goal and 8pt on the row with one. Seen as a picture,
-          the odd row out reads as a mistake and, worse, as a different SHAPE:
-          a sparkline column exists to be scanned down, and two scales cannot
-          be compared.
+            Rendered only when a goal existed, the spark on a goal-less row grew
+            into the space the tag would have taken — so on a 320pt phone the
+            charts came out at two different bar widths on one screen: 14pt on
+            rows without a goal and 8pt on the row with one. Seen as a picture,
+            the odd row out reads as a mistake and, worse, as a different SHAPE:
+            a sparkline column exists to be scanned down, and two scales cannot
+            be compared.
 
-          Reserving it costs nothing at 390pt — the bars there are capped at 14
-          and there is still room — and at 320pt it makes every row agree.
-        */}
-        <Text style={[s.goalTag, row.goal?.achieved && s.goalTagDone]} numberOfLines={1}>
-          {row.goal ? goalTag(row.goal, languageOf(getRepo())) : ''}
-        </Text>
-        {/* The unit is printed because "+25" alone is a number with no
-            stated basis, and the column header above says over what. */}
-        <Text style={[
-          s.trend,
-          row.trend != null && row.trend > 0 && s.up,
-          row.trend != null && row.trend < 0 && s.down
-        ]} accessibilityLabel={trendA11y(row, languageOf(getRepo())) ?? undefined}>
-          {row.trend == null ? '—'
-            : row.trend === 0 ? `0 ${row.unit}`
-            : `${row.trend > 0 ? '+' : ''}${row.trend} ${row.unit}`}
-        </Text>
+            Reserving it costs nothing at 390pt — the bars there are capped at 14
+            and there is still room — and at 320pt it makes every row agree.
+          */}
+          <Text style={[s.goalTag, row.goal?.achieved && s.goalTagDone]} numberOfLines={1}>
+            {row.goal ? goalTag(row.goal, lang) : ''}
+          </Text>
+          {/* The unit is printed because "+25" alone is a number with no
+              stated basis, and the column header above says over what. */}
+          <Text style={[
+            s.trend,
+            row.trend != null && row.trend > 0 && s.up,
+            row.trend != null && row.trend < 0 && s.down
+          ]}>
+            {row.trend == null ? '—'
+              : row.trend === 0 ? `0 ${row.unit}`
+              : `${row.trend > 0 ? '+' : ''}${row.trend} ${row.unit}`}
+          </Text>
+        </View>
       </View>
-    </View>
+      {/* Beside both lines rather than on the first, so the best set stays
+          flush right over the trend column the way every row reads down. */}
+      <Text style={s.rowArrow}>›</Text>
+    </Pressable>
   );
 }
 
@@ -588,7 +596,11 @@ const s = StyleSheet.create({
     ...COLUMN, flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyText: { color: '#9AA5AF', fontSize: 14 },
 
-  row: { paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#161B20' },
+  row: {
+    paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#161B20',
+    flexDirection: 'row', alignItems: 'center'
+  },
+  rowBody: { flex: 1 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   name: { color: '#E8EAED', fontSize: 15, fontWeight: '600', flexShrink: 1, marginRight: 12 },
   best: { color: '#fff', fontSize: 15, fontWeight: '800' },
@@ -613,7 +625,9 @@ const s = StyleSheet.create({
    * the extreme-scale case into a second line instead of an overlap.
    */
   rowBottom: {
-    flexDirection: 'row', alignItems: 'flex-end', marginTop: 12, gap: 14, flexWrap: 'wrap'
+    // 10, not 14, since R680 put the row's "›" beside this line: the chart
+    // still reaches full size at 390pt (progress-row-fits.test.ts).
+    flexDirection: 'row', alignItems: 'flex-end', marginTop: 12, gap: 10, flexWrap: 'wrap'
   },
 
   /*
@@ -713,6 +727,9 @@ const s = StyleSheet.create({
   },
   youText: { color: '#9AA5AF', fontSize: 12, fontWeight: '800', letterSpacing: 1.4 },
   youArrow: { color: '#7C8792', fontSize: 20, fontWeight: '700' },
+  // The YOU row's mark for "this opens something" (R680), at its size. The
+  // row's width budget pays for it (progress-row-fits.test.ts).
+  rowArrow: { color: '#7C8792', fontSize: 20, fontWeight: '700', marginLeft: 4 },
 
   past: {
     backgroundColor: '#0E1114', borderRadius: 14, padding: 16, marginBottom: 12,

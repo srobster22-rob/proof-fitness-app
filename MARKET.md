@@ -131,7 +131,7 @@ the loop now requires, keeping the lower score in each row.
 | 1 | Onboarding | 2 | **3** | H1: the first set after 3 taps, with no account. But PT0 hit 4 confusions in the first 10 minutes (PLAYTESTS.md), and only scripted personas have played, which caps this row at 3. | 3 (account) | 4 | 4 (quiz → workout) | 4 | 4 (questionnaire → plan) |
 | 2 | Speed of the core action | 3 | **4** | H2: 1.60 taps per set across the first workout. A repeat set is 1 tap, every field is pre-filled, and the rest timer starts itself. There is no Live Activity (§8b is unbuilt). | 5 (Live Activity) | 5 (Live Activity) | 4 | 4 | 4 (m) |
 | 3 | Content library (exercises and programs) | 3 | **2** | CONTENT.md: 60 exercises since R678 (was 32), each with a day, muscles and a starting weight; 3 split plans; no programs. | 4 (400+, 26 programs) | 3 (200+) | 5 (1,600+) | 5 (11,000+ programs) | 4 (558; 795 in plans) |
-| 4 | Insight and progress visualisation | 3 | **2** | CONTENT.md: 9 insights. Every Progress row has a 10-session sparkline and a best set, but no row opens its history. `shots/PT0/18-week2-progress.png`: two weeks in, each row is one dot and "—". No calendar, no muscle view. | 5 | 4 | 4 | 3 | 4 (m) |
+| 4 | Insight and progress visualisation | 3 | **3** | CONTENT.md: 11 insights. Since R680 every Progress row opens its lift's own history: the best set for each rep count, and the last 12 workouts with their records starred (`shots/R680/bench-history-sheet.png`). Still no per-lift chart beyond the 10-session sparkline, no calendar and no muscle view, and a week-two first-timer's rows are still one dot each (`shots/PT0/18-week2-progress.png`). | 5 | 4 | 4 | 3 | 4 (m) |
 | 5 | Coaching intelligence | 2 | **2** | CONTENT.md: 7 coach situations, 3 coaching modes, plate-aware; R671 swept 448 suggestions, all dialable. But H3 = 0: the first coach line comes on day 8 at the earliest, and it never lays out sets × reps. | 4 (Trainer, Pro-only) | 1 | 5 | 3 (programmed) | 5 (per set, Pro) |
 | 6 | Retention hooks | 2 | **2** | `shots/PT0/17-week2-recap.png`: STREAK 2 WK; the weekly line and goals (CONTENT.md). No reminder, calendar or widget, and the streak stays hidden below 2 weeks. | 5 | 3 | 3 | 3 | 3 (m) |
 | 7 | Design polish | 2 | **2** | OWNER.md, owner's words: "looks a little sloppy and AI-generated". The look at phone size is the owner's open question. | 4 | 4 | 5 | 4 | 4 (m) |
@@ -149,8 +149,8 @@ from the matrix (`node tools/market.ts`, in app/); never edit them by hand.
 <!-- market:scores -->
 | | PROOF | Hevy | Fitbod | Alpha Progression | Strong | Boostcamp |
 |---|---|---|---|---|---|---|
-| weighted sum | 59 | 119 | 112 | 104 | 102 | 98 |
-| **market score** | **44** | **88** | **83** | **77** | **76** | **73** |
+| weighted sum | 62 | 119 | 112 | 104 | 102 | 98 |
+| **market score** | **46** | **88** | **83** | **77** | **76** | **73** |
 
 Best comparable: **Hevy, 88**. The weights sum to 27, so the maximum weighted sum is 135.
 <!-- /market:scores -->
@@ -171,7 +171,7 @@ Best comparable: **Hevy, 88**. The weights sum to 27, so the maximum weighted su
 | 11 Platform readiness | 3 × (5 − 1) = **12** | Mostly owner-only. The developer account costs money, and the bundle id and domain are the owner's choice. Store copy, screenshots and a privacy page are ours. |
 | 13 Watch and health sync | 2 × (5 − 0) = **10** | Frozen by PROMPT.md §9 ("wearable integration, Apple Health sync"); asked in OWNER.md. |
 | 3 Content library (exercises and programs) | 3 × (5 − 2) = **9** | Exercises are ours. A *program library* is a §9 non-goal, asked in OWNER.md. |
-| 4 Insight and progress visualisation | 3 × (5 − 2) = **9** | no |
+| 4 Insight and progress visualisation | 3 × (5 − 3) = **6** | no |
 | 5 Coaching intelligence | 2 × (5 − 2) = **6** | no |
 | 6 Retention hooks | 2 × (5 − 2) = **6** | no |
 | 7 Design polish | 2 × (5 − 2) = **6** | The look at phone size is the owner's open question, so only polish that is not the look is ours. |
@@ -247,3 +247,4 @@ ever names a weight your own plates and buttons can make.
 | R677 | 52 | Hevy 86 | first scoring, by the loop alone; RETRO adds a blind re-score |
 | R678 | 54 | Hevy 86 | content library 1 → 2: the library grew from 32 to 60 movements |
 | R679 | 44 | Hevy 88 | the outside coach's corrections: five rows re-scored lower (C5), Strong and Hevy each up one cell (C6), a frozen row 13 for Watch and health sync (C7), Alpha Progression scored in place of Knurl (C3); totals now from tools/market.ts |
+| R680 | 46 | Hevy 88 | insight and progress 2 → 3: every Progress row opens its lift's own history |

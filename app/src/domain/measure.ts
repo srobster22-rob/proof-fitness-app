@@ -188,10 +188,16 @@ export function trendOf(
 export function readingAt(
   kind: MeasurementKind, all: readonly Measurement[], at: number
 ): Measurement | null {
-  const before = all
-    .filter(m => m.kind === kind && m.at <= at)
-    .sort((a, b) => a.at - b.at);
-  return before.length ? before[before.length - 1] : null;
+  // One pass, not a filter and a sort per call (R680). Every bodyweight set
+  // asks this, and a lift's own history asks it for years of sets: sorting
+  // 100 weigh-ins each time made opening a pull-up's history take a second.
+  // `>=` keeps the last of several readings at the same moment, as the
+  // stable sort did.
+  let found: Measurement | null = null;
+  for (const m of all) {
+    if (m.kind === kind && m.at <= at && (!found || m.at >= found.at)) found = m;
+  }
+  return found;
 }
 
 /** "82.5 kg", "5'11\"" — the number as a person would say it. */

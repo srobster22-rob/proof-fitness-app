@@ -98,7 +98,7 @@ describe('every function returning a unit: Unit claim derives it from displayUni
       // array of it) — a function CONSTRUCTS the claim, an interface only
       // states its shape.
       const returnRe = new RegExp(
-        `export function (\\w+)\\([^)]*\\):\\s*${iface}(\\[\\])?\\s*\\{`, 'g');
+        `export function (\\w+)\\([^)]*\\):\\s*${iface}(\\[\\])?(\\s*\\|\\s*null)?\\s*\\{`, 'g');
       let rm;
       let found = 0;
       while ((rm = returnRe.exec(src))) {

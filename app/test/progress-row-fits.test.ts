@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { SPARK_POINTS } from '../src/ui/progress-model.ts';
 import { MIN_BAR, MAX_BAR, GAP, sparkFloor } from '../src/ui/spark-geom.ts';
 import { region } from './helpers/source.ts';
+import { shortDate } from '../src/ui/dates.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(path.join(HERE, '..', 'app', 'progress.tsx'), 'utf8');
@@ -44,6 +45,14 @@ const GOAL_TAG_PT = 70;
  */
 const GOAL_TAG_TYPICAL_PT = 57;
 
+/**
+ * The row's "›" (R680) as it renders at fontSize 20, weight 700: 6.9pt wide,
+ * measured in the running app. It sits beside both lines, so every budget
+ * below pays for it with its margin.
+ */
+const ARROW_GLYPH_PT = 6.9;
+const arrow = () => styleNum('rowArrow', 'marginLeft') + ARROW_GLYPH_PT;
+
 /** Pull a number out of a style declaration, so the test tracks the source. */
 function styleNum(styleName: string, prop: string): number {
   const decl = region(src, `  ${styleName}: {`, '},');
@@ -80,7 +89,7 @@ describe('a Progress row fits on the narrowest phone', () => {
     const tagGap = styleNum('goalTag', 'marginLeft');
     const available = SE - gutter * 2;
     // spark, goalTag, trend — two gaps between three children.
-    const chrome = gap * 2 + tagGap + trend + GOAL_TAG_PT;
+    const chrome = gap * 2 + tagGap + trend + GOAL_TAG_PT + arrow();
     const floor = sparkFloor(SPARK_POINTS);
 
     assert.ok(chrome + floor <= available,
@@ -95,7 +104,7 @@ describe('a Progress row fits on the narrowest phone', () => {
     const tagGap = styleNum('goalTag', 'marginLeft');
 
     const full = SPARK_POINTS * MAX_BAR + (SPARK_POINTS - 1) * GAP;
-    const available = 390 - gutter * 2 - (gap * 2 + tagGap + trend + GOAL_TAG_TYPICAL_PT);
+    const available = 390 - gutter * 2 - (gap * 2 + tagGap + trend + GOAL_TAG_TYPICAL_PT + arrow());
     assert.ok(full <= available,
       'the chart cannot reach full size even on a 390pt phone — the cap is decorative');
   });
@@ -130,7 +139,7 @@ describe('the sparkline column can be compared down its length', () => {
     // The reservation must cost nothing on the common phone.
     const available = 390 - styleNum('body', 'paddingHorizontal') * 2
       - (styleNum('rowBottom', 'gap') * 2 + styleNum('goalTag', 'marginLeft')
-         + styleNum('goalTag', 'minWidth') + styleNum('trend', 'minWidth'));
+         + styleNum('goalTag', 'minWidth') + styleNum('trend', 'minWidth') + arrow());
     const full = SPARK_POINTS * MAX_BAR + (SPARK_POINTS - 1) * GAP;
     assert.ok(full <= available,
       `reserving the tag leaves ${available}pt and the chart needs ${full}pt at full size`);
@@ -271,9 +280,19 @@ describe('the streak names the record to chase, only while it is a different fac
  */
 describe('a stale session in the recent-workouts list names its year', () => {
   test('the year is added only once it differs from this one', () => {
-    assert.match(src, /startedDate\.getFullYear\(\) !== new Date\(\)\.getFullYear\(\)/,
-      'the recent-workouts date no longer checks whether it needs a year');
-    assert.match(src, /year:\s*'numeric'/,
-      'the year option itself is gone — an old session reads as this year again');
+    // By what `shortDate` returns rather than by matching its source (R680).
+    const year = new Date().getFullYear();
+    const lastYear = new Date(year - 1, 7, 15, 12).getTime();
+    const thisYear = new Date(year, 0, 2, 12).getTime();
+    assert.match(shortDate(lastYear, 'en', { weekday: true }), new RegExp(String(year - 1)),
+      'an old session reads as this year');
+    assert.doesNotMatch(shortDate(thisYear, 'en', { weekday: true }), new RegExp(String(year)),
+      'every date spells out a year it does not need');
+    assert.match(shortDate(thisYear, 'en', { weekday: true }), /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), /,
+      'the recent-workouts list names a day without its weekday');
+    assert.doesNotMatch(shortDate(thisYear, 'en'), /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/,
+      'a lift\'s history, which asks for no weekday, gets one');
+    assert.match(src, /shortDate\(h\.startedAt, .*\{ weekday: true \}\)/,
+      'the recent-workouts list stopped naming its days, weekday first, with shortDate');
   });
 });

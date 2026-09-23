@@ -4331,3 +4331,17 @@ Content: unchanged. Measurements, at 2 of 6, is still furthest below target.
 Coach: C2–C11 taken. S1–S6 ranked by gap value: S2 is R680's pick, and S1 feeds the BIG SWING.
 Decisions: D5 (after bench, OHP stays behind the isolation lifts)
 Next: R680 EXPAND, a lift's own history on Progress (row 4, gap value 9, S2). The derived RETRO swaps: 2 building rounds since setup.
+
+## R680 · EXPAND · a lift opens its own history
+Pick: a lift's own history, opened from its Progress row — gap value 9 (MARKET row 4) / COACH S2 · impact planned 2/2/+1. The RETRO swapped: 2 building rounds since setup.
+Player notices: Tap any lift on Progress to see its best at each rep count and its last 12 workouts, with the record sessions starred.
+Impact: planned 2/2/+1 → shipped 2/2/+1 (biggest file i18n.ts 1262→1282; progress.tsx 761→778; now-model.ts untouched)
+Built: LiftSheet.tsx on a new BottomSheet.tsx; lift-history.ts `liftHistory` + the `LIFT_INSIGHTS` registry (bestSetAtReps, topSetPerExercise, findPRs, in the display unit); dates.ts `shortDate`, shared with RECENT WORKOUTS; Progress rows are labelled buttons with a ›, the bottom line's gaps 14→10 to pay for it; 10 i18n keys (en, es).
+Quality: self-review, then reviewer REJECT (fixed at ≥2×2: kg rep bests, BW labels, one label per row, midnight dates, single-pass readingAt, the row's width budget) → APPROVE. Backlog: BW rep bests across two bodyweights, pull-up sheet ~200 ms, the row's "0 × 8" vs the sheet's "BW × 8", 7 hand-rolled sheets to move onto BottomSheet.
+Verified: suite 2291/2291, tsc, dist and MARKET.md current. 16 plants (oldest first, beaten rep count shown, later-workout records, kg unconverted, no cap, high reps, heaviest set, hard-coded unit, no year, arrow margin, gap 14, no weekday, dated by first set, goal off the label, line not accessible, BW with a unit) each fail a named test and restore sha256-identical. Phone size on the app's sample: rows 98pt, the arrow 6.9pt at 4pt margin (shots/R680/).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 0→0 · H5 1.50→1.50 (the persona never opens the sheet)
+Market: row 4 2→3, provisional until a playtest opens it (shots/R680/bench-history-sheet.png); 44→46
+Content: insights 9→11
+Coach: S2 taken
+Decisions: none
+Next: R681 PLAYTEST, postponed from R678; 3 building rounds have now run since PT0.

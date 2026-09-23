@@ -18,6 +18,7 @@ import { SPLIT_PLANS } from '../src/domain/split.ts';
 import { KINDS } from '../src/domain/measure.ts';
 import { LANGUAGES } from '../src/domain/i18n.ts';
 import { TRAINING_GOALS } from '../src/ui/training-goal.ts';
+import { LIFT_INSIGHTS } from '../src/ui/lift-history.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
@@ -53,7 +54,8 @@ const COUNTERS: Record<string, () => Count> = {
     const fields = [...block(read('src', 'domain', 'session.ts'), 'export interface RecapPayload {')
       .matchAll(/^ {2}(\w+)\??:/gm)].map(m => m[1]).filter(f => !NOT_INSIGHTS.has(f));
     const weekly = /export function weeklyLine\(/.test(read('src', 'ui', 'progress-model.ts')) ? ['weeklyLine'] : [];
-    return of([...fields, ...weekly]);
+    // What a lift's own history shows (R680), from the registry the sheet renders.
+    return of([...fields, ...weekly, ...LIFT_INSIGHTS.map(i => `lift:${i}`)]);
   },
   goals: () => {
     const dir = path.join(APP, 'src', 'domain');
