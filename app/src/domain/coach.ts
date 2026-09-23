@@ -438,6 +438,25 @@ export function coachSuggestion(
       // not a rung on a ladder, so the whole run stops being a climb.
       if (to <= from || to - from > from * MAX_CLIMB_FRACTION) { rising = false; break; }
     }
+    /*
+     * A climb needs the reps to hold (R691). 200×5 then 205×3 is a miss, not a
+     * rung: "try 215" after it told a lifter to add weight to a set they had
+     * just failed (PT2, and R690's blind re-score). The call is the same
+     * weight again, for the reps asked of it.
+     *
+     * Asked, not merely done before: the bar is the fewer of last session's
+     * reps and the goal's target. 100×10 then 105×8 on SIZE made the call
+     * "try 105" asked for, and it is a climb, not "105 again — make 10"
+     * (R691 review).
+     */
+    const asked = Math.min(sets[1].reps, target);
+    if (rising && sets[0].reps < asked) {
+      return {
+        kind: 'hold', weight: latest.weight, recentWeight: latest.weight,
+        sessions: 1, key: 'coachMissed', reps: asked,
+        params: { weight: latest.weight, reps: asked }
+      };
+    }
     if (rising) {
       const theirStep = sets[0].weight - sets[1].weight;
       /*

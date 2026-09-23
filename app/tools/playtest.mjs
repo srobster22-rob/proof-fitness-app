@@ -190,8 +190,13 @@ export class Session {
     // Ask Chrome to shut down first (R689). Killed outright, it dropped the
     // localStorage writes it had not yet put on disk, and two PT2 personas
     // reported that as the app losing their sets.
+    // And wait for it to finish (R691): under a loaded machine Chrome took over
+    // two seconds to write its profile, and the kill below cut it off, so a
+    // relaunch on the same profile opened a fresh install.
+    const exited = this.chrome.exitCode !== null ? Promise.resolve()
+      : new Promise(resolve => this.chrome.once('exit', resolve));
     try { await Promise.race([this.send('Browser.close'), sleep(1500)]); } catch { /* already gone */ }
-    await sleep(500);
+    await Promise.race([exited, sleep(10_000)]);
     try { this.ws.close(); } catch { /* already gone */ }
     this.chrome.kill();
     await sleep(800);

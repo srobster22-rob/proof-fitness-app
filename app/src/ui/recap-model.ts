@@ -47,11 +47,18 @@ export interface Recap {
    * them (R689): what `payload.volume` leaves out when `volumeKnown` is false.
    */
   uncounted: number;
-  /** The coach's call for next time, on the screen and never on the card (R687). */
-  next: NextCall | null;
+  /**
+   * The coach's calls for next time, on the screen and never on the card
+   * (R687): every lift that earned one, in the order trained, at most
+   * `NEXT_CALLS` (R691). Empty when none did.
+   */
+  next: NextCall[];
 }
 
-export interface NextCall { lift: string; line: string }
+/** How many calls a recap names: enough to plan the next session, few enough to read. */
+export const NEXT_CALLS = 3;
+
+export interface NextCall { id: string; lift: string; line: string }
 
 /**
  * Is this the first workout of its calendar week?
@@ -168,15 +175,17 @@ export function recapFor(repo: Repo, sessionId: string, now: number, title?: str
     multiple,
     uncounted: sets.filter(x =>
       CARRIES_BODYWEIGHT.has(x.exerciseId) && !realLoad(x, measurements, session.unit)).length,
-    next: nextCall(repo, sets, Math.min(now, session.endedAt ?? now), session.unit, lang)
+    next: nextCalls(repo, sets, Math.min(now, session.endedAt ?? now), session.unit, lang)
   };
 }
 
 /**
- * What the coach will call next time for this workout's lifts (R687): the
- * first INCREASE in the order they were trained, a number to come back and
- * beat. Holds, deloads and "first time at" lines are advice for the lift
- * itself, and the last can be false after a break (PT1), so the recap leaves
+ * What the coach will call next time for this workout's lifts (R687): each
+ * INCREASE in the order they were trained, a number to come back and beat,
+ * up to `NEXT_CALLS`. R687 named only the first, so a lift that earned its
+ * call went unmentioned beside it (PT2). Holds, deloads and "first time at"
+ * lines are advice for the lift itself, and the last can be false after a
+ * break (PT1), so the recap leaves
  * them to the Now screen.
  *
  * The finished workout is evidence now, so even the first recap of a lifter's
@@ -185,7 +194,7 @@ export function recapFor(repo: Repo, sessionId: string, now: number, title?: str
  * reopening an old recap shows what it called then. Kept off the share card:
  * it is advice for the lifter, not a claim for others.
  */
-export function nextCall(repo: Repo, sets: readonly LoggedSet[], at: number, unit: Unit, lang: Language): NextCall | null {
+export function nextCalls(repo: Repo, sets: readonly LoggedSet[], at: number, unit: Unit, lang: Language): NextCall[] {
   const units = repo.sessionUnits();
   const history = repo.allSets().map(x => {
     const from = units.get(x.sessionId) ?? unit;
@@ -193,6 +202,7 @@ export function nextCall(repo: Repo, sets: readonly LoggedSet[], at: number, uni
   });
   const exercises = repo.exercises();
   const goal = trainingGoal(repo);
+  const calls: NextCall[] = [];
   for (const id of new Set(sets.map(x => x.exerciseId))) {
     const own = sets.filter(x => x.exerciseId === id);
     const kit = own[own.length - 1].equipment ?? 'barbell';
@@ -200,10 +210,11 @@ export function nextCall(repo: Repo, sets: readonly LoggedSet[], at: number, uni
       unit, goal, grid: WEIGHT_STEP[unit], base: EQUIPMENT_BASE[kit][unit]
     });
     if (call?.kind === 'increase') {
-      return { lift: exercises.get(id)?.name ?? id, line: fill(t(lang, call.key as never), call.params) };
+      calls.push({ id, lift: exercises.get(id)?.name ?? id, line: fill(t(lang, call.key as never), call.params) });
+      if (calls.length === NEXT_CALLS) break;
     }
   }
-  return null;
+  return calls;
 }
 
 /**

@@ -4485,3 +4485,17 @@ Content: coach situations 7→8 since R685
 Coach: none new
 Decisions: none
 Next: R691 BIG SWING (691 mod 10 = 1), chosen by a three-draft design panel. Vision check: the last ten rounds moved H3 but lost 4 market points to outside re-scores of rows the playtests found broken (insight, data trust). The raise after a miss (PT2 Broken 3, confirmed live by the blind scorer, shots/R690/) is the coach's top defect, so the panel is briefed with it first.
+
+## R691 · BIG SWING · The Call Sheet, slice 1: a miss is not a rung, and the recap names every call
+Pick: "The Call Sheet", the design panel's pick over "Called Shot" (7) and "Proof of Progress" (6); it answers the critic's first reason ("it plans nothing") and the live trust bug — gap value 6 (MARKET row 5) / PT2 Broken 3, R690 blind · swing planned 3/3/+1; slice 1 planned 2/3/+1
+Player notices: After a missed set the coach says "205 again — make 5" instead of "try 215", and the recap names every lift that earned a call, not just the first.
+Impact: planned 2/3/+1 → shipped 2/3/+1 (biggest file i18n.ts 1296→1298; coach.ts 545→564)
+Built: coach.ts `coachMissed` (D7): a rising run whose latest reps fell below the session before is a hold at that weight for the earlier reps. recap-model `nextCalls` returns every earned increase in the order trained, up to NEXT_CALLS (3); recap.tsx maps over them. i18n coachMissed (en, es). Grafts: from "Called Shot", every call on the recap; from "Proof of Progress", "one rule for up" is queued as the next row 4 EXPAND.
+Quality: self-review split the swing: putting the call on the dial broke the R550/R669/R671 prefill and grid tests, so it is slice 2 (prototype in scratch). Reviewer REJECT (fixed at ≥2×2: the miss rule ignored the goal's target, so a made "try 105" at 105×8 on SIZE became "105 again — make 10"; the bar is now the fewer of the last reps and the target; also fixed: a false "never a raise" claim, list keys by lift id, the Spanish "haz") → APPROVE. Known limits in D7: rep waves read as misses, a stuck plateau still raises, a miss after a repeated weight still settles. The harness's close() now waits for Chrome to exit, after a loaded run lost a profile.
+Verified: suite 2342/2344 under a 30-process load (the two failures, the hundred-goals timing and the link-build race, pass alone), tsc, dist and MARKET.md current. 6 plants (a miss is a rung, the miss asks for the missed reps, only the first call, no cap, the screen draws one, the target ignored) each fail a named test and restore sha256-identical. Phone size on the sample: 200×5 then 205×3 leaves no squat raise on the recap, and three days later Now opens on "205 again — make 5" (shots/R691/; before: shots/R690/blind-raise-after-a-miss.png).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 2→3 · H4 0→0 · H5 1.50→1.50
+Market: unchanged at 42. Row 5 held at 2 (PLAYBOOK STOP: no up-score in the round that built it); its evidence cites R691.
+Content: coach situations 8→9
+Coach: none
+Decisions: D7 (a climb needs the reps to hold; a miss is the same weight again)
+Next: R692, The Call Sheet slice 2: the call on the dial (the prototype that broke the R550/R669/R671 prefill and grid tests is in scratch, r691/now-model.with-dial.ts).

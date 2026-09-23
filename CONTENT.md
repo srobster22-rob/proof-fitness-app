@@ -8,7 +8,7 @@ history row with `--history R<n>`.
 |---|---|---|---|---|
 | Exercise library | 60 | 150 | 40% | 60 items |
 | Programs | 3 | 6 | 50% | ppl, upper-lower, full |
-| Coach situations | 8 | 12 | 67% | coachAllSets, coachDeloadFloor, coachDeload, coachHold, coachPlateau, coachIncrease, coachClimbing, coachSettle |
+| Coach situations | 9 | 12 | 75% | coachAllSets, coachDeloadFloor, coachDeload, coachHold, coachPlateau, coachIncrease, coachMissed, coachClimbing, coachSettle |
 | Insights | 11 | 14 | 79% | streakRecord, firstSession, bestYet, best, pr, goalLine, trendLine, multiple, weeklyLine, lift:repBests, lift:sessions |
 | Goal kinds | 2 | 4 | 50% | Goal, MeasureGoal |
 | Body measurements | 2 | 6 | 33% | bodyweight, height |

@@ -601,6 +601,16 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**The Call Sheet, slice 1: a miss is not a rung, and the recap names every call (R691).** A climbing
+call now needs the latest session's reps to reach the fewer of the session before's and the goal's
+target; falling short at a new weight is `coachMissed`,
+"205 again — make 5", a hold made only at that weight (D7). `recapFor().next` is a list, every lift
+that earned an increase in the order trained, at most `NEXT_CALLS` (3). The panel's slices still to
+come: the call on the dial (a prototype that breaks the R550/R669/R671 prefill and grid tests is
+kept in the loop's scratch) and the day laid out on TODAY IS. `playtest.mjs` `close()` now also waits,
+up to 10 s, for Chrome to exit after `Browser.close`: under load, killing it after 2 s still lost
+a profile, so a relaunch opened a fresh install.
+
 **Bodyweight sets keep the total, and bodyweight lifts read as trained (R689).** A bodyweight set with
 no reading behind it used to replace the whole recap total with a message; the recap now shows the
 total it knows and, under it, how many sets leave the lifter's bodyweight out (`Recap.uncounted`).

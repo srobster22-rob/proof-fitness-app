@@ -88,8 +88,10 @@ describe('the lifter sees it', () => {
     const repo = trained([...session('bench', 45, [8, 8, 7]), ...session('fly', 30, [8, 8, 8]).map(s => ({ ...s, id: `f${s.id}` })),
       ...session('triext', 10, [12, 12, 12]).map(s => ({ ...s, id: `t${s.id}` }))]);
     const recap = recapFor(repo, 's1', T0)!;
-    assert.deepEqual(recap.next, { lift: 'Chest Fly', line: '30×8 for 3 sets — try 35' },
-      'bench fell short, so the call belongs to the fly, the first lift that earned one');
+    assert.deepEqual(recap.next, [
+      { id: 'fly', lift: 'Chest Fly', line: '30×8 for 3 sets — try 35' },
+      { id: 'triext', lift: 'Tricep Extension', line: '10×12 for 3 sets — try 15' }
+    ], 'bench fell short, so the calls belong to the lifts that earned one, in the order trained');
   });
 
   test('a number to beat outranks advice to back off, whichever lift came first', () => {
@@ -102,7 +104,7 @@ describe('the lifter sees it', () => {
       repo.endSession(id, T0 - days * DAY + 3_600_000);
     }
     assert.equal(coachSuggestion(repo.allSets(), 'bench', T0, { unit: 'lb', grid: 5 })?.kind, 'deload', 'the fixture no longer deloads bench');
-    assert.equal(recapFor(repo, 's1', T0)!.next?.lift, 'Chest Fly');
+    assert.deepEqual(recapFor(repo, 's1', T0)!.next.map(c => c.lift), ['Chest Fly']);
     // And the other way round: the fly first, the bench after.
     const flyFirst = trained([...session('fly', 30, [8, 8, 8]).map(s => ({ ...s, id: `f${s.id}` })), ...session('bench', 205, [4]).map(s => ({ ...s, at: s.at + 900_000 }))]);
     for (const [id, days, reps] of [['p1', 11, 8], ['p2', 7, 6]] as const) {
@@ -110,15 +112,22 @@ describe('the lifter sees it', () => {
       flyFirst.logSet({ id: `${id}b`, sessionId: id, exerciseId: 'bench', weight: 205, reps, at: T0 - days * DAY });
       flyFirst.endSession(id, T0 - days * DAY + 3_600_000);
     }
-    assert.equal(recapFor(flyFirst, 's1', T0)!.next?.lift, 'Chest Fly');
+    assert.deepEqual(recapFor(flyFirst, 's1', T0)!.next.map(c => c.lift), ['Chest Fly']);
+  });
+
+  test('at most three calls, the first three earned in the order trained (R691)', () => {
+    const lifts = ['fly', 'triext', 'curl', 'lateral'];
+    const repo = trained(lifts.flatMap((lift, k) => session(lift, 20 + k * 5, [12, 12, 12]).map(s => ({ ...s, id: `${lift}${s.id}`, at: s.at + k * 900_000 }))));
+    const next = recapFor(repo, 's1', T0)!.next;
+    assert.deepEqual(next.map(c => c.lift), ['Chest Fly', 'Tricep Extension', 'Bicep Curl']);
   });
 
   test('a workout with nothing to call says nothing, and the call never goes on the card', () => {
     const repo = trained(session('bench', 45, [8, 6]));
-    assert.equal(recapFor(repo, 's1', T0)!.next, null);
+    assert.deepEqual(recapFor(repo, 's1', T0)!.next, []);
     const made = trained(session('fly', 30, [8, 8, 8]));
     const recap = recapFor(made, 's1', T0)!;
-    assert.ok(recap.next);
+    assert.equal(recap.next.length, 1);
     assert.doesNotMatch(JSON.stringify(recap.payload), /try 35/, 'the call reached the share card');
     assert.doesNotMatch(shareText(recap), /try 35/, 'the call reached the share message');
   });
@@ -126,12 +135,12 @@ describe('the lifter sees it', () => {
   test('the goal decides the call on the recap as it does on Now', () => {
     const repo = trained(session('fly', 30, [8, 8, 8]));
     repo.setPref(PREF_GOAL, 'consistency');
-    assert.equal(recapFor(repo, 's1', T0)!.next, null, 'a consistency lifter was told to add weight');
+    assert.deepEqual(recapFor(repo, 's1', T0)!.next, [], 'a consistency lifter was told to add weight');
   });
 
   test('reopened days later, a recap still shows what it called then', () => {
     const repo = trained(session('fly', 30, [8, 8, 8], 20), 20);
-    assert.equal(recapFor(repo, 's1', T0)!.next?.line, '30×8 for 3 sets — try 35',
+    assert.equal(recapFor(repo, 's1', T0)!.next[0]?.line, '30×8 for 3 sets — try 35',
       'the two weeks were counted back from today instead of from the workout');
   });
 
@@ -139,7 +148,7 @@ describe('the lifter sees it', () => {
     const HERE = path.dirname(fileURLToPath(import.meta.url));
     const screen = readFileSync(path.join(HERE, '..', 'app', 'recap.tsx'), 'utf8');
     assert.match(screen, /const \{ payload, thin, next[^}]*\} = recap;/);
-    assert.match(screen, /\{next && \([\s\S]{0,200}T\('nextTime'\)[\s\S]{0,300}\{next\.lift\}[\s\S]{0,40}\{next\.line\}/,
+    assert.match(screen, /\{next\.length > 0 && \([\s\S]{0,200}T\('nextTime'\)[\s\S]{0,200}next\.map\(call =>[\s\S]{0,200}\{call\.lift\}[\s\S]{0,40}\{call\.line\}/,
       'the recap no longer draws the call');
     assert.equal(t('es', 'nextTime'), 'LA PRÓXIMA VEZ');
     assert.equal(t('es', 'coachAllSets'), '{weight}×{reps} en {n} series — prueba {suggest}');

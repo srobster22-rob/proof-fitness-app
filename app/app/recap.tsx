@@ -283,14 +283,17 @@ export default function Recap() {
           ))}
         </View>
 
-        {/* The coach's call for next time (R687): a number to come back and
-            beat, named on the first recap too. Not on the share card. */}
-        {next && (
+        {/* The coach's calls for next time (R687, R691): a number to come back
+            and beat for each lift that earned one, named on the first recap
+            too. Not on the share card. */}
+        {next.length > 0 && (
           <View style={s.next}>
             <Text style={s.label} allowFontScaling={false}>{T('nextTime')}</Text>
-            <Text style={s.nextLine} allowFontScaling={false}>
-              <Text style={s.nextLift}>{next.lift}</Text>{'  ·  '}{next.line}
-            </Text>
+            {next.map(call => (
+              <Text key={call.id} style={s.nextLine} allowFontScaling={false}>
+                <Text style={s.nextLift}>{call.lift}</Text>{'  ·  '}{call.line}
+              </Text>
+            ))}
           </View>
         )}
 

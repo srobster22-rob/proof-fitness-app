@@ -93,3 +93,21 @@ new work.
   every set is told the next step, not to repeat it. Bodyweight with nothing added gets no call.
 - **Revert:** restore `if (sets.length < MIN_SESSIONS) return null;` in coachSuggestion (coach.ts);
   drop `next` from recapFor.
+
+## D7 · R691 · A climb needs the reps to hold; a miss is the same weight again
+- **Choice:** R691 opens the BIG SWING "The Call Sheet", the design panel's pick over "Called Shot" (7) and
+  "Proof of Progress" (6). It answers the critic's first reason not to buy ("it plans nothing") and
+  the live trust bug. Its first slice: a climb read only the weights, so 200×5 then 205×3 was "try
+  215". A climb now needs the latest session's reps to reach what was asked: the fewer of the
+  session before's reps and the goal's target. A miss is "205 again — make 5": the same weight, for
+  those reps. It is a hold, made only at that weight. Known limits: a planned rep wave (5/3/1) reads
+  as a miss; three sessions stuck at a new weight still reach the plateau's raise; and a miss after
+  a repeated weight (200, 200, then 205×3) is not a rising run, so it still says "First time at
+  205×3 — repeat it before adding".
+- **Alternative:**
+  - require the goal's target reps for every climb, which would turn the sample's 5-rep climbs on
+    SIZE into holds;
+  - drop to settle ("First time at 205×3"), which names the failed set as the target.
+- **Why:** the lifter's own rep scheme is the evidence. Reps falling at a new weight is the one
+  signal that the step was too big, and the honest call is to make it before adding more.
+- **Revert:** remove the `coachMissed` branch before `if (rising)` in coachSuggestion (coach.ts).
