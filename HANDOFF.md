@@ -746,6 +746,14 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**A call from one session, and the first recap names it (R687).** `coachSuggestion` also calls from a
+single session in the window when two or more sets at its top weight all reach the goal's reps
+(`coachAllSets`, one step up; D6), and the same check runs before "repeat it before adding"; anything
+less from one session stays silent, and bodyweight with nothing added gets no call. `recapFor` returns
+`next`, the coach's call for next time judged as of the workout's end (the first increase in the order
+trained, never a hold or a "first time" line), and the recap shows it under NEXT TIME. It is not on the share card.
+H3 moved 0 → 2 for the first-timer.
+
 **The latest set keeps its UNDO and + (R686).** R684's tail-reveal held only for some set counts:
 after 3 sets the chips wrapped away from their buttons, and after 4 Chrome's scroll anchoring moved
 the list up past them. Each chip now sits in a slot keyed by its set, and the last slot also holds

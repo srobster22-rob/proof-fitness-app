@@ -77,3 +77,19 @@ new work.
     the first tier, ahead of every lift they have never done.
 - **Revert:** order a remaining compound first in `railOrder`, or wrap `railRow` in
   NowScreen.tsx.
+
+## D6 · R687 · One session is enough for a call when its own sets are the pattern
+- **Choice:** the coach needed two sessions of a lift in two weeks, so a first week of push, pull and
+  legs, which trains no lift twice, never heard it (H3 = 0 since PT0). It now also calls from ONE
+  session when two or more sets at its top weight all reach the goal's reps: one step up,
+  "30×8 for 3 sets — try 35". The first recap names that call under NEXT TIME.
+- **Alternative:**
+  - keep two sessions, and a first-timer's coach stays silent for a week or more;
+  - call from any single session, including "first time at 185×5", which a break makes false (PT1).
+- **Why:** two or more sets at a weight, every one at target, is the standard linear-progression
+  signal to add weight, and it is something the lifter did several times, not once. Anything less
+  from one session stays silent, and the consistency goal never adds weight. The same check runs
+  before "repeat it before adding", so a lifter who takes "try 35" on a 30 lb lift and does it for
+  every set is told the next step, not to repeat it. Bodyweight with nothing added gets no call.
+- **Revert:** restore `if (sets.length < MIN_SESSIONS) return null;` in coachSuggestion (coach.ts);
+  drop `next` from recapFor.

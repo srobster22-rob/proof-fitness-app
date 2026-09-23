@@ -605,8 +605,9 @@ export function lastTimeParts(input: LastTimeInput, lang: Language = 'en'): {
    * did" — that line is the confirmation that the set you just logged landed,
    * and swapping advice in on top of it would answer a question the lifter is
    * not asking mid-set. In practice the two never collide anyway: `previous`
-   * already wins over `thisSession`, and the coach needs two sessions in the
-   * window, which is a strict superset of having a `previous` at all.
+   * already wins over `thisSession`, and the coach needs at least one earlier
+   * session in the window (two, or one whose sets all reached the goal: D6),
+   * which is a strict superset of having a `previous` at all.
    */
   /*
    * A call the lifter has made says so, for the rest of the workout (R682).

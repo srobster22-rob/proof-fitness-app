@@ -61,6 +61,7 @@ from outside its loop. Rules are in AGENT_LOOP.md v3.1, sections 1 and 6.
   - First slice: on a no-history day the rail header reads "Today: Bench 3×8 · OHP 3×8 · Fly 3×12" (existing companion/recommendNext order + R678's calibrated startingWeight), and "First time — 45 is a starting point" becomes "3 × 8 at 45 — add 5 next time if all 8 move".
   - Est: +1 on each row = **+3.2**. The natural R681 BIG SWING.
   -> R679: ranked (gap 6, row 5; plus row 1, gap 2). It is the likely core of the next BIG SWING: the panel's differentiator draft ("The Call") makes the coach speak from session two and on the recap. Under v3.3, its first slice lands in R682, after R681's postponed playtest.
+  -> R687: partly taken. The first recap now names a call for next time and the coach can call from one session (H3 0 → 2). Laying out TODAY's session before the first set is still open.
 - **S2 A history sheet per lift** — row 4 (w3, gap 9).
   - Why: Progress rows cannot be tapped, and PT0's week-two Progress was 5 identical one-dot rows; Strong, Hevy and Knurl all have per-exercise history and charts. §4's screen cap means a sheet.
   - First slice: tap a row → each session's best set as a plain-View line (like Spark), its PRs (pr.ts), and the goal gap — wiring the orphaned `goalE1rmGap` (HANDOFF.md:518).

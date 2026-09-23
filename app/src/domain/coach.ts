@@ -74,6 +74,12 @@ export const WINDOW_DAYS = 14;
  * a guess wearing the clothes of evidence, and the line's whole value is that
  * it can point at what you actually did. Two sessions at the same weight is the
  * smallest thing that is genuinely a trend.
+ *
+ * One exception (R687): a single session whose OWN sets are a pattern. Two or
+ * more sets at its top weight, every one at the goal's reps, is the standard
+ * linear-progression signal to add weight, and it is something the lifter did
+ * several times over, not once. Anything less from one session stays silent:
+ * no "first time" claims, which a break makes false (PT1).
  */
 export const MIN_SESSIONS = 2;
 
@@ -180,7 +186,7 @@ export function coachSuggestion(
 ): Suggestion | null {
   const goal = opts.goal ?? 'size';
   const sets = topSets(history, exerciseId, opts.live ? Math.min(now, opts.live.startedAt) : now, opts.live?.id);
-  if (sets.length < MIN_SESSIONS) return null;
+  if (!sets.length) return null;
 
   const step = STEP[goal] * MIN_INCREMENT[opts.unit];
   /*
@@ -244,6 +250,35 @@ export function coachSuggestion(
   };
   const target = TARGET_REPS[goal];
   const latest = sets[0];
+
+  // Nothing to call at bodyweight with no load added: "0×12 for 3 sets — try
+  // 5" tells a lifter to strap on a plate the first time a push-up set goes
+  // well (R687 review). Until the coach can count reps as progress, it waits.
+  if (latest.weight <= 0) return null;
+
+  /*
+   * The latest session's OWN sets as the evidence (R687, D6): two or more at
+   * its top weight, every one at the goal's reps, is the linear-progression
+   * signal to add weight. It speaks from one session, and it also comes before
+   * "repeat it before adding": a lifter who took "try 35" and did 35×8 for
+   * 3 was told to repeat it, because a 5 lb step on a 30 lb lift is too big to
+   * count as climbing (R687 review). The consistency goal never adds weight.
+   */
+  const ownSetsCall = (): Suggestion | null => {
+    if (goal === 'consistency') return null;
+    const atTop = history.filter(s =>
+      s.sessionId === latest.sessionId && s.exerciseId === exerciseId && s.weight === latest.weight);
+    if (atTop.length < 2 || atTop.some(s => s.reps < target)) return null;
+    const up = nearer(latest.weight, latest.weight + step, raise(latest.weight, latest.weight + step), true);
+    return {
+      kind: 'increase', weight: up, recentWeight: latest.weight,
+      sessions: atSameWeightOf(sets), key: 'coachAllSets', reps: target,
+      params: { weight: latest.weight, reps: Math.min(...atTop.map(s => s.reps)), n: atTop.length, suggest: up }
+    };
+  };
+  // One session in the window: a call only when its own sets say so (see
+  // MIN_SESSIONS).
+  if (sets.length < MIN_SESSIONS) return ownSetsCall();
 
   // Sessions at the top of the window that share the most recent weight. This
   // is "what you have been doing", and it is the evidence the line cites.
@@ -440,6 +475,8 @@ export function coachSuggestion(
   }
 
   if (atSameWeight < MIN_SESSIONS) {
+    const own = ownSetsCall();
+    if (own) return own;
     return {
       kind: 'hold', weight: latest.weight, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachSettle', reps: latest.reps,
@@ -475,6 +512,13 @@ export function callMade(call: Suggestion | null, sets: readonly LoggedSet[]): L
     ? Math.abs(w - call.weight) < 1e-9
     : w >= call.weight - 1e-9;
   return sets.find(s => atWeight(s.weight) && s.reps >= reps) ?? null;
+}
+
+/** How many sessions, newest first, share the latest session's top weight. */
+function atSameWeightOf(sets: readonly TopSet[]): number {
+  let n = 0;
+  while (n < sets.length && sets[n].weight === sets[0].weight) n++;
+  return n;
 }
 
 /** Round to the unit's own granularity, so no suggestion is unloadable. */

@@ -104,7 +104,7 @@ export default function Recap() {
     );
   }
 
-  const { payload, thin } = recap;
+  const { payload, thin, next } = recap;
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
@@ -272,6 +272,17 @@ export default function Recap() {
             </View>
           ))}
         </View>
+
+        {/* The coach's call for next time (R687): a number to come back and
+            beat, named on the first recap too. Not on the share card. */}
+        {next && (
+          <View style={s.next}>
+            <Text style={s.label} allowFontScaling={false}>{T('nextTime')}</Text>
+            <Text style={s.nextLine} allowFontScaling={false}>
+              <Text style={s.nextLift}>{next.lift}</Text>{'  ·  '}{next.line}
+            </Text>
+          </View>
+        )}
 
         {/* A first session has no streak to hold — see `shortOneFirst`. */}
         {thin && (
@@ -468,6 +479,9 @@ const s = StyleSheet.create({
   volt: { color: VOLT },
 
   thin: { color: '#9AA5AF', fontSize: 14, marginTop: 22, textAlign: 'center' },
+  next: { marginTop: 24, gap: 6 },
+  nextLine: { color: '#9AA5AF', fontSize: 15, fontWeight: '500', lineHeight: 21 },
+  nextLift: { color: '#E8EAED', fontWeight: '800' },
 
   actions: { ...COLUMN, paddingHorizontal: 24, paddingBottom: 8 },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },

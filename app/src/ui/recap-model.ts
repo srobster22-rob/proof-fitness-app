@@ -5,8 +5,12 @@ import { planOf } from '../domain/split.ts';
 import { headlineGoal, narrativeLine } from '../domain/goals.ts';
 import { shareUrl } from '../domain/share-url.ts';
 import { weeklyLine } from './progress-model.ts';
-import type { PersonalRecord, LoggedSet, Session } from '../domain/types.ts';
-import { loadLabel } from '../domain/types.ts';
+import type { PersonalRecord, LoggedSet, Session, Unit } from '../domain/types.ts';
+import { loadLabel, convertWeight } from '../domain/types.ts';
+import { coachSuggestion } from '../domain/coach.ts';
+import { EQUIPMENT_BASE } from '../domain/coldstart.ts';
+import { trainingGoal } from './training-goal.ts';
+import { WEIGHT_STEP } from './now-model.ts';
 import { t, fill, languageOf, number, type Language } from '../domain/i18n.ts';
 import {
   CARRIES_BODYWEIGHT, bodyweightMultiple,
@@ -38,7 +42,11 @@ export interface Recap {
   sessionId: string;
   /** "Squat 315 x 5 - 1.75x bodyweight", or null. See `multipleLine`. */
   multiple: string | null;
+  /** The coach's call for next time, on the screen and never on the card (R687). */
+  next: NextCall | null;
 }
+
+export interface NextCall { lift: string; line: string }
 
 /**
  * Is this the first workout of its calendar week?
@@ -152,8 +160,43 @@ export function recapFor(repo: Repo, sessionId: string, now: number, title?: str
     // showing the user, not worth pushing them to send.
     thin: sets.length === 1 && prs.length === 0 && !goalLine,
     sessionId,
-    multiple
+    multiple,
+    next: nextCall(repo, sets, Math.min(now, session.endedAt ?? now), session.unit, lang)
   };
+}
+
+/**
+ * What the coach will call next time for this workout's lifts (R687): the
+ * first INCREASE in the order they were trained, a number to come back and
+ * beat. Holds, deloads and "first time at" lines are advice for the lift
+ * itself, and the last can be false after a break (PT1), so the recap leaves
+ * them to the Now screen.
+ *
+ * The finished workout is evidence now, so even the first recap of a lifter's
+ * life can name a number to beat: the only coach line a first week sees when
+ * no lift comes round twice in it. Judged as of the workout's end, so
+ * reopening an old recap shows what it called then. Kept off the share card:
+ * it is advice for the lifter, not a claim for others.
+ */
+export function nextCall(repo: Repo, sets: readonly LoggedSet[], at: number, unit: Unit, lang: Language): NextCall | null {
+  const units = repo.sessionUnits();
+  const history = repo.allSets().map(x => {
+    const from = units.get(x.sessionId) ?? unit;
+    return from === unit ? x : { ...x, weight: convertWeight(x.weight, from, unit) };
+  });
+  const exercises = repo.exercises();
+  const goal = trainingGoal(repo);
+  for (const id of new Set(sets.map(x => x.exerciseId))) {
+    const own = sets.filter(x => x.exerciseId === id);
+    const kit = own[own.length - 1].equipment ?? 'barbell';
+    const call = coachSuggestion(history, id, at, {
+      unit, goal, grid: WEIGHT_STEP[unit], base: EQUIPMENT_BASE[kit][unit]
+    });
+    if (call?.kind === 'increase') {
+      return { lift: exercises.get(id)?.name ?? id, line: fill(t(lang, call.key as never), call.params) };
+    }
+  }
+  return null;
 }
 
 /**

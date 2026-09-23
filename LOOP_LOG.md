@@ -4429,3 +4429,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R687 EXPAND, The Call slices 2 and 3: a call from one session when the sets say so, and the first recap naming each lift's next call (row 5, gap 6; the only way H3 can move for a first-timer who never repeats a lift in two weeks).
+
+## R687 · EXPAND · The Call, slices 2 and 3: a call from one session, and the first recap names it
+Pick: The Call's next slices — gap value 6 (MARKET row 5) / COACH S1 (in part) · impact planned 2/3/+1. R685's vision check: H3 cannot move while the coach needs two sessions and a first week repeats no lift.
+Player notices: The first workout's recap ends with NEXT TIME and a number to beat ("Tricep Extension · 10×12 for 3 sets — try 15"), and the coach speaks the second time a lift comes round.
+Impact: planned 2/3/+1 → shipped 2/3/+1 (biggest file now-model.ts 2243→2244, a comment; coach.ts 501→545; R686's log said NowScreen.tsx 2672, it was 2674)
+Built: coach.ts `ownSetsCall` (D6): two or more sets at the latest session's top weight, all at the goal's reps, make an increase (`coachAllSets`). It speaks from one session and before "repeat it before adding"; bodyweight with nothing added gets no call. recap-model `nextCall` (the first increase in the order trained, judged at the workout's end) feeds NEXT TIME on the recap, off the share card. i18n coachAllSets, nextTime (en, es).
+Quality: self-review limited the recap to increases, since a settle line there could repeat PT1's false "first time". Reviewer REJECT (fixed at ≥2×2: bodyweight got "0×12 for 3 sets — try 5"; taking "try 35" on a 30 lb lift led to "repeat it" and a silent recap; also fixed: stale MARKET/now-model text, test gaps, row 5 back to 2) → APPROVE. Backlog: a light day's low call (it trades against a taken deload's "try 190"), bodyweight holds silenced until coach lines print BW, the plate jump in nextCall, two numbers to beat on one recap, an old recap's stale NEXT TIME. Biggest function touched: coachSuggestion, ~330 lines.
+Verified: suite 2329/2329, tsc, dist and MARKET.md current. 11 plants (never from one session, short set counts, one set a pattern, consistency adds, most reps named, any call wins, counted from today, not drawn, bodyweight called, taken call means repeat, another lift's sets count) each fail a named test and restore sha256-identical. Phone size: the first-timer's day-1 recap shows NEXT TIME above SHARE (shots/R687/).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→2 · H4 0→0 · H5 1.50→1.50
+Market: unchanged at 45. Row 5 held at 2 until a playtest (the reviewer: Boostcamp's 3 plans every set); its evidence now cites R687.
+Content: coach situations 7→8
+Coach: S1 in part (the recap names a call; laying out today's session is still open)
+Decisions: D6 (one session is enough when its own sets are the pattern)
+Next: R688 PLAYTEST (PT2): 5 building rounds since PT1. Personas: a Strong veteran (unscripted), the min-maxer PT1 skipped, and a critic.
