@@ -261,3 +261,4 @@ ever names a weight your own plates and buttons can make.
 | R690 | 42 | Hevy 88 | RETRO with a blind re-score, lower kept: data trust 3 → 2; the blind scorer was higher on rows 4, 6, 7 and 8 |
 | R691 | 42 | Hevy 88 | BIG SWING The Call Sheet, slice 1: no raise after a miss, every call on the recap; no row moved in the round that built it |
 | R692 | 42 | Hevy 88 | The Call Sheet, slice 2: the call on the dial (D8); no row moved in the round that built it |
+| R693 | 42 | Hevy 88 | PT3: no row moved; coaching held at 2 (2, 1, 2) on a raise after an in-session miss; design held at 2 (2, 3, 3) with no design change since R690 |

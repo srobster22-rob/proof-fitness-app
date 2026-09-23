@@ -4513,3 +4513,17 @@ Content: unchanged
 Coach: none
 Decisions: D8 (a lift with a call opens with it on the dial; the §4 tension stated)
 Next: R693 PLAYTEST (PT3): 3 building rounds since PT2 (R689, R691, R692). The personas play The Call Sheet's first two slices.
+
+## R693 · PLAYTEST · PT3: a Fitbod veteran, a struggling lifter and a critic; the coach still raises after a miss
+Pick: the derived PLAYTEST — 3 building rounds since PT2 (R689, R691, R692) · no score (PLAYTEST)
+Player notices: nothing (PLAYTEST/RETRO)
+Impact: none planned or shipped (PLAYTEST); no source touched
+Built: PLAYTESTS.md PT3: a Fitbod veteran (fresh install, FULL BODY, 3 days, 36 sets), the struggling lifter PT2 skipped (the sample, misses after a made first set on purpose, a day-6 look), a critic (fresh and sample). All three unscripted; sets in real time, days stepped. shots/PT3/: 35 cited shots, 5 store picks (2 marked FILLER), the scripted first-timer (01–19).
+Quality: the top finding was checked against its screenshots: row 160×8, ×6, ×5 → "try 165" and squat 200×5, 200×3, 185×5 → "try 205" are on the recaps. Cause read in coach.ts: the rule takes each session's top set, so R691's miss rule sees a miss only when the top set is the miss. Relaunch losses are marked as harness relaunches that iOS would also cause.
+Verified: market.ts --check at 42. Critic 5/10, down from 6; only 3 of 5 store shots sell it (was 4).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (scripted first-timer on 6420770)
+Market: unchanged at 42. Row 5 held at 2 (2, 1, 2); row 7 held at 2 (2, 3, 3): no design change since R690's blind re-score, so the rise is scorer noise. Rows 1, 2, 3, 4, 6, 10 and 12 held.
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R694 FIX (PT3 found bugs): the coach reads every set at the top weight, not the top set: no raise after a later miss, "made it" ends at a miss, and with no call the dial opens on last time's top set.

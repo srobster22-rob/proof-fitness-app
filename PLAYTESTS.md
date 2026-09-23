@@ -6,6 +6,77 @@ and the tool refuses to tap anything a thumb could not reach. Scenario scripts l
 `app/tools/playtests/`. Screenshots a report cites are committed under `shots/PT<n>/` and cited
 by that path (AGENT_LOOP v3.2 §1).
 
+### PT3 · R693 · personas: Fitbod veteran (unscripted), struggling lifter (unscripted, misses on purpose), critic (unscripted) · build 6420770
+Sessions:
+- **Veteran:** fresh install on FULL BODY. Three full-body days on the stepped clock (Wed 23, Sat 26, Tue 29 Sep), 36 sets over about 17 minutes. Followed one call and missed another on purpose.
+- **Struggling lifter:** the app's sample, about 11 minutes. Two leg days (23 and 26 Sep) with misses after a made first set: squat 200×5, 200×3, 185×5, then 205×5, ×3, ×2. Leg press dropped to 240 after 250×8. Then looked at Now on day 6 without logging.
+- **Critic:** a fresh FULL BODY install (8 minutes), then the sample (12 minutes): Progress, history, an old recap, Goals, Settings, and squat 200×5, ×5, ×4, then SHARE. All on the real clock.
+- Every persona chose its own taps from what the screen showed. Time inside a workout, the rest timer included, was always real. My scripted first-timer re-ran on this build: `shots/PT3/01-…19-…`.
+Headline: H1 3 (was 3) · H2 1.60 (1.60) · H3 3 (2 at PT2; 3 since R691) · H4 0 (0) · H5 1.50 (1.50), scripted first-timer on 6420770.
+Versus Fitbod (veteran, from memory):
+- Fitbod lays out the whole workout before the first set. PROOF showed one lift, and the day's lifts appeared only after a set, with no set count (`veteran-008-s07-open-exercise-picker.png`).
+- PROOF's first-day guesses from one squat were faster than Fitbod's quiz (bench 170 was right, row 110 was 45 lb light).
+- A call on the dial with its reason ("170×8 for 3 sets — try 175") beats Fitbod's black box, and accepting it takes zero taps (`veteran-031-s25-day4-bench-dial.png`).
+- Fitbod backs off after a miss, and PROOF raised (Broken 1).
+- Against Alpha Progression and Hevy (the struggling lifter), PROOF never shames a miss and never notices one either.
+Felt samey:
+- Full Body is the same 4 lifts every day, with no rotation.
+- Every NEXT TIME line reads "X and climbing, N sessions — try X+5".
+- Every recap opens on a lime NEW PERSONAL RECORD banner.
+- Every screen is the same black, lime and spaced capitals.
+Confusing:
+- The picker says "START WITH … PUSH DAY" on a Full Body day, which PT2 also found.
+- "+" is labelled "same as the last" but opens an ADD A SET sheet.
+- "2 WK" has no label.
+- SIZE "waits for 8", yet climbing calls raise after 5 (`critic-sample-01-s10-end.png`, `critic-sample-01-s12-end.png`), which PT2 also found.
+- The recap said "4 sessions" and Now three days later "3 sessions".
+- "1.26×" has no label on Progress.
+- "TODAY IS FULL BODY" sits above a single FULL BODY button.
+- The TODAY IS sheet never marks a day, so following it gave legs three sessions running.
+- CLEAR is boxed while FINISH is plain text.
+Broken:
+1. **The coach raises after a miss within a session** (all three personas). R691 catches a miss only when it is the session's top set. The rule reads each session's top set, so a made first set hides the misses after it.
+   - Row 160×8, ×6, ×5 → "try 165" on the recap, and 165 on the next dial (`veteran-038-s28-day4-ohp.png`, `veteran-047-s33-day7-bench-row.png`).
+   - Squat 200×5, 200×3, 185×5 → "try 205" (`struggling-02-022-w1-recap-reopened.png`). Squat 205×5, ×3, ×2 → "try 210" (`struggling-02-035-w2-recap-reopened.png`).
+   - The critic's 200×5, ×5, ×4 → "try 205" (`critic-sample-01-s14-end.png`).
+2. **"Made it" goes stale.** The line stays green on "160×8 — made it" above 160×6 and 160×5, and on "205×5 — made it" above 205×2 (`veteran-036-s27-day4-row-miss.png`, `struggling-03-026-w2-squat-set3-missed-205x2.png`).
+3. **With no call, the dial opens on last time's last set, often the worst.** Squat opened at 205×7 after two 205×8 sets, and OHP at 95×6. Following it did less than the week before (`veteran-028-s23-day4-fullbody.png`, `veteran-037-s28a-ohp-dial.png`).
+4. **A past recap uses later data.** Sep 18 says "30 lb from a 225 squat", but the best squat that day was 190. It is also a squat goal on a push day (`critic-sample-01-s06-end.png`), which PT2 also found.
+5. **THIS WORKOUT clips earlier sets** to 4pt slivers under its header (`critic-fresh-01-f06-bench3sets.png`, `struggling-03-026-…`).
+6. **History and recap hide misses.** They show "160 × 8, 3 sets" and "205 × 5 ★, 3 sets" and never the 6, 5, 3 or 2 (`veteran-052-s36-row-history.png`, `struggling-02-037-w2-squat-history.png`). Progress draws a "—" trend for 95×8, 6, 7 under the headline, and a 2% squat gain as a 5× bar (`veteran-040-s30-progress-day4.png`).
+7. **Taps too small for a finger** (the harness refused these):
+   - History DONE is 38×15 and Progress DONE 41×16 (`critic-sample-01-s05-end.png`, `veteran-054-s38-progress-done-tap.png`).
+   - Goals CHANGE is 55×14 (`critic-sample-01-s08-end.png`).
+   - Also WIPE 34×14, SHARE 44×14 and Change split 71×15.
+   - PT2 found the same.
+8. **The recap leaves things out.** Only one best gets a card, and OHP's made "add a rep" call gets no NEXT TIME line. The last NEXT TIME row sits under SHARE (`veteran-025-s20-finish-day1.png`, `veteran-051-s35-day7-finish.png`). The first recap has a blank gap of about 250px (`critic-fresh-01-f09-end.png`).
+9. **A picked lift and a split without a day are lost on relaunch.** One LOG SET after a reload logged a leg-press set as squat (`struggling-01-010-w1-legpress-set1.png`). The reload was the harness relaunching; iOS closing the app would do the same. PT2 also found this.
+10. **SHARE does nothing visible on web** (`critic-sample-01-s15-end.png`).
+11. **Rail chips are cut at its edges, and the NEXT chip's label reads "heavy overlap"**, a warning on the lift it recommends.
+Critic: 5/10, down from 6. Three reasons not to buy:
+- You never see today's plan before you lift.
+- You can't trust the coach: it ignores SIZE, raises after a miss, and an old recap uses later numbers.
+- It is thin next to free rivals: a list for history, no Watch, Health, import or backup, and buttons too small to hit.
+Store shots: `shots/PT3/store-1-dial-made-it-200x5.png`, `store-2-recap-new-pr-squat.png` and `store-3-progress-every-lift.png`. **Only 3 of 5 sell it**; 4 and 5 are marked FILLER.
+Best moment:
+- Veteran: day-4 bench opened on 175 under "170×8 for 3 sets — try 175", and one LOG SET turned it green, "175×8 — made it" (`veteran-032-s26a-bench-after-set1.png`).
+- Struggling lifter: a miss takes three taps, and nothing shames it.
+- Critic: the lime "200×5 — made it" with its star.
+Matrix re-scores:
+- **No row moves.** Row 5 holds at 2 (persona scores 2, 1, 2). Its slices work where tested, but Broken 1–3 are coaching.
+- **Row 7 holds at 2** (scores 2, 3, 3). No design work shipped since R690's blind re-score kept it at 2, and the cited defects, including 3 of 5 store shots, are PT1's and PT2's. A rise with no change in the build is scorer noise.
+- **Rows held:** 1 (4, 3), 2 (4, 4, 4), 3 (2), 4 (2, 2, 2), 6 (2, 2), 10 (2, 2, 2), 12 (1).
+Backlog (ranked by gap value):
+1. Row 5, the coach's reading of a session (Broken 1–3):
+   - judge a raise from every working set at the top weight, not the top set;
+   - "made it" ends when a later set at that weight misses;
+   - with no call, the dial opens on last time's top set.
+   → R694 FIX.
+2. Row 5, the SIZE contradiction and the plan: the day laid out on TODAY IS (The Call Sheet, slice 3).
+3. Row 10, trust: the old recap's goal distance, and history and recap that name the missed sets (Broken 4, 6).
+4. Row 7: finger-sized targets, THIS WORKOUT's clipped sets, the recap's gap and cut-off row, the rail's chips (Broken 5, 7, 8, 11).
+5. Row 2: the lift and day kept across a relaunch (Broken 9).
+
 ### PT2 · R688 · personas: Strong veteran (unscripted), min-maxer (scripted, every number checked), critic (unscripted) · build 9f6b0d2
 Sessions:
 - **Veteran:** fresh install on UPPER / LOWER. Upper, Lower, then Upper again on the stepped clock, 57 sets in about 20 minutes, 12 lifts found by search.
