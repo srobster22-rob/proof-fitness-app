@@ -74,6 +74,8 @@ const BG = '#08090A';
  */
 const RAIL_FADE = [0.12, 0.3, 0.55, 0.8, 1];
 const MUTED = '#7C8792';
+/** The line under the lift name: one row, 20px, as measured on the running app (R684). */
+const LAST_TIME_LINE = 20;
 
 /**
  * Fire-and-forget feedback that can never break a write.
@@ -623,22 +625,28 @@ export function NowScreen({
         {/* One line, always. R104 gave this line a second clause — the goal on
             the lift being trained — and the column's height model treats it as
             exactly one row: wrapping on a narrow phone would push the hero down
-            by 18px with nothing in the fit math expecting it. Truncating drops
-            the goal before the last-time numbers, which is the right order. */}
-        <Text style={s.lastTime} numberOfLines={1} role="status" aria-live="polite">
+            by 18px with nothing in the fit math expecting it.
+
+            So the row is one line tall and wraps: the goal fits beside the
+            numbers or drops whole onto a second line nobody sees. It used to
+            be cut mid-number instead, "try 200 · 30 to 2…", which reads as a
+            wrong number (PT1). The goal still goes before the numbers do. */}
+        <View style={s.lastTime} role="status" aria-live="polite">
           {/* A made call (R682) in volt, for the rest of the workout. */}
-          {state.lastTime.made ? <Text style={s.lastTimeHit}>{state.lastTime.head}</Text> : state.lastTime.head}
+          <Text style={[s.lastTimeText, state.lastTime.made && s.lastTimeHit]} numberOfLines={1}>
+            {state.lastTime.head}
+          </Text>
           {/* Volt only for the set that just hit the goal. §15 spends the accent
               on what matters right now, and for the length of one set that is
               this — it is a different size class from the hero, so it draws the
               eye without competing with the number. A gap still to close stays
               grey: it is information, not news. */}
           {state.lastTime.tail !== '' && (
-            <Text style={state.lastTime.hit ? s.lastTimeHit : undefined}>
-              {state.lastTime.tail}
+            <Text style={[s.lastTimeText, s.lastTimeTail, state.lastTime.hit && s.lastTimeHit]} numberOfLines={1}>
+              {state.lastTime.tail.trimStart()}
             </Text>
           )}
-        </Text>
+        </View>
 
         {/* Equipment, under the numbers rather than over them. It changes maybe
             once a month — carried over from the last set of this lift — so it
@@ -2253,10 +2261,18 @@ const s = StyleSheet.create({
   streak: {
     color: VOLT, fontSize: TYPE.label, fontWeight: '900', letterSpacing: SPACING.label
   },
+  // One 20px row (the line's measured height, which the fit math counts):
+  // what does not fit on it wraps below and is clipped (R684).
   lastTime: {
-    color: MUTED, fontSize: TYPE.lead, marginTop: 8, fontWeight: '500',
-    alignSelf: 'stretch', textAlign: 'center'
+    marginTop: 8, height: LAST_TIME_LINE, overflow: 'hidden', alignSelf: 'stretch',
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center'
   },
+  lastTimeText: {
+    color: MUTED, fontSize: TYPE.lead, lineHeight: LAST_TIME_LINE, fontWeight: '500', flexShrink: 1
+  },
+  // The "   ·   " the model puts before the goal, as a margin: a line's leading
+  // spaces vanish on web, and its own Text starts one.
+  lastTimeTail: { marginLeft: 5 },
   lastTimeHit: { color: VOLT, fontWeight: '800' },
 
   heroRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

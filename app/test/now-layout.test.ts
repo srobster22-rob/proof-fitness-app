@@ -123,7 +123,7 @@ describe('Now screen — layout invariants', () => {
   test('only the set that hit the goal is volt', () => {
     assert.match(style('lastTimeHit'), /color:\s*VOLT/,
       'the one moment worth marking is drawn in the same grey as everything else');
-    assert.match(SOURCE, /state\.lastTime\.hit \? s\.lastTimeHit : undefined/,
+    assert.match(SOURCE, /s\.lastTimeTail, state\.lastTime\.hit && s\.lastTimeHit\]/,
       'the accent must be conditional on the hit, not on there being a goal at all');
   });
 
@@ -131,7 +131,14 @@ describe('Now screen — layout invariants', () => {
     // The colour needed a nested Text, and nesting is where numberOfLines
     // quietly stops applying. The height model treats this as exactly one row.
     // R660: the tag also carries role/aria-live now; still one row.
-    assert.match(SOURCE, /<Text style=\{s\.lastTime\} numberOfLines=\{1\}[^>]*>/);
+    // R684: one row that WRAPS and is clipped, so the goal drops whole instead
+    // of being cut mid-number. Each part is still one line of its own.
+    assert.match(style('lastTime'), /height:\s*LAST_TIME_LINE/, 'the line is no longer one row tall');
+    assert.match(style('lastTime'), /overflow:\s*'hidden'/, 'a wrapped goal would show on a second row');
+    assert.match(style('lastTime'), /flexWrap:\s*'wrap'/, 'a goal that does not fit is cut, not dropped');
+    assert.match(style('lastTimeText'), /lineHeight:\s*LAST_TIME_LINE/, 'the text is not the row\'s height');
+    assert.match(SOURCE, /const LAST_TIME_LINE = 20;/, 'the row is not the 20px the fit math measured');
+    assert.match(SOURCE, /<Text style=\{\[s\.lastTimeText, state\.lastTime\.made && s\.lastTimeHit\]\} numberOfLines=\{1\}>/);
     assert.match(style('lastTime'), /alignSelf:\s*'stretch'/,
       'numberOfLines can only ellipsize against a definite width');
   });

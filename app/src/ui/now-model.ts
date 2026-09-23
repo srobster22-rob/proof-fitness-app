@@ -740,9 +740,13 @@ export function revealOffset(input: {
   const top = block.y, bottom = block.y + block.h;
   if (top >= scrollTop && bottom <= scrollTop + viewport) return null;
 
-  // A block taller than the viewport cannot be fully shown, so show its head:
-  // the lift's name and its first sets, not its tail.
-  const target = block.h >= viewport || top < scrollTop ? top : bottom - viewport;
+  // A block taller than the viewport cannot be fully shown, so show its TAIL:
+  // the latest set, with the UNDO and + a thumb goes to next. Its head is the
+  // lift's name, which the screen already shows as its title. Showing the
+  // head left a 375x812 phone's first set half under CLEAR / FINISH, its +
+  // beyond a thumb (PT1). A block that fits and sits above the fold still
+  // aligns to its top.
+  const target = block.h >= viewport ? bottom - viewport : top < scrollTop ? top : bottom - viewport;
   const clamped = Math.min(max, Math.max(0, target));
   return clamped === scrollTop ? null : clamped;
 }

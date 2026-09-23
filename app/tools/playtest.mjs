@@ -106,12 +106,27 @@ export class Session {
     return this.open();
   }
 
-  /** Every control on screen: its accessible name, visible text, and centre point. */
+  /**
+   * Every control on screen: its accessible name, visible text, and the centre of the part
+   * of it a finger can SEE (vw × vh), inside every scrolling ancestor and the screen. A chip
+   * half past the rail's edge has its geometric centre where nothing is drawn; a thumb
+   * presses the half that shows (R684: PT1 reported two such chips as dead).
+   */
   async controls() {
     return this.eval(`[...document.querySelectorAll('[role=button],[role=tab],[role=link],a,input,textarea,[role=switch]')]
       .map((el, i) => { const r = el.getBoundingClientRect();
+        let L = r.left, R = r.right, T = r.top, B = r.bottom;
+        for (let p = el.parentElement; p; p = p.parentElement) {
+          const cs = getComputedStyle(p), q = p.getBoundingClientRect();
+          if (cs.overflowX !== 'visible') { L = Math.max(L, q.left); R = Math.min(R, q.right); }
+          if (cs.overflowY !== 'visible') { T = Math.max(T, q.top); B = Math.min(B, q.bottom); }
+        }
+        L = Math.max(L, 0); T = Math.max(T, 0); R = Math.min(R, innerWidth); B = Math.min(B, innerHeight);
+        const seen = R > L && B > T;
         return { i, label: el.getAttribute('aria-label') || '', text: (el.innerText || el.value || '').trim().replace(/\\s+/g, ' ').slice(0, 60),
-          role: el.getAttribute('role') || el.tagName.toLowerCase(), x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width, h: r.height,
+          role: el.getAttribute('role') || el.tagName.toLowerCase(),
+          x: seen ? (L + R) / 2 : r.x + r.width / 2, y: seen ? (T + B) / 2 : r.y + r.height / 2, w: r.width, h: r.height,
+          vw: seen ? R - L : 0, vh: seen ? B - T : 0,
           disabled: el.getAttribute('aria-disabled') === 'true' }; })
       .filter(c => c.w > 0 && c.h > 0)`);
   }
@@ -129,11 +144,16 @@ export class Session {
     const SELECTOR = `document.querySelectorAll('[role=button],[role=tab],[role=link],a,input,textarea,[role=switch]')[${target.i}]`;
     // Off screen on EITHER axis: a chip at the far end of a horizontal row is on screen
     // vertically and still 500px off the right edge, and a touch there reaches nothing.
-    if (target.y < 0 || target.y > PHONE.height || target.x < 0 || target.x > PHONE.width) {
+    // Or none of it shows at all: clipped out of its scroller while still inside the screen.
+    if (target.vw === 0 || target.y < 0 || target.y > PHONE.height || target.x < 0 || target.x > PHONE.width) {
       await this.eval(`${SELECTOR}.scrollIntoView({ block: 'center', inline: 'center' })`);
       await sleep(400);
       all = await this.controls();
       Object.assign(target, all.find(c => c.i === target.i));
+    }
+    // A sliver is not a target: a fingertip needs about 20pt of the control to land on it.
+    if (target.vw > 0 && (target.vw < 20 || target.vh < 20)) {
+      throw new Error(`playtest: only ${Math.round(target.vw)}×${Math.round(target.vh)} of "${target.label || target.text}" is visible — too little for a finger`);
     }
     // A thumb only presses what is actually under it. Refuse to report a tap on something
     // covered, clipped or still off screen instead of silently touching whatever is there.

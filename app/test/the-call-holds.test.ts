@@ -160,7 +160,7 @@ describe('the screen shows it', () => {
   const screen = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
 
   test('a made call is in volt', () => {
-    assert.match(screen, /\{state\.lastTime\.made \? <Text style=\{s\.lastTimeHit\}>\{state\.lastTime\.head\}<\/Text> : state\.lastTime\.head\}/,
+    assert.match(screen, /<Text style=\{\[s\.lastTimeText, state\.lastTime\.made && s\.lastTimeHit\]\} numberOfLines=\{1\}>\s*\{state\.lastTime\.head\}/,
       'a made call is not in volt');
   });
 

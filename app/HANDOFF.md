@@ -601,6 +601,14 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**PT1's layout defects (R684).** THIS WORKOUT is a ~52px window at 375×812, shorter than one lift's
+block, so `revealOffset` now shows a tall block's TAIL (the latest set, its UNDO and +) instead of
+its head, which had left the + half under CLEAR / FINISH. The line under the lift name is a
+one-row (`LAST_TIME_LINE`, 20px) wrapping View: the goal fits beside the numbers or drops whole
+onto a clipped second row, never "30 to 2…". PT1's "dead" half-visible rail chips were the
+harness: `playtest.mjs` tapped an element's geometric centre even when it was clipped, and now
+taps the middle of the part a finger can see (and refuses a sliver under 20pt).
+
 **Search on the add path (R683).** Typing in the picker's "+ Something else" lists up to five
 movements from the whole library and the lifter's own, under MATCHES, just above the field; a tap
 picks one. `find-exercise.ts` matches by name, then an alias ("RDL", "OHP", "skullcrusher"),

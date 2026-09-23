@@ -35,8 +35,10 @@ function enclosingText(marker: string): string {
  */
 describe('logging a set is confirmed to a screen reader (R660)', () => {
   test('the line under the lift is a polite status', () => {
-    // The head's own expression, which R682 wraps in volt once a call is made.
-    const tag = enclosingText('{state.lastTime.made ?');
+    // Since R684 the line is a View holding the head and the goal as two
+    // Texts, so the status is the View that holds the head.
+    const before = upTo(SCREEN, '{state.lastTime.head}');
+    const tag = region(before.slice(before.lastIndexOf('<View')), '<View', '>');
     assert.match(tag, /style=\{s\.lastTime\}/, 'the anchor no longer sits in the last-time line');
     assert.match(tag, /role="status"/, 'the confirmation line is not a status');
     assert.match(tag, /aria-live="polite"/, 'the confirmation line is not a live region');

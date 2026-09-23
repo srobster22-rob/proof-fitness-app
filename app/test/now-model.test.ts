@@ -1431,10 +1431,18 @@ describe('Now screen — TODAY follows the lift you are on (§4)', () => {
     assert.equal(to, 119, 'showing the name is the point');
   });
 
-  test('a block taller than the viewport shows its head, not its tail', () => {
+  /*
+   * PT1 (R684). At 375x812 the list is a 52px window, shorter than one lift's
+   * name and its row of sets, and showing the head left the latest set's +
+   * half under CLEAR / FINISH, where a thumb could not press it. The name is
+   * the screen's title already; the tail is where the next tap goes.
+   */
+  test('a block taller than the viewport shows its tail: the latest set, its UNDO and +', () => {
     const tall = [{ y: 0, h: 100 }, { y: 100, h: 400 }];
     const to = revealOffset({ blocks: tall, current: 1, viewport: VIEW, content: 500, scrollTop: 0 });
-    assert.equal(to, 100, 'the lift name is at the top of the block');
+    assert.equal(to, 100 + 400 - VIEW, 'the latest set is at the bottom of the block');
+    // Scrolled past it, too: the tail, not the name.
+    assert.equal(revealOffset({ blocks: tall, current: 1, viewport: VIEW, content: 900, scrollTop: 600 }), 100 + 400 - VIEW);
   });
 
   test('the offset never exceeds what there is to scroll', () => {

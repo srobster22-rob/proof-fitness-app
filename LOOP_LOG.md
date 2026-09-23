@@ -4387,3 +4387,17 @@ Content: unchanged
 Coach: S3 taken
 Decisions: none
 Next: R684 FIX, PT1's layout defects: the first set's row under CLEAR / FINISH (Broken 2), the half-visible rail chip (3), and the cut-off coach line (6).
+
+## R684 · FIX · PT1's layout defects: the set row under FINISH, the cut-off coach line, and the "dead" chips
+Pick: PT1 Broken 2, 3 and 6 — PT ref PT1 · impact planned 2/3/0
+Player notices: After a set, its UNDO and + sit above CLEAR / FINISH instead of half under them, and the line under the lift shows its goal whole or not at all, never "30 to 2…".
+Impact: planned 2/3/0 → shipped 2/3/0 (biggest file NowScreen.tsx 2630→2646; now-model.ts 2239→2243)
+Built: now-model `revealOffset` shows a tall block's tail (the latest set, its UNDO and +), since THIS WORKOUT is a ~52px window at 375×812. NowScreen's line under the lift is a one-row (LAST_TIME_LINE, 20px, as measured) wrapping View of two Texts, so the goal drops whole onto a clipped row. tools/playtest.mjs taps the middle of a control's visible part and refuses a sliver under 20pt.
+Quality: self-review (FIX needs no independent review, §4). Broken 3 was the harness, not the app: a thumb on the visible half of the chip works, and the harness had tapped a clipped centre. Four source pins moved to the line's new shape. Backlog: PT1's other bugs (0×8 rows, the recap's bodyweight promise, empty sparklines).
+Verified: suite 2314/2314, tsc, dist and MARKET.md current. 6 plants (head shown again, no wrap, second row visible, not one row tall, text off the row height, harness taps the centre) each fail a named test or the live chip probe, and restore sha256-identical. Phone size: the + at y 657–691, tapped after 1 and 4 sets (was 689–723, refused); a coach line's goal wraps below a 46–66 box; "200×5 — made it · 25 to 225 × 5" fits on one row; the half-visible Overhead Press chip taps at x 327 and opens (shots/R684/).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 0→0 · H5 1.50→1.50
+Market: unchanged at 46. Row 7 stays 2: the look at phone size is the owner's open question.
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R685 RETRO. 7 building rounds since setup (R678–R684) and PT1 is newer than any retro.
