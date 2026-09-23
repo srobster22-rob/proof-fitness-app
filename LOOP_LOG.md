@@ -4345,3 +4345,17 @@ Content: insights 9→11
 Coach: S2 taken
 Decisions: none
 Next: R681 PLAYTEST, postponed from R678; 3 building rounds have now run since PT0.
+
+## R681 · PLAYTEST · PT1: three unscripted personas, and the coach's call moves under the lifter
+Pick: the playtest postponed from R678 — 3 building rounds (R678–R680) since PT0 · no score (PLAYTEST)
+Player notices: nothing (PLAYTEST/RETRO)
+Impact: none planned or shipped (PLAYTEST); no source touched
+Built: PLAYTESTS.md PT1: a Hevy veteran (fresh install, 4 days), a returning lifter (the sample after a 9-day break), a critic (both ways); all unscripted, sets on real time, days stepped. shots/PT1/: 23 cited shots, 5 store picks, and the scripted first-timer re-run (01–19).
+Quality: every Broken item I act on next was checked against its screenshot, and the moving call was reproduced by my own probe before any persona reported it. No reviewer or plants (PLAYTEST).
+Verified: suite 2291/2291, dist and MARKET.md current. Critic 5/10; only 3 of 5 store shots are clean.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 0→0 · H5 1.50→1.50 (scripted first-timer on 13752c1)
+Market: unchanged at 46. Row 4 held at 3 in play (no longer provisional); rows 1, 5 and 7 carry PT1's evidence.
+Content: unchanged
+Coach: none. PT1 backs S3 (search, all three personas) as R683's pick.
+Decisions: none
+Next: R682 BIG SWING "The Call", slice 1: the call holds for the whole workout and says when it is made (PT1 Broken 1). Then R683 EXPAND search on the add path (row 3, gap 9); R684 FIX (PT1 Broken 2, 3, 6).
