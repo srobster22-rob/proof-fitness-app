@@ -4443,3 +4443,17 @@ Content: coach situations 7→8
 Coach: S1 in part (the recap names a call; laying out today's session is still open)
 Decisions: D6 (one session is enough when its own sets are the pattern)
 Next: R688 PLAYTEST (PT2): 5 building rounds since PT1. Personas: a Strong veteran (unscripted), the min-maxer PT1 skipped, and a critic.
+
+## R688 · PLAYTEST · PT2: a Strong veteran, the min-maxer and a critic; insight falls to 2
+Pick: the derived PLAYTEST — 5 building rounds since PT1 (R682, R683, R684, R686, R687) · no score (PLAYTEST)
+Player notices: nothing (PLAYTEST/RETRO)
+Impact: none planned or shipped (PLAYTEST); no source touched
+Built: PLAYTESTS.md PT2: a Strong veteran (fresh install, UPPER/LOWER, 3 days, unscripted), the min-maxer PT1 skipped (the sample, every coach number checked, 3 goals, +10 and +7 days), a critic (both ways, unscripted). Sets ran in real time, days were stepped. shots/PT2/: 26 cited shots, 5 store picks, the scripted first-timer (01–19).
+Quality: the one "clipped row" claim was checked against its screenshot: the latest set, its UNDO and + are whole, and only the line above shows at the window's edge. Two personas' "data loss" was the harness hard-killing Chrome, and is recorded as the harness's fault, not the app's. Deadlift on Upper is the owner's open question (D4), not a bug.
+Verified: suite 2329/2329; market.ts --check at 43. Critic 6/10, up from 5; 4 of 5 store shots are clean (was 3).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 2→2 · H4 0→0 · H5 1.50→1.50 (scripted first-timer on 9f6b0d2)
+Market: 45→43. Row 4 3→2 (persona scores 3, 2, 2: bodyweight rows, the "—" trend under an "up 25 lb" headline, the blanked recap volume). Rows 1, 2, 3, 5, 6, 7, 9 and 10 held.
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R689 FIX (PT2 found bugs): row 4's insight defects (bodyweight rows, the blanked recap volume, the "—" trend) and the harness's close(). The bodyweight-row patch is ready in scratch.

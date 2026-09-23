@@ -6,6 +6,56 @@ and the tool refuses to tap anything a thumb could not reach. Scenario scripts l
 `app/tools/playtests/`. Screenshots a report cites are committed under `shots/PT<n>/` and cited
 by that path (AGENT_LOOP v3.2 §1).
 
+### PT2 · R688 · personas: Strong veteran (unscripted), min-maxer (scripted, every number checked), critic (unscripted) · build 9f6b0d2
+Sessions:
+- **Veteran:** fresh install on UPPER / LOWER. Upper, Lower, then Upper again on the stepped clock, 57 sets in about 20 minutes, 12 lifts found by search.
+- **Min-maxer:** the app's sample. Made one call and missed another, switched the coaching goal three ways, then came back at +10 and +7 days, about 30 minutes.
+- **Critic:** a fresh upper day with a searched lift, then the sample's legs day, Progress, history, Goals, Settings, an old recap and SHARE, about 14 minutes on the real clock.
+- My scripted first-timer re-ran on this build: `shots/PT2/01-…19-…`.
+Headline: H1 3 (was 3) · H2 1.60 (1.60) · H3 2 (2) · H4 0 (0) · H5 1.50 (1.50), scripted first-timer on 9f6b0d2.
+Versus Strong (veteran, from memory):
+- PROOF is faster to the first set (2 taps), and a repeat set is 1 tap.
+- Strong starts from a template that shows the whole day, puts last time's numbers on every set, counts rest down, shows every set on its recap with volume PRs, and imports. PROOF prefills the last (often worst) set, and shows the workout through a ~70pt strip.
+- PROOF's NEXT TIME call has no Strong equivalent: "the Now screen kept the recap's promise" on day 6.
+- Against Alpha Progression (min-maxer), PROOF's line hides the reps it wants and never puts the call on the dial.
+Felt samey: every lift is the same dial screen; every recap ends with one NEXT TIME line; on the sample every call reads "X and climbing — try Y".
+Confusing:
+- The picker says "PUSH DAY" on an Upper day (critic, veteran; `critic-01-011-change-exercise.png`).
+- SIZE "waits for 8" in Settings, yet a climbing call raises after 5 or 6 reps.
+- An old recap says "25 lb from a 225 squat", which is today's distance, not that day's (`critic-01-017-old-recap-push.png`).
+- Dumbbell lifts offer ±45 plate buttons, and nothing says whether the weight is per hand.
+- NEXT TIME names one lift when two earned a call.
+- The recap asks to "add your bodyweight on YOU", and no tab is called YOU.
+- A squat start of 275×8 is too heavy for this lifter.
+Broken:
+1. **Bodyweight lifts on Progress.** Pull-up and Dip read "0 × 8 190 lb" with the sample's bodyweight (`critic-01-009-progress-top.png`), and "— —" without one, spoken as "not trained at this rep range yet" (`veteran-01-s31-pullup-history.png`). PT1 found this too.
+2. **One bodyweight set blanks the recap's total.** A pull-up set replaced about 13,000 lb of barbell volume with "Add your bodyweight…", and Now's volume went with it (`veteran-01-s25-after-finish.png`). PT1 found this too.
+3. **The coach adds weight after a miss.** A climbing call's rep target is the last session's reps, so OHP 100×6 on SIZE still meant "try 105", and 105×6 counted as "made it" (`minmax-043-w2-ohp-105x6.png`). Also "try 70" after 65×8, 8, 7 (`veteran-04-s46-upper2-recap-scrolled.png`).
+4. **The recap's promise lapses after a gap.** It said "try 105". Ten days later only one OHP session was left in the window, so Now showed "Last time 90 × 8", a back-off set (`minmax-033-after-finish.png`, `minmax-038-plus10-ohp.png`).
+5. **CONSISTENCY states false history.** "175 last 2 — stay here and add a rep" after 175 and 170, and the goal switch replaced "180×5 — made it" (`minmax-025-goal-consistency-bench.png`). R687's reviewer found the same count.
+6. **Progress contradicts itself.** "Bench Press is up 25 lb since 4 weeks ago" sits above Bench and OHP rows whose change reads "—", because the trend compares reps too (`minmax-052-w2-progress.png`). PT1 found empty trends too.
+7. **A record starred on Now is missing from the recap** (OHP 100×6; `minmax-014-ohp-100x6-miss.png`, `minmax-033-after-finish.png`).
+8. **Taps too small for a finger.** Goals' CHANGE is 55×14 and WIPE 34×14 (`critic-01-015-goal-change.png`). The bodyweight screen's DONE is 38×15 (`veteran-02-s30-fail12.png`).
+9. **The suggestion rail keeps its old scroll**, so the lift it marks NEXT sits 19pt from the left edge (`veteran-06-s45-fail59.png`).
+10. **The chosen day and lift are lost on reopen** until a set is logged (`veteran-03-s41-end.png`). The persona reloaded after every step, which exaggerates it.
+- **The harness's fault, not the app's:** `playtest.mjs` `close()` hard-killed Chrome, so unsaved localStorage writes vanished and looked like data loss (critic, veteran). Both fixed it in their own scripts with `Browser.close`.
+- **Owner's question, not a bug:** Deadlift is marked NEXT on Upper and never offered on Lower (`veteran-02-s05-end.png`). That is D4 and the open "which day do the deadlifts go on" question in OWNER.md.
+Critic: 6/10, up from 5. Three reasons not to buy:
+- It plans nothing: no templates or sets × reps.
+- The depth is thin: no instructions, no e1RM chart, and "0 × 8" rows.
+- It sits outside the ecosystem: no Watch, no Health, no import, and SHARE does nothing on web.
+Store shots: `shots/PT2/store-1-recap-new-personal-record.png` … `store-4-pick-your-split.png`. **Only 4 of 5 are clean**; the fifth shows the "0 × 8" Pull-up row.
+Best moment: "180×5 — made it" turning volt on the set that earned it, and holding through two back-offs (min-maxer, `minmax-020-bench-160x8-backoff2.png`). The critic's was the squat PR band. The veteran's was search finding "incline db" at once, and day 6's Now screen keeping the recap's "try 65".
+Matrix re-scores:
+- **Row 4: 3 → 2.** Persona scores 3, 2, 2. The bodyweight rows, the "—" trend under an "up 25 lb" headline, and the recap's blanked volume are all insight about the lifter's own numbers.
+- **Rows held:** 1 (3, 3), 2 (4, 4, 3), 3 (2, 3), 5 (2, 2, 1), 6 (2, 2), 7 (3, 2, 2), 9 (3), 10 (3, 2, 3).
+Backlog (ranked by gap value):
+1. Row 4: bodyweight rows, the "—" trend, the recap's blanked volume and the missing record star (Broken 1, 2, 6, 7). → R689 FIX, with the harness's `close()`.
+2. Row 5: no raise after a miss (reps on climbing calls), the recap's promise across a gap, CONSISTENCY's count, and the call on the dial (Broken 3, 4, 5).
+3. Rows 7 and 9: finger-sized targets, "PUSH DAY" on Upper, the rail's stale scroll, and "BODYWEI GHT" breaking mid-word (Broken 8, 9).
+4. Row 2: the prefill is the last set rather than the call; the day and lift are lost on reopen (Broken 10).
+5. Rows 10 and 1: import from Strong or Hevy (COACH S5), asked for by both veterans.
+
 ### PT1 · R681 · personas: genre veteran (Hevy, unscripted), returning lifter (unscripted), critic (unscripted) · build 13752c1
 Sessions:
 - **Veteran**, fresh install: push, pull, legs, then push again on day 8. 64 sets and about 15 minutes of app time. They set a bench goal and recorded their bodyweight.
