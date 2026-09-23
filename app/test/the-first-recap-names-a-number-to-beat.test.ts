@@ -138,7 +138,7 @@ describe('the lifter sees it', () => {
   test('the recap screen shows it under NEXT TIME, in both languages', () => {
     const HERE = path.dirname(fileURLToPath(import.meta.url));
     const screen = readFileSync(path.join(HERE, '..', 'app', 'recap.tsx'), 'utf8');
-    assert.match(screen, /const \{ payload, thin, next \} = recap;/);
+    assert.match(screen, /const \{ payload, thin, next[^}]*\} = recap;/);
     assert.match(screen, /\{next && \([\s\S]{0,200}T\('nextTime'\)[\s\S]{0,300}\{next\.lift\}[\s\S]{0,40}\{next\.line\}/,
       'the recap no longer draws the call');
     assert.equal(t('es', 'nextTime'), 'LA PRÓXIMA VEZ');

@@ -4457,3 +4457,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R689 FIX (PT2 found bugs): row 4's insight defects (bodyweight rows, the blanked recap volume, the "—" trend) and the harness's close(). The bodyweight-row patch is ready in scratch.
+
+## R689 · FIX · bodyweight sets keep the recap's total, bodyweight lifts read as trained, and the harness keeps its data
+Pick: PT2 Broken 1 and 2 (also PT1 Broken 4 and 5), and PT2's harness data loss — PT ref PT2 · impact planned 2/3/0
+Player notices: A pull day with one bodyweight set still shows its total ("450 LB", and that bodyweight is not counted in 1 set); Pull-up and Dip read "BW × 8" on Progress, never "0 × 8" or "—".
+Impact: planned 2/3/0 → shipped 2/3/0 (biggest file i18n.ts 1290→1296; progress-model.ts 942→947)
+Built: recap-model `Recap.uncounted`; recap.tsx shows the known volume with a note (volumeLeavesOut / One), and replaces only a total of nothing; needsBodyweight no longer promises to count logged sets and names where bodyweight is recorded (en, es). progress.tsx prints `loadLabel(best)` when `bestReps > 0`; bestSetA11y gains bestSetBodyweightA11y. tools/playtest.mjs close() sends Browser.close before the kill.
+Quality: self-review (FIX, §4). Both app defects and the data loss were reproduced first: the recap read "Add your bodyweight on YOU…" over 450 lb of deadlifts, the Pull-up row "— —"; and with the old close(), 3 of 3 reopenings lost their sets. The note was put on the type scale (12, not 13). Backlog: the "—" trend under an "up 25 lb" headline (PT2 Broken 6), Now's volume line with a bodyweight set, the recap's missing record star.
+Verified: suite 2335/2335, tsc, dist and MARKET.md current. 7 plants (raw weight, trained means a reading, not-trained label, one set hides the total, every bodyweight set uncounted, the old promise, Chrome killed outright) each fail a named test or the live reopen probe (3 of 3 lost), and restore sha256-identical. Phone size: the before and after recap and Progress (shots/R689/).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 2→2 · H4 0→0 · H5 1.50→1.50
+Market: unchanged at 43. Row 4 held at 2 until a playtest: the "—" trend remains.
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R690 RETRO: 3 building rounds since R685 (R686, R687, R689), and PT2 is newer than it.

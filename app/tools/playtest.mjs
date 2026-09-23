@@ -187,6 +187,11 @@ export class Session {
   }
 
   async close() {
+    // Ask Chrome to shut down first (R689). Killed outright, it dropped the
+    // localStorage writes it had not yet put on disk, and two PT2 personas
+    // reported that as the app losing their sets.
+    try { await Promise.race([this.send('Browser.close'), sleep(1500)]); } catch { /* already gone */ }
+    await sleep(500);
     try { this.ws.close(); } catch { /* already gone */ }
     this.chrome.kill();
     await sleep(800);

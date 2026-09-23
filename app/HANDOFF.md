@@ -601,6 +601,14 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**Bodyweight sets keep the total, and bodyweight lifts read as trained (R689).** A bodyweight set with
+no reading behind it used to replace the whole recap total with a message; the recap now shows the
+total it knows and, under it, how many sets leave the lifter's bodyweight out (`Recap.uncounted`).
+Only a total of nothing is still replaced, and the message no longer promises to count sets already
+logged. Progress prints a bodyweight best as "BW × 8" (`bestReps > 0` is "trained"), spoken as "best at
+bodyweight". `playtest.mjs` `close()` sends `Browser.close` before killing Chrome: killed outright, it
+lost unsaved localStorage, which two PT2 personas took for the app losing sets.
+
 **A call from one session, and the first recap names it (R687).** `coachSuggestion` also calls from a
 single session in the window when two or more sets at its top weight all reach the goal's reps
 (`coachAllSets`, one step up; D6), and the same check runs before "repeat it before adding"; anything

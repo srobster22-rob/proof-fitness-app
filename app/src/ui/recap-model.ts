@@ -13,7 +13,7 @@ import { trainingGoal } from './training-goal.ts';
 import { WEIGHT_STEP } from './now-model.ts';
 import { t, fill, languageOf, number, type Language } from '../domain/i18n.ts';
 import {
-  CARRIES_BODYWEIGHT, bodyweightMultiple,
+  CARRIES_BODYWEIGHT, bodyweightMultiple, realLoad,
   type Measurement, type MeasureUnit } from '../domain/measure.ts';
 
 /**
@@ -42,6 +42,11 @@ export interface Recap {
   sessionId: string;
   /** "Squat 315 x 5 - 1.75x bodyweight", or null. See `multipleLine`. */
   multiple: string | null;
+  /**
+   * Sets whose load is the lifter, logged with no bodyweight reading behind
+   * them (R689): what `payload.volume` leaves out when `volumeKnown` is false.
+   */
+  uncounted: number;
   /** The coach's call for next time, on the screen and never on the card (R687). */
   next: NextCall | null;
 }
@@ -161,6 +166,8 @@ export function recapFor(repo: Repo, sessionId: string, now: number, title?: str
     thin: sets.length === 1 && prs.length === 0 && !goalLine,
     sessionId,
     multiple,
+    uncounted: sets.filter(x =>
+      CARRIES_BODYWEIGHT.has(x.exerciseId) && !realLoad(x, measurements, session.unit)).length,
     next: nextCall(repo, sets, Math.min(now, session.endedAt ?? now), session.unit, lang)
   };
 }

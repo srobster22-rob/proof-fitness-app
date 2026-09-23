@@ -843,8 +843,13 @@ export function lastTrainedA11y(row: ProgressRow, lang: Language = 'en'): string
 }
 
 export function bestSetA11y(row: ProgressRow, lang: Language = 'en'): string {
+  // A bodyweight best is a best (R689): a pull-up row trained twelve times
+  // was read out as "not trained at this rep range yet" because it added no
+  // load. Trained is any best set at all, which `bestReps` records.
   const value = row.best > 0
     ? fill(t(lang, 'bestSetValueA11y'), { name: row.name, weight: row.best, unit: row.unit, reps: row.bestReps })
+    : row.bestReps > 0
+    ? fill(t(lang, 'bestSetBodyweightA11y'), { name: row.name, reps: row.bestReps })
     : fill(t(lang, 'bestSetNoneA11y'), { name: row.name });
   if (!row.bestAt) return value;
   const d = new Date(row.bestAt);

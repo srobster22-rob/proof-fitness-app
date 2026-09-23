@@ -104,7 +104,7 @@ export default function Recap() {
     );
   }
 
-  const { payload, thin, next } = recap;
+  const { payload, thin, next, uncounted } = recap;
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
@@ -149,7 +149,11 @@ export default function Recap() {
             rendered through `Stat()` so it needed its own fix. */}
         <Text style={s.label} allowFontScaling={false}>{T('totalVolume')}</Text>
         <View style={s.volumeRow}>
-          {payload.volumeKnown === false ? (
+          {/* R689: with barbell work beside it, a bodyweight set without a
+              reading hid the whole total (13,000 lb for one pull-up set, PT2).
+              The total it knows is shown, and the note below says what it
+              leaves out; only a total of nothing is still replaced. */}
+          {payload.volumeKnown === false && payload.volume <= 0 ? (
             <Text style={s.volumeUnknown} allowFontScaling={false}>{T('needsBodyweight')}</Text>
           ) : (
             <>
@@ -158,6 +162,12 @@ export default function Recap() {
             </>
           )}
         </View>
+
+        {payload.volumeKnown === false && payload.volume > 0 && uncounted > 0 && (
+          <Text style={s.volumeNote} allowFontScaling={false}>
+            {fill(T(uncounted === 1 ? 'volumeLeavesOutOne' : 'volumeLeavesOut'), { n: uncounted })}
+          </Text>
+        )}
 
         <View style={s.stats}>
           <Stat label={T('setsLabel')} value={String(payload.sets)} />
@@ -388,6 +398,7 @@ const s = StyleSheet.create({
   /* Sized to read as a note rather than as a hero number that failed to load —
      it is standing in for the number, not being one. */
   volumeUnknown: { color: '#9AA5AF', fontSize: 15, lineHeight: 22, fontWeight: '600', paddingVertical: 14 },
+  volumeNote: { color: '#9AA5AF', fontSize: 12, lineHeight: 17, marginTop: 4 },
   unit: { color: VOLT, fontSize: 20, fontWeight: '900', marginLeft: 6 },
 
   stats: { flexDirection: 'row', marginTop: 22 },

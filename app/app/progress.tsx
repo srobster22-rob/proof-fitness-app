@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getRepo } from '../src/data/db.ts';
 import { t, fill, languageOf, number } from '../src/domain/i18n.ts';
+import { loadLabel } from '../src/domain/types.ts';
 
 /**
  * Every visible string on this screen, in the chosen language.
@@ -366,11 +367,14 @@ function Row({ row, onOpen }: { row: ProgressRow; onOpen: () => void }) {
         <View style={s.rowTop}>
           <Text style={s.name} numberOfLines={1}>{row.name}</Text>
           <Text style={s.best}>
-            {row.best > 0 || row.realBest ? `${row.best} × ${row.bestReps}` : '—'}
-            {/* What it actually weighed, for a lift whose load is the lifter. A
-                pull-up logged as "0 x 8" is not a light set, it is a set the app
-                had no bodyweight for; with one, it says so. Quiet, because the
-                number the user TYPED is still the one they will recognise. */}
+            {/* "BW × 8" for a bodyweight best, as the lift's own history and the
+                recap write it (R689): "0 × 8" read as a set of nothing, and
+                without a bodyweight reading the row showed "—" as if never
+                trained. `bestReps` is 0 only when there is no best set. */}
+            {row.bestReps > 0 ? `${loadLabel(row.best)} × ${row.bestReps}` : '—'}
+            {/* What it actually weighed, for a lift whose load is the lifter:
+                with a bodyweight reading, the row says so. Quiet, because the
+                set as logged is still the one they will recognise. */}
             {row.realBest !== null && (
               <Text style={s.realBest}>  {row.realBest} {row.unit}</Text>
             )}
