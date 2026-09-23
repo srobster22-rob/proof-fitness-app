@@ -283,7 +283,13 @@ export function NowScreen({
   stateRef.current = state;
 
   const revealCurrent = useCallback(() => {
-    const { viewport, content, scrollTop } = todayMetrics.current;
+    const { viewport, content } = todayMetrics.current;
+    // Where the list really is, on web. The cached `scrollTop` comes from
+    // onScroll, a frame behind the browser, which also moves the list by itself
+    // (scroll anchoring) when a chip reflows onto the line above (R686).
+    const node = (todayScroller.current as { getScrollableNode?: () => HTMLElement } | null)
+      ?.getScrollableNode?.();
+    const scrollTop = typeof node?.scrollTop === 'number' ? node.scrollTop : todayMetrics.current.scrollTop;
     const today = stateRef.current.today;
     const to = revealOffset({
       blocks: today.map(l => blockLayouts.current.get(l.exerciseId) ?? { y: 0, h: 0 }),
@@ -296,6 +302,16 @@ export function NowScreen({
   // Covers switching lift, which can change which block is current without
   // changing a single measurement.
   useEffect(() => { revealCurrent(); }, [state, revealCurrent]);
+
+  // No scroll anchoring on web: when the fourth set's chip joins the line
+  // above, Chrome scrolled the list UP 42px to keep that chip still, which
+  // hid the set just logged and its UNDO and + (R686). The list decides where
+  // it sits (`revealCurrent`), not the browser.
+  useEffect(() => {
+    const node = (todayScroller.current as { getScrollableNode?: () => HTMLElement } | null)
+      ?.getScrollableNode?.();
+    if (node?.style) node.style.setProperty('overflow-anchor', 'none');
+  }, [L.scrolls]);
 
   // Same-tick double-fire guard, NOT a cooldown: two real presses spaced even
   // 50ms apart are two intentional sets and both must land — that is the whole
@@ -1104,8 +1120,15 @@ export function NowScreen({
                   {lift.sets.map((set, i) => (
                     /* Keyed on the set's id, so only a NEW chip mounts and
                        animates — the ones already on screen are reused and stay
-                       put, which is what stops one arrival becoming a flock. */
-                    <Arrive key={set.id}>
+                       put, which is what stops one arrival becoming a flock.
+
+                       The LATEST set's slot also holds UNDO and +, and the list
+                       wraps slots, never inside one: so the set just logged and
+                       its two buttons always share a line. Wrapped apart, the
+                       list's one-line window at 375x812 showed UNDO and + with no
+                       set beside them after three sets (R685's blind re-score). */
+                    <View key={set.id} style={i === lift.sets.length - 1 ? s.lastSetGroup : undefined}>
+                    <Arrive>
                     <Pressable
                       /* Tapping a set now EDITS it. It used to arm it for
                          destruction, so the only way to fix a mistyped weight
@@ -1142,7 +1165,7 @@ export function NowScreen({
                       {set.note ? <Text style={s.chipNote}>✎</Text> : null}
                     </Pressable>
                     </Arrive>
-                  ))}
+                    {i === lift.sets.length - 1 && (<>
                   {/* Every lift with sets in it, not just the one being
                       trained. A set logged wrong and then moved on from used to
                       be stranded — visible in this list, with the only fix
@@ -1181,6 +1204,9 @@ export function NowScreen({
                   >
                     <Text style={s.addSetText}>+</Text>
                   </Pressable>
+                    </>)}
+                    </View>
+                  ))}
                 </View>
               )}
             </View>
@@ -2455,6 +2481,8 @@ const s = StyleSheet.create({
   liftCount: { color: '#7C8792', fontSize: 11, fontWeight: '700', marginLeft: 'auto' },
   liftEmpty: { color: '#7C8792', fontSize: 12, marginTop: 5, fontStyle: 'italic' },
   liftSets: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 7, alignItems: 'center' },
+  // The latest set with its UNDO and +: one unit the wrap cannot split (R686).
+  lastSetGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: '#0F1113', borderRadius: 9, paddingVertical: 8, paddingHorizontal: 12, marginRight: 8

@@ -746,6 +746,13 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**The latest set keeps its UNDO and + (R686).** R684's tail-reveal held only for some set counts:
+after 3 sets the chips wrapped away from their buttons, and after 4 Chrome's scroll anchoring moved
+the list up past them. Each chip now sits in a slot keyed by its set, and the last slot also holds
+UNDO and +, so the wrap never splits them; the list turns off `overflow-anchor`, and
+`revealCurrent` reads the scroller's live `scrollTop` on web. `tools/playtests/latest-set-sweep.mjs`
+checks 1–7 sets live (needs the dev server).
+
 **PT1's layout defects (R684).** THIS WORKOUT is a ~52px window at 375×812, shorter than one lift's
 block, so `revealOffset` now shows a tall block's TAIL (the latest set, its UNDO and +) instead of
 its head, which had left the + half under CLEAR / FINISH. The line under the lift name is a

@@ -4415,3 +4415,17 @@ Content: exercises 32→60, insights 9→11 since R676
 Coach: none new
 Decisions: none
 Next: R686 takes the slot as a FIX for R684's miss (the latest set, UNDO and + as one group that never splits), since it is last round's false claim. H3 cannot move while the first-timer never repeats a lift, so The Call slices 2 and 3 (a call from one session, and the first recap naming each lift's next call) become R687's EXPAND.
+
+## R686 · FIX · the latest set keeps its UNDO and + at every count (R684's miss)
+Pick: R684's false claim, found by R685's blind re-score — PT ref PT1 Broken 2 · impact planned 2/3/0. The derived EXPAND slot is taken because it is last round's own miss; The Call's next slices move to R687.
+Player notices: After any number of sets, the list under the numbers shows the set just logged with its UNDO and +, never the buttons alone.
+Impact: planned 2/3/0 → shipped 2/3/0 (biggest file NowScreen.tsx 2646→2672)
+Built: NowScreen: each chip in a slot keyed by its set, the last slot also holding UNDO and + (lastSetGroup, no wrap), so the list's wrap never splits them; the TODAY scroller turns off overflow-anchor; revealCurrent reads the scroller's live scrollTop on web. tools/playtests/latest-set-sweep.mjs sweeps 1–7 sets live; test/the-latest-set-keeps-its-buttons.test.ts pins the structure.
+Quality: self-review (FIX, §4). Two causes, both measured: at 3 sets the chips wrapped away from their buttons; at 4 Chrome's scroll anchoring moved the list up 42px (scrollTop 74→32) while the cached position still read 74, so the reveal did nothing. The chip keeps its key on the slot, so no chip replays its entrance.
+Verified: suite 2317/2317, tsc, dist and MARKET.md current. 5 plants (buttons leave the set, the group wraps, key back on Arrive, anchoring on, cached position) each fail a named test and restore sha256-identical; P1 also fails the live sweep; the two scroll plants together bring back the cut list at exactly 4 and 7 sets; each alone is covered by the other, so its pin guards it. Live sweep: all 7 counts whole, + tapped after 7 (shots/R686/).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 0→0 · H5 1.50→1.50
+Market: unchanged at 45. Row 7 stays 2; its evidence now records the fix.
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R687 EXPAND, The Call slices 2 and 3: a call from one session when the sets say so, and the first recap naming each lift's next call (row 5, gap 6; the only way H3 can move for a first-timer who never repeats a lift in two weeks).
