@@ -24,3 +24,4 @@ Furthest below target: **Body measurements** (2 of 6, 33%).
 | round | exercises | programs | coach | insights | goals | measurements | equipment | trainingGoals | languages | screens |
 |---|---|---|---|---|---|---|---|---|---|---|
 | R676 | 32 | 3 | 7 | 9 | 2 | 2 | 4 | 3 | 2 | 6 |
+| R685 | 60 | 3 | 7 | 11 | 2 | 2 | 4 | 3 | 2 | 6 |

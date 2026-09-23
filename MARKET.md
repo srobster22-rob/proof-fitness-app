@@ -134,10 +134,10 @@ the loop now requires, keeping the lower score in each row.
 | 4 | Insight and progress visualisation | 3 | **3** | CONTENT.md: 11 insights. Since R680 every Progress row opens its lift's own history: the best set for each rep count, and the last 12 workouts with their records starred (`shots/R680/bench-history-sheet.png`). All three PT1 personas scored it 3, two after opening it (`shots/PT1/returning-12-squat-history.png`). Against it: Pull-up and Dip rows read "0 × 8", one-rep-count lifts draw an empty sparkline, a heavier set can show "—", and warm-ups count as bests. Still no per-lift chart beyond the 10-session sparkline, no calendar and no muscle view, and a week-two first-timer's rows are still one dot each (`shots/PT0/18-week2-progress.png`). | 5 | 4 | 4 | 3 | 4 (m) |
 | 5 | Coaching intelligence | 2 | **2** | CONTENT.md: 7 coach situations, 3 coaching modes, plate-aware; R671 swept 448 suggestions, all dialable. But H3 = 0: the first coach line comes on day 8 at the earliest, and it never lays out sets × reps. PT1 (scores 1, 2, 2): the line reads the live workout, so the call moves after a made set and a break yields "First time at 185×5" of a weight done before (`shots/PT1/critic-sample-s08-squatset1.png`); it is cut off beside a goal, and it is never set on the dial. | 4 (Trainer, Pro-only) | 1 | 5 | 3 (programmed) | 5 (per set, Pro) |
 | 6 | Retention hooks | 2 | **2** | `shots/PT0/17-week2-recap.png`: STREAK 2 WK; the weekly line and goals (CONTENT.md). No reminder, calendar or widget, and the streak stays hidden below 2 weeks. | 5 | 3 | 3 | 3 | 3 (m) |
-| 7 | Design polish | 2 | **2** | OWNER.md, owner's words: "looks a little sloppy and AI-generated". The look at phone size is the owner's open question. PT1 (scores 3, 2): the first set's row sits under CLEAR / FINISH, rail chips are clipped, a recap has a blank gap, and only 3 of 5 store shots are clean (`shots/PT1/critic-fresh-s04-end.png`). R684 fixed the set row and the cut-off coach line (`shots/R684/`); the "dead" chips were the harness. | 4 | 4 | 5 | 4 | 4 (m) |
+| 7 | Design polish | 2 | **2** | OWNER.md, owner's words: "looks a little sloppy and AI-generated". The look at phone size is the owner's open question. PT1 (scores 3, 2): the first set's row sits under CLEAR / FINISH, rail chips are clipped, a recap has a blank gap, and only 3 of 5 store shots are clean (`shots/PT1/critic-fresh-s04-end.png`). R684 fixed the cut-off coach line (`shots/R684/`); its set-row fix holds only for some set counts: after 3 sets the list shows UNDO and + with no set (R685 blind re-score, `shots/R685/blind-three-sets-show-no-set.png`). The "dead" chips were the harness. | 4 | 4 | 5 | 4 | 4 (m) |
 | 8 | Performance and offline | 2 | **3** | All data is local. A Now render takes 0.6–0.7 ms at 3,600 sets (R678, measured in node). It has never run natively (HANDOFF: "expect real bugs"), and the app-open time is a desktop-web figure, not a phone one (C4). | 4 | 5 | 3 (m) | 4 (m) | 3 (wants a connection) |
 | 9 | Accessibility | 1 | **3** | PT0 dump: every one of the 37 controls on Now carries an accessible name; R655–R663 added roles, states and live regions. VoiceOver on a device is device-blocked. | 3 (m) | 3 (m) | 3 (m) | 3 (m) | 3 (m) |
-| 10 | Data trust and export | 1 | **4** | `shots/PT0/12-progress-day1.png`: EXPORT, RESTORE, ERASE. No account and no network; the share link carries the workout in the URL fragment. There is no sync (§11 is unbuilt). | 4 (CSV out, Strong CSV in) | 4 | 3 (m) | 3 (m) | 4 (CSV, optional sync) |
+| 10 | Data trust and export | 1 | **3** | R685 blind re-score 3, kept (the lower): no import from Strong or Hevy, no sync, and PT1's recap promised a bodyweight fix that does not come. `shots/PT0/12-progress-day1.png`: EXPORT, RESTORE, ERASE. No account and no network; the share link carries the workout in the URL fragment. There is no sync (§11 is unbuilt). | 4 (CSV out, Strong CSV in) | 4 | 3 (m) | 3 (m) | 4 (CSV, optional sync) |
 | 11 | Platform readiness | 3 | **1** | HANDOFF: "First native build has never happened"; app.json `com.example.proof`; placeholder icons. | 5 | 5 | 5 | 5 | 5 |
 | 12 | Social | 1 | **1** | SHARE_BASE is `https://example.app/r` (share-url.ts), no card image or clip file is shared (HANDOFF), and PT0 never saw a share. A feed is a §9 non-goal. | 5 | 2 | 2 | 3 | 2 (plan sharing) |
 | 13 | Watch and health sync | 2 | **0** | Frozen: PROMPT.md §9 lists "wearable integration, Apple Health sync" as non-goals. Asked in OWNER.md. | 5 (Watch; Apple Health, Health Connect) | 4 (Watch logs weights and reps) | 5 (m) | 1 (no Watch) | 3 (Apple Health) |
@@ -149,8 +149,8 @@ from the matrix (`node tools/market.ts`, in app/); never edit them by hand.
 <!-- market:scores -->
 | | PROOF | Hevy | Fitbod | Alpha Progression | Strong | Boostcamp |
 |---|---|---|---|---|---|---|
-| weighted sum | 62 | 119 | 112 | 104 | 102 | 98 |
-| **market score** | **46** | **88** | **83** | **77** | **76** | **73** |
+| weighted sum | 61 | 119 | 112 | 104 | 102 | 98 |
+| **market score** | **45** | **88** | **83** | **77** | **76** | **73** |
 
 Best comparable: **Hevy, 88**. The weights sum to 27, so the maximum weighted sum is 135.
 <!-- /market:scores -->
@@ -179,8 +179,8 @@ Best comparable: **Hevy, 88**. The weights sum to 27, so the maximum weighted su
 | 12 Social | 1 × (5 − 1) = **4** | A feed is a §9 non-goal; a working share link needs the owner's domain. |
 | 2 Speed of the core action | 3 × (5 − 4) = **3** | The Live Activity is native and device-blocked. |
 | 1 Onboarding | 2 × (4 − 3) = **2** | no |
+| 10 Data trust and export | 1 × (4 − 3) = **1** | no |
 | 9 Accessibility | 1 × (3 − 3) = **0** | no |
-| 10 Data trust and export | 1 × (4 − 4) = **0** | no |
 <!-- /market:gaps -->
 
 ## Differentiator
@@ -252,3 +252,4 @@ ever names a weight your own plates and buttons can make.
 | R682 | 46 | Hevy 88 | the coach's call holds and says when it is made; row 5 stays 2 (still from day 8, only after a set) |
 | R683 | 46 | Hevy 88 | search on the add path; row 3 stays 2: the library is reachable now, but not larger |
 | R684 | 46 | Hevy 88 | FIX: PT1's set row under FINISH and cut-off coach line; row 7 stays 2 (the look is the owner's question) |
+| R685 | 45 | Hevy 88 | RETRO with a blind re-score, lower kept: data trust 4 → 3 (no import, no sync, a broken bodyweight promise); the blind scorer was higher on rows 1, 7 and 8 and lower nowhere else |

@@ -4401,3 +4401,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R685 RETRO. 7 building rounds since setup (R678–R684) and PT1 is newer than any retro.
+
+## R685 · RETRO · the first v3 retro: 46 → 45 on a blind re-score, and R684's set-row fix only half holds
+Pick: RETRO — 7 building rounds since setup, and PT1 is newer than any retro · no score (RETRO)
+Player notices: nothing (PLAYTEST/RETRO)
+Impact: none planned or shipped (RETRO)
+Built: Scorecard R676–R684: 6 building rounds (R678, R679, R680, R682, R683, R684), all player-visible and all shipped as planned (totals 5, 5, 5, 6, 6, 5); none weak, lost or repeated. Taken: PT1 backlog 1 (search) and Broken 1, 2, 3, 6; COACH C1–C11, S2, S3, S6. Health: largest file NowScreen.tsx 2600→2646; largest function the NowScreen component 1270→1288; tests 194→200 files, 1458→1517 KB; suite 18.4 s; no linter configured. PLAYBOOK: KEEP reproduce a playtest bug in the running build; STOP a source regex as a screen's only test; TRY build the next patch in scratch while a subagent runs (judged at the next RETRO). LOOP_LESSONS.md: 4 lessons.
+Quality: the blind re-scorer read scrubbed copies (no PROOF column, gap values or re-score lines) under an allow-list. Every "taken" COACH disposition was opened and is real. `## Never` audit clean: no network call added, no git undo, device checks still marked blocked.
+Verified: CONTENT.md history row R685; market.ts --check at 45.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 2→0 · H5 3.00→1.50 (PT0 → now)
+Market: 46→45. Row 10 4→3 (blind 3, mine 3). The blind scorer was higher on rows 1 (4), 7 (3) and 8 (4); the lower is kept. Targets: 4 of the last 5 rounds player-visible, yes; content grew, yes; headline metrics H4 and H5 right, H3 flat (miss); market score 52→45 over the cycle, mostly the coach's C5 corrections (52→44), then 44→45 (miss); PT1's #1 acted on, yes; every COACH note dispositioned, yes; 0 rounds lost, 0 weak. Miss stated: R684's log says the latest set's UNDO and + sit above FINISH "after a set", but after 3 sets the chips wrap away and only UNDO and + show (shots/R685/blind-three-sets-show-no-set.png).
+Content: exercises 32→60, insights 9→11 since R676
+Coach: none new
+Decisions: none
+Next: R686 takes the slot as a FIX for R684's miss (the latest set, UNDO and + as one group that never splits), since it is last round's false claim. H3 cannot move while the first-timer never repeats a lift, so The Call slices 2 and 3 (a call from one session, and the first recap naming each lift's next call) become R687's EXPAND.
