@@ -14,7 +14,7 @@ import {
   PLAN_DAYS, PLAN_DAY_COVERS,
   type SplitDay, type SplitGroup, type SplitPlan, type PlanDay
 } from '../domain/split.ts';
-import { coachSuggestion, type Suggestion } from '../domain/coach.ts';
+import { coachSuggestion, callMade, type Suggestion } from '../domain/coach.ts';
 import { trainingGoal } from './training-goal.ts';
 import { PHONE_MAX } from './column.ts';
 import { loadLabel, convertWeight } from '../domain/types.ts';
@@ -596,7 +596,7 @@ export interface LastTimeInput {
  * colour half a line.
  */
 export function lastTimeParts(input: LastTimeInput, lang: Language = 'en'): {
-  head: string; tail: string; hit: boolean;
+  head: string; tail: string; hit: boolean; made: boolean; justMade: boolean;
 } {
   const { previous, thisSession, goal, coach, start } = input;
   /*
@@ -607,7 +607,19 @@ export function lastTimeParts(input: LastTimeInput, lang: Language = 'en'): {
    * already wins over `thisSession`, and the coach needs two sessions in the
    * window, which is a strict superset of having a `previous` at all.
    */
-  const head = coach
+  /*
+   * A call the lifter has made says so, for the rest of the workout (R682).
+   * The coach no longer reads the live session, so the call holds still while
+   * they chase it, and it can be finished. `justMade`: the set that made it is
+   * the last one logged, which LOG SET reads for the success tap (an UNDO can
+   * leave it true, but nothing plays a tap on UNDO). A miss changes nothing:
+   * the call stays up, grey, and nothing turns red.
+   */
+  const made = callMade(coach ?? null, thisSession);
+  // The set that made it, not the call: 210 for 8 on "try 210" says 210×8.
+  const head = made
+    ? fill(t(lang, 'coachMade'), { weight: loadLabel(made.weight), reps: made.reps })
+    : coach
     ? fill(t(lang, coach.key as never), coach.params)
     : previous ? `${t(lang, 'lastTime')}  ${loadLabel(previous.weight)} × ${previous.reps}`
     : thisSession.length
@@ -615,7 +627,10 @@ export function lastTimeParts(input: LastTimeInput, lang: Language = 'en'): {
         `${thisSession[thisSession.length - 1].reps}`
       : start ? fill(t(lang, 'firstTimeStart'), { w: loadLabel(start) })
       : t(lang, 'firstTime');
-  return { head, tail: goalTail(goal, lang), hit: goal?.justHit === true };
+  return {
+    head, tail: goalTail(goal, lang), hit: goal?.justHit === true,
+    made: made !== null, justMade: made !== null && made === thisSession[thisSession.length - 1]
+  };
 }
 
 /** What the Now screen needs to know about a goal: the gap and the target. */
@@ -792,7 +807,7 @@ export interface NowState {
    * The line under the lift name, split at the point the colour changes.
    * Never blank — see `lastTimeParts`.
    */
-  lastTime: { head: string; tail: string; hit: boolean };
+  lastTime: { head: string; tail: string; hit: boolean; made: boolean; justMade: boolean };
   /** What language to draw the chrome in. See `NowModel.lang`. */
   lang: Language;
   /** Which routine they are running. Chosen once, changed in Settings. */
@@ -1374,6 +1389,7 @@ export class NowModel {
           this.historyInSessionUnit(), this.exerciseId, this.now(),
           {
             unit: this.session.unit, goal: trainingGoal(this.repo),
+            live: { id: this.session.id, startedAt: this.session.startedAt },
             // The stepper's own grid; the lifter's jump is handed over below
             // — see the comment above this call for why (R592, R671).
             grid: WEIGHT_STEP[this.session.unit],

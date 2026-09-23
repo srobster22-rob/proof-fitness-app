@@ -28,11 +28,15 @@ function enclosingText(marker: string): string {
  * landed. The line under the lift answers exactly that -- "Just did 175 x 5",
  * the goal gap, the coach -- and it is always mounted and changes in place,
  * the case a polite live region announces dependably. It changes only on the
- * lifter's own actions (logging, switching lifts), never on a timer.
+ * lifter's own actions (logging, switching lifts), never on a timer. Not on
+ * every set, though: a lift with history reads "Last time" or the coach's
+ * call, which hold still, and since R682 a coached lift's line changes only
+ * when the call is made. A per-set confirmation for those is backlogged.
  */
 describe('logging a set is confirmed to a screen reader (R660)', () => {
   test('the line under the lift is a polite status', () => {
-    const tag = enclosingText('{state.lastTime.head}');
+    // The head's own expression, which R682 wraps in volt once a call is made.
+    const tag = enclosingText('{state.lastTime.made ?');
     assert.match(tag, /style=\{s\.lastTime\}/, 'the anchor no longer sits in the last-time line');
     assert.match(tag, /role="status"/, 'the confirmation line is not a status');
     assert.match(tag, /aria-live="polite"/, 'the confirmation line is not a live region');

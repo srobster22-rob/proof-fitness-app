@@ -46,6 +46,12 @@ export interface Suggestion {
   /** How many sessions in the window back that up. */
   sessions: number;
   /**
+   * The reps the call asks for at `weight` (R682), so a set can be seen to
+   * make it (`callMade`). Absent on a deload: backing off is not a number
+   * to beat, and a lifter who does it has not "made" anything.
+   */
+  reps?: number;
+  /**
    * An i18n KEY plus its values, never a sentence.
    *
    * This module is not allowed to produce English. The app ships in two
@@ -90,11 +96,11 @@ interface TopSet { sessionId: string; at: number; weight: number; reps: number; 
  * not the thing being progressed, and including them would drag every
  * suggestion down toward the warm-up.
  */
-function topSets(history: LoggedSet[], exerciseId: string, now: number): TopSet[] {
+function topSets(history: LoggedSet[], exerciseId: string, now: number, live?: string): TopSet[] {
   const cutoff = now - WINDOW_DAYS * 86_400_000;
   const best = new Map<string, TopSet>();
   for (const s of history) {
-    if (s.exerciseId !== exerciseId) continue;
+    if (s.exerciseId !== exerciseId || s.sessionId === live) continue;
     if (s.at < cutoff || s.at > now) continue;
     const cur = best.get(s.sessionId);
     if (!cur || s.weight > cur.weight || (s.weight === cur.weight && s.reps > cur.reps)) {
@@ -159,10 +165,21 @@ export function coachSuggestion(
   history: LoggedSet[],
   exerciseId: string,
   now: number,
-  opts: { goal?: TrainingGoal; unit: Unit; base?: number; grid?: number; jump?: number }
+  opts: {
+    goal?: TrainingGoal; unit: Unit; base?: number; grid?: number; jump?: number;
+    /**
+     * The session the call is FOR (R682). Its own sets are never evidence: a
+     * lifter who makes "try 210" must not be told "try 215" by the set that
+     * made it. And the two weeks are counted back from when it STARTED, not
+     * from `now`: a weekly lifter's oldest session would otherwise slide out
+     * of the window mid-lift, and the call with it (R682 review). So the call
+     * they walk in with holds until the workout is over.
+     */
+    live?: { id: string; startedAt: number };
+  }
 ): Suggestion | null {
   const goal = opts.goal ?? 'size';
-  const sets = topSets(history, exerciseId, now);
+  const sets = topSets(history, exerciseId, opts.live ? Math.min(now, opts.live.startedAt) : now, opts.live?.id);
   if (sets.length < MIN_SESSIONS) return null;
 
   const step = STEP[goal] * MIN_INCREMENT[opts.unit];
@@ -298,7 +315,7 @@ export function coachSuggestion(
   if (goal === 'consistency') {
     return {
       kind: 'hold', weight: latest.weight, recentWeight: latest.weight,
-      sessions: atSameWeight, key: 'coachHold',
+      sessions: atSameWeight, key: 'coachHold', reps: latest.reps + 1,
       params: { weight: latest.weight, n: Math.max(atSameWeight, sets.length) }
     };
   }
@@ -313,7 +330,7 @@ export function coachSuggestion(
     const up = nearer(latest.weight, latest.weight + step, raise(latest.weight, latest.weight + step), true);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
-      sessions: atSameWeight, key: 'coachPlateau',
+      sessions: atSameWeight, key: 'coachPlateau', reps: Math.min(latest.reps, target),
       params: { weight: latest.weight, suggest: up, n: atSameWeight }
     };
   }
@@ -326,7 +343,7 @@ export function coachSuggestion(
     const up = nearer(latest.weight, latest.weight + step, raise(latest.weight, latest.weight + step), true);
     return {
       kind: 'increase', weight: up, recentWeight: latest.weight,
-      sessions: atSameWeight, key: 'coachIncrease',
+      sessions: atSameWeight, key: 'coachIncrease', reps: Math.min(latest.reps, target),
       params: { weight: latest.weight, suggest: up, n: atSameWeight }
     };
   }
@@ -416,7 +433,7 @@ export function coachSuggestion(
       const up = theirPlates ? latest.weight + theirStep : raise(latest.weight, latest.weight + theirStep);
       return {
         kind: 'increase', weight: up, recentWeight: latest.weight,
-        sessions: sets.length, key: 'coachClimbing',
+        sessions: sets.length, key: 'coachClimbing', reps: Math.min(latest.reps, target),
         params: { weight: latest.weight, suggest: up, n: sets.length }
       };
     }
@@ -425,7 +442,7 @@ export function coachSuggestion(
   if (atSameWeight < MIN_SESSIONS) {
     return {
       kind: 'hold', weight: latest.weight, recentWeight: latest.weight,
-      sessions: atSameWeight, key: 'coachSettle',
+      sessions: atSameWeight, key: 'coachSettle', reps: latest.reps,
       params: { weight: latest.weight, reps: latest.reps }
     };
   }
@@ -438,9 +455,26 @@ export function coachSuggestion(
    */
   return {
     kind: 'hold', weight: latest.weight, recentWeight: latest.weight,
-    sessions: atSameWeight, key: 'coachHold',
+    sessions: atSameWeight, key: 'coachHold', reps: latest.reps + 1,
     params: { weight: latest.weight, n: atSameWeight }
   };
+}
+
+/**
+ * The set that made the call, or null (R682): the first one that did what it
+ * asked. The first, so the moment belongs to one set. An increase is made at
+ * its weight or above, for its reps: 205 for 8 is not "try 210" made, and
+ * neither is 210 for 4. A hold ("repeat it before adding", "stay here and add
+ * a rep") is made only AT its weight, since a heavier set is the thing it
+ * said not to do yet. `sets` must be in the call's unit.
+ */
+export function callMade(call: Suggestion | null, sets: readonly LoggedSet[]): LoggedSet | null {
+  if (!call || call.reps === undefined) return null;
+  const reps = call.reps;
+  const atWeight = (w: number) => call.kind === 'hold'
+    ? Math.abs(w - call.weight) < 1e-9
+    : w >= call.weight - 1e-9;
+  return sets.find(s => atWeight(s.weight) && s.reps >= reps) ?? null;
 }
 
 /** Round to the unit's own granularity, so no suggestion is unloadable. */

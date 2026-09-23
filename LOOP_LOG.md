@@ -4359,3 +4359,17 @@ Content: unchanged
 Coach: none. PT1 backs S3 (search, all three personas) as R683's pick.
 Decisions: none
 Next: R682 BIG SWING "The Call", slice 1: the call holds for the whole workout and says when it is made (PT1 Broken 1). Then R683 EXPAND search on the add path (row 3, gap 9); R684 FIX (PT1 Broken 2, 3, 6).
+
+## R682 · BIG SWING · The Call, slice 1: the coach's call holds, and says when it is made
+Pick: "The Call", the design panel's pick over "Lift story" (6) and "The One to Beat" (5) — gap value 6 (MARKET row 5) / PT1 Broken 1 · swing planned 3/3/+1; slice 1 planned 2/3/+1
+Player notices: The coach's "try 200" stays put while you chase it; the set that makes it turns the line to "200×5 — made it" in volt with a success tap.
+Impact: planned 2/3/+1 → shipped 2/3/+1 (biggest file NowScreen.tsx 2605→2611; now-model.ts 2211→2227)
+Built: coach.ts `opts.live` {id, startedAt}: the live session is never evidence, and the 14 days count back from its start. `Suggestion.reps` on every call but a deload; `callMade` (an increase at or above, a hold only at its weight). now-model `lastTimeParts` made/justMade and the coachMade line; NowScreen volt and the success haptic; i18n coachMade (en, es).
+Quality: self-review, then reviewer REJECT (fixed at ≥2×2: the 14-day window slid mid-workout and un-made a weekly lifter's call; also fixed: "call" jargon and a Spanish line that said something else, a heavier set making a hold, source-text pins weak enough that mutants passed, two false comments) → APPROVE. Backlog: a hold on a converted weight is made only at the prefilled off-grid value; "0 for 2 sessions — try 5" on bodyweight lifts; screen-reader confirmation per set on coached lifts (2×1). Biggest function touched: coachSuggestion, ~300 lines.
+Verified: suite 2303/2303, tsc, dist and MARKET.md current. 12 plants (live session read, lighter set, short set, deload made, every set taps, hold asks the same reps, not volt, line quotes the call, window from now, heavier set makes a hold, stale-state tap, no success tap) each fail a named test and restore sha256-identical. Phone size on the sample: "try 200" became "try 205" after a set of 200 before (shots/R682/before-the-call-moves-on.png); now "200×5 — made it", held through a 190 back-off (shots/R682/).
+Headline: H1 3→3 · H2 1.60→1.60 · H3 0→0 · H4 0→0 · H5 1.50→1.50 (the first-timer never trains one lift twice in 14 days)
+Market: unchanged at 46. Row 5 stays 2: the coach still speaks from day 8 at the earliest, only after a set, and never on the dial.
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R683 EXPAND, search on the add path (row 3, gap 9; PT1 backlog 1; COACH S3). The PLAYTEST slot swaps: 1 building round since PT1.

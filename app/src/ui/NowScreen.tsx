@@ -318,9 +318,14 @@ export function NowScreen({
     model.log();                       // the write, first and unconditionally
     setTyping(null);                   // logging always exits the typed fields
     setTypingReps(null);
-    sync();
-    feedback(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
-  }, [model, sync]);
+    const next = model.state();
+    setState(next);
+    // The set that makes the coach's call gets the success tap (R682); every
+    // other set the usual thud. A miss is silent, never an error buzz.
+    feedback(() => next.lastTime.justMade
+      ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+      : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
+  }, [model]);
 
   const bump = useCallback((fn: () => void) => {
     fn();
@@ -621,7 +626,8 @@ export function NowScreen({
             by 18px with nothing in the fit math expecting it. Truncating drops
             the goal before the last-time numbers, which is the right order. */}
         <Text style={s.lastTime} numberOfLines={1} role="status" aria-live="polite">
-          {state.lastTime.head}
+          {/* A made call (R682) in volt, for the rest of the workout. */}
+          {state.lastTime.made ? <Text style={s.lastTimeHit}>{state.lastTime.head}</Text> : state.lastTime.head}
           {/* Volt only for the set that just hit the goal. §15 spends the accent
               on what matters right now, and for the length of one set that is
               this — it is a different size class from the hero, so it draws the

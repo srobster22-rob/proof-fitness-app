@@ -601,6 +601,14 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**The coach's call holds, and says when it is made (R682).** `coachSuggestion` takes `live`, the
+session the call is for, and never reads that session's sets, so a set that makes "try 210" no
+longer turns it into "try 215" (PT1 Broken 1). Every call but a deload carries `reps`, and
+`callMade` finds the first set that did what it asked: at the weight or above for an increase,
+only at the weight for a hold. The two weeks count back from the session's start, so a weekly
+lifter's call cannot slide out of the window mid-lift. The line then reads "210×5 — made it" in
+volt for the rest of that lift's workout, and LOG SET plays the success haptic for that one set.
+
 **A lift opens its own history (R680).** Tapping a Progress row opens `LiftSheet`, a sheet rather
 than a seventh screen. It shows the best set for each rep count and the last 12 workouts, each by
 the top set its recap names, with a ★ where that recap awarded a record. `liftHistory`
