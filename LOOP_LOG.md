@@ -4555,3 +4555,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R696 ORGANIZE: one exercises registry (coldstart, muscles, split and find-exercise's aliases as views; COACH code-quality note), patch ready in scratch. Backlog FIX: ppl legs → upper-lower → ppl brings legs back (setPlan reads chosenDay after the plan changed).
+
+## R696 · ORGANIZE · One exercise registry: coldstart, muscles, split and the aliases are views of it
+Pick: ORGANIZE 2 of ≤ 6 (§3a checklist 4, "content is data"; the coordinator's first item and COACH's code-quality note: the same ids typed in three tables plus the aliases) · impact planned 0/0/+1
+Player notices: nothing (ORGANIZE: behaviour-preserving)
+Impact: planned 0/0/+1 → shipped 0/0/+1 (product source 65 files, 21,011 lines → 66, 20,975; coldstart.ts 454→343, muscles.ts 333→264, split.ts 383→300, find-exercise.ts 124→113, exercises.ts new 237; largest file NowScreen.tsx 2,674 and function NowScreen 1,314 unchanged)
+Built: src/domain/exercises.ts: `EXERCISES`, one entry per movement (seeds, kit, factor, calibrates, day, muscles, aliases) in three tiers, generated from the live tables so no value was retyped, with their rationale comments. coldstart's tiers are a projection onto the seed fields, `MUSCLES` and the day table are derived, find-exercise's aliases are the entries' readable aliases through `stem`, and `CARRIES_BODYWEIGHT` is the bodyweight kit. First in the domain bundle. `node tools/sizes.mjs --map` refreshes ARCHITECTURE.md's sizes and names rows it lacks. COACH's note → taken.
+Quality: reviewer REJECT on two doc defects, both fixed as it specified (its verdict: that flips it to APPROVE): the kettlebell swing's rationale comment was dropped by the generator, and DECISIONS D2/D4's revert steps pointed at the old tables. Its nits, fixed: the 10 aliases pinned as typed (5 had no test), CARRIES_BODYWEIGHT derived too, a types-only warning on the registry's imports, --map keeps tables largest first, a tautological assertion dropped. Not this round: link-build-is-self-contained writes the real link/index.html while other tests run (trap 19), a flake.
+Verified: check ALL GREEN in 21 s, suite 2406/2406 (was 2398). Snapshot: all 14 behaviour sections identical to R695's; exports differ only by the 4 added names (EXERCISES, STARTING, MORE, WIDER). 12 plants (library columns leaking into BUILTIN, a copied muscle profile, the day table missing a tier, aliases keyed as typed, a duplicate entry, a thirteenth starter, an entry training nothing, the bundle without the registry, --map dropping a row or not sorting, a lost bodyweight movement, "OHP" no longer picking Overhead Press) each fail a named test and restore sha256-identical.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (no product change)
+Market: unchanged at 42
+Content: unchanged (exercises 60)
+Coach: code-quality "three parallel tables" → R696: taken
+Decisions: D2 and D4's revert steps now point at exercises.ts
+Next: R697 ORGANIZE: now-model.ts split by concern (steppers, layout, the line, the state types), a pure move with re-exports, then importers updated. Trap found: a source file created while `npm run web` runs is written into the tracked router.d.ts until the server restarts (in ARCHITECTURE.md).

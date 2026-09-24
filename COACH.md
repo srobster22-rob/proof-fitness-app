@@ -103,6 +103,7 @@ from outside its loop. Rules are in AGENT_LOOP.md v3.1, sections 1 and 6.
 
 - **R678, good:** rail ordering extracted to rail-order.ts (now-model.ts 2,228→2,204 lines); tuning numbers named (ADVICE_PLACES, TIER, DONE_RANK); seeding in one transaction; a BY_ID map replaced a per-set linear find; D1–D4 recorded.
 - **Content split across three parallel tables:** the same 28 ids are typed in coldstart.ts:136-172, muscles.ts:116-146 and split.ts:193-227, and VISION's 150 target means 90 more ×3. Fix: one EXERCISES registry (id, name, seeds, kit, factor, calibrates, day, muscles) with the three exports derived — +1 code health, and S3's aliases become one column.
+  -> R696: taken. `EXERCISES` in src/domain/exercises.ts is one entry per movement (seeds, kit, factor, calibrates, day, muscles, aliases); coldstart's tiers, `MUSCLES`, each lift's day and find-exercise's aliases are views of it. Snapshot identical but for the four new exports.
 - **Weak test:** the-library-reaches-every-lifter.test.ts:134 `notDeepEqual(core, sorted)` passes for any non-alphabetical order, a shuffle included. Pin the curated prefix.
   -> R678: taken. The test now pins the full curated order of every day's core and wider tiers, so a shuffle fails it too.
 - **Gameable inventory:** insights are a denylist (inventory.ts:43), so any new RecapPayload plumbing field counts as an insight; coach situations are counted by i18n key (inventory.ts:51), so rewording one line into two keys counts as a new "situation".

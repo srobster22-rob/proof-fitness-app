@@ -1,5 +1,6 @@
 import type { LoggedSet } from './types.ts';
 import { t, type Language } from './i18n.ts';
+import { EXERCISES } from './exercises.ts';
 
 /**
  * What each movement actually trains, and what that means for what to do next.
@@ -74,77 +75,7 @@ export interface Profile {
  * be exactly the made-up fact §16 exists to stop, and a wrong profile is worse
  * than none because it would move real recommendations around.
  */
-export const MUSCLES: Record<string, Profile> = {
-  // ---- push ---------------------------------------------------------------
-  bench:      { primary: ['chest', 'triceps'], secondary: ['frontdelt'], compound: true },
-  incline:    { primary: ['chest', 'frontdelt'], secondary: ['triceps'], compound: true },
-  dbpress:    { primary: ['chest', 'triceps'], secondary: ['frontdelt'], compound: true },
-  chestpress: { primary: ['chest', 'triceps'], secondary: ['frontdelt'], compound: true },
-  pushup:     { primary: ['chest', 'triceps'], secondary: ['frontdelt', 'core'], compound: true },
-  dip:        { primary: ['chest', 'triceps'], secondary: ['frontdelt'], compound: true },
-  ohp:        { primary: ['frontdelt', 'triceps'], secondary: ['sidedelt', 'core'], compound: true },
-  dbohp:      { primary: ['frontdelt', 'triceps'], secondary: ['sidedelt'], compound: true },
-  fly:        { primary: ['chest'], secondary: [], compound: false },
-  triext:     { primary: ['triceps'], secondary: [], compound: false },
-  pushdown:   { primary: ['triceps'], secondary: [], compound: false },
-  lateral:    { primary: ['sidedelt'], secondary: [], compound: false },
-
-  // ---- pull ---------------------------------------------------------------
-  row:       { primary: ['lats', 'upperback'], secondary: ['biceps', 'lowerback'], compound: true },
-  dbrow:     { primary: ['lats', 'upperback'], secondary: ['biceps'], compound: true },
-  cablerow:  { primary: ['lats', 'upperback'], secondary: ['biceps'], compound: true },
-  pulldown:  { primary: ['lats'], secondary: ['biceps'], compound: true },
-  pullup:    { primary: ['lats'], secondary: ['biceps'], compound: true },
-  chinup:    { primary: ['lats', 'biceps'], secondary: [], compound: true },
-  deadlift:  { primary: ['hamstrings', 'glutes', 'lowerback'], secondary: ['traps', 'lats'], compound: true },
-  shrug:     { primary: ['traps'], secondary: ['forearms'], compound: false },
-  facepull:  { primary: ['reardelt', 'upperback'], secondary: [], compound: false },
-  revfly:    { primary: ['reardelt', 'upperback'], secondary: [], compound: false },
-  curl:      { primary: ['biceps'], secondary: ['forearms'], compound: false },
-  hammer:    { primary: ['biceps', 'forearms'], secondary: [], compound: false },
-
-  // ---- legs ---------------------------------------------------------------
-  squat:     { primary: ['quads', 'glutes'], secondary: ['lowerback', 'core'], compound: true },
-  legpress:  { primary: ['quads', 'glutes'], secondary: [], compound: true },
-  lunge:     { primary: ['quads', 'glutes'], secondary: ['core'], compound: true },
-  rdl:       { primary: ['hamstrings', 'glutes'], secondary: ['lowerback'], compound: true },
-  hipthrust: { primary: ['glutes', 'hamstrings'], secondary: [], compound: true },
-  legcurl:   { primary: ['hamstrings'], secondary: [], compound: false },
-  legext:    { primary: ['quads'], secondary: [], compound: false },
-  calf:      { primary: ['calves'], secondary: [], compound: false },
-
-  // R678's additions.
-  'close-grip-bench': { primary: ['triceps', 'chest'], secondary: ['frontdelt'], compound: true },
-  'incline-db-press': { primary: ['chest', 'frontdelt'], secondary: ['triceps'], compound: true },
-  'machine-shoulder-press': { primary: ['frontdelt', 'triceps'], secondary: ['sidedelt'], compound: true },
-  'arnold-press': { primary: ['frontdelt', 'sidedelt'], secondary: ['triceps'], compound: true },
-  'skull-crusher': { primary: ['triceps'], secondary: [], compound: false },
-  'cable-fly': { primary: ['chest'], secondary: [], compound: false },
-  'db-fly': { primary: ['chest'], secondary: [], compound: false },
-  'front-raise': { primary: ['frontdelt'], secondary: [], compound: false },
-  'cable-lateral-raise': { primary: ['sidedelt'], secondary: [], compound: false },
-
-  't-bar-row': { primary: ['lats', 'upperback'], secondary: ['biceps', 'lowerback'], compound: true },
-  'machine-row': { primary: ['upperback', 'lats'], secondary: ['biceps'], compound: true },
-  'sumo-deadlift': { primary: ['glutes', 'hamstrings', 'quads'], secondary: ['lowerback', 'traps'], compound: true },
-  'rack-pull': { primary: ['upperback', 'traps', 'lowerback'], secondary: ['glutes', 'hamstrings', 'lats', 'forearms'], compound: true },
-  'straight-arm-pulldown': { primary: ['lats'], secondary: [], compound: false },
-  'barbell-curl': { primary: ['biceps'], secondary: ['forearms'], compound: false },
-  'cable-curl': { primary: ['biceps'], secondary: [], compound: false },
-  'preacher-curl': { primary: ['biceps'], secondary: [], compound: false },
-
-  'front-squat': { primary: ['quads', 'glutes'], secondary: ['core', 'upperback'], compound: true },
-  'hack-squat': { primary: ['quads', 'glutes'], secondary: [], compound: true },
-  'trap-bar-deadlift': { primary: ['quads', 'glutes', 'hamstrings'], secondary: ['lowerback', 'traps'], compound: true },
-  'goblet-squat': { primary: ['quads', 'glutes'], secondary: ['core'], compound: true },
-  'bulgarian-split-squat': { primary: ['quads', 'glutes'], secondary: ['core'], compound: true },
-  'good-morning': { primary: ['hamstrings', 'lowerback'], secondary: ['glutes'], compound: true },
-  'step-up': { primary: ['quads', 'glutes'], secondary: [], compound: true },
-  'kettlebell-swing': { primary: ['glutes', 'hamstrings'], secondary: ['lowerback', 'core'], compound: true },
-  'seated-calf-raise': { primary: ['calves'], secondary: [], compound: false },
-  'hip-abduction': { primary: ['glutes'], secondary: [], compound: false },
-  'cable-crunch': { primary: ['core'], secondary: [], compound: false }
-};
+export const MUSCLES: Record<string, Profile> = Object.fromEntries(EXERCISES.map(e => [e.id, e.muscles]));
 
 /** Null for anything invented by the user — see MUSCLES. */
 export function profileFor(exerciseId: string): Profile | null {

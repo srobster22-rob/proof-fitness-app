@@ -1,4 +1,5 @@
 import type { Unit } from './types.ts';
+import { EXERCISES } from './exercises.ts';
 
 /**
  * Measurements of the lifter.
@@ -245,13 +246,13 @@ export function formatMeasure(value: number, unit: MeasureUnit): string {
  * recorded as "25", so volume, PRs and estimated 1RM all treat their hardest
  * pulling work as their lightest.
  *
- * Kept as a set of ids rather than read from `EQUIPMENT_BASE` because the
- * equipment on a SET is what the user chose that day, and these four are
+ * Read from each movement's own `kit` in the library, never from the
+ * equipment on a SET: that is what the user chose that day, and these are
  * bodyweight movements whether or not anyone tapped a chip.
  */
-export const CARRIES_BODYWEIGHT: ReadonlySet<string> = new Set([
-  'pullup', 'chinup', 'dip', 'pushup'
-]);
+export const CARRIES_BODYWEIGHT: ReadonlySet<string> = new Set(
+  EXERCISES.filter(e => e.kit === 'bodyweight').map(e => e.id)
+);
 
 /**
  * What a set actually weighed.

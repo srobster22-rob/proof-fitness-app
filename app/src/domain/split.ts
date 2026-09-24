@@ -1,4 +1,5 @@
 import type { Exercise } from './types.ts';
+import { EXERCISES } from './exercises.ts';
 
 /**
  * Splits — what goes with what. PROMPT.md §6 and §7.
@@ -140,92 +141,8 @@ export const SPLIT_LABEL: Record<SplitDay, string> = {
   legs: 'LEGS'
 };
 
-/**
- * The starting twelve, assigned the conventional way.
- *
- * Deadlift sits on pull rather than legs: it is trained with the back in every
- * common PPL template, and putting it on leg day next to squats is how people
- * end up unable to walk.
- */
-const DAY_OF: Record<string, SplitDay> = {
-  bench: 'push',
-  ohp: 'push',
-  dbpress: 'push',
-  triext: 'push',
-  lateral: 'push',
-
-  deadlift: 'pull',
-  row: 'pull',
-  pulldown: 'pull',
-  dbrow: 'pull',
-  curl: 'pull',
-
-  squat: 'legs',
-  legpress: 'legs',
-
-  // The rest of the library (`MORE_MOVEMENTS`). Every movement the app ships
-  // knowing about has a day, or the picker cannot file it and it falls into
-  // YOURS beside the ones the user invented.
-  incline: 'push',
-  dbohp: 'push',
-  chestpress: 'push',
-  fly: 'push',
-  pushdown: 'push',
-
-  cablerow: 'pull',
-  hammer: 'pull',
-  facepull: 'pull',
-  revfly: 'pull',
-  // Vertical pulling is pull day; dips and push-ups are pressing.
-  pullup: 'pull',
-  chinup: 'pull',
-  dip: 'push',
-  pushup: 'push',
-  shrug: 'pull',
-
-  rdl: 'legs',
-  hipthrust: 'legs',
-  legcurl: 'legs',
-  legext: 'legs',
-  lunge: 'legs',
-  calf: 'legs',
-
-  // R678's additions, filed the way the list above already files their kind.
-  'close-grip-bench': 'push',
-  'incline-db-press': 'push',
-  'machine-shoulder-press': 'push',
-  'arnold-press': 'push',
-  'skull-crusher': 'push',
-  'cable-fly': 'push',
-  'db-fly': 'push',
-  'front-raise': 'push',
-  'cable-lateral-raise': 'push',
-
-  't-bar-row': 'pull',
-  'machine-row': 'pull',
-  // Floor-pulled deadlifts are pull day with the conventional one above, sumo
-  // and trap bar alike. See the deadlift note on why they are not on leg day.
-  'sumo-deadlift': 'pull',
-  'trap-bar-deadlift': 'pull',
-  'rack-pull': 'pull',
-  'straight-arm-pulldown': 'pull',
-  'barbell-curl': 'pull',
-  'cable-curl': 'pull',
-  'preacher-curl': 'pull',
-
-  'front-squat': 'legs',
-  'hack-squat': 'legs',
-  'goblet-squat': 'legs',
-  'bulgarian-split-squat': 'legs',
-  'good-morning': 'legs',
-  'step-up': 'legs',
-  'kettlebell-swing': 'legs',
-  'seated-calf-raise': 'legs',
-  'hip-abduction': 'legs',
-  // Direct core work has no pushing or pulling day, and leg day is where most
-  // push/pull/legs programmes put it.
-  'cable-crunch': 'legs'
-};
+/** Each built-in's day, from the library (`exercises.ts` says why each is filed where it is). */
+const DAY_OF: Record<string, SplitDay> = Object.fromEntries(EXERCISES.map(e => [e.id, e.day]));
 
 /** Which day a movement belongs to, or null for one the user invented. */
 export function dayOf(exerciseId: string): SplitDay | null {

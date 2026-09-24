@@ -746,6 +746,12 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**One exercise registry (R696, ORGANIZE).** A movement is one entry in `src/domain/exercises.ts`
+(`EXERCISES`: seeds, kit, factor, calibrates, day, muscles, aliases), in three tiers. `BUILTIN` and its tiers
+(coldstart.ts), `MUSCLES` (muscles.ts), each lift's day (split.ts), the typed aliases (find-exercise.ts) and which
+movements carry the body (`CARRIES_BODYWEIGHT`, measure.ts) are views of it, so adding a movement is one entry.
+It imports only types, and is first in the domain bundle (build-domain.cjs).
+
 **The check command, the snapshot and the map (R695, ORGANIZE).** `npm run check` in app/ is the SHIP
 gate: 8 gates, then a summary naming each failure's first assertion and file:line, exit 1 on any failure,
 full outputs in app/out/. `node tools/snapshot.ts` fingerprints every decision the pure `.ts` modules make

@@ -36,8 +36,8 @@ new work.
     calibrate, although they carry factors, would bring the overshoot back:
     - DB Row at 60 lb would open a first squat at 255 lb;
     - DB Bench at 50 lb would open a first deadlift at 205 lb, a worse version of PT0's 150.
-- **Revert:** the `calibrates` flags in `coldstart.ts`, and the two `continue` lines in
-  `strengthIndex`.
+- **Revert:** the `calibrates` flags on the entries in `exercises.ts` (they lived in `coldstart.ts`
+  until R696), and the two `continue` lines in `strengthIndex` (`coldstart.ts`).
 
 ## D3 · R678 · A lifter's own movement wins over a same-named built-in
 - **Choice:** `Repo.exercises()` hides a built-in while a live exercise of the lifter's own holds
@@ -53,9 +53,11 @@ new work.
   hinge belongs on for UPPER / LOWER is still the owner's open question (HANDOFF, R673), and
   OWNER.md carries the new evidence.
 - **Alternative:** the trap bar on legs, as a quad-driven hybrid.
-- **Why:** `split.ts`'s own rule keeps floor-pulled deadlifts off leg day. Filing one variant
-  differently contradicted it (R678 review).
-- **Revert:** the `'trap-bar-deadlift'` line in `DAY_OF`.
+- **Why:** the library's own rule keeps floor-pulled deadlifts off leg day (the deadlift note on
+  `STARTING` in `exercises.ts`; it was `split.ts`'s until R696). Filing one variant differently
+  contradicted it (R678 review).
+- **Revert:** `day: 'pull'` on the `'trap-bar-deadlift'` entry in `exercises.ts` (the `DAY_OF` table
+  in `split.ts` until R696).
 
 ## D5 · R679 · After bench, the rail keeps Overhead Press behind the isolation lifts
 - **Choice:** PT0 found Overhead Press off the right edge of the day rail. R679 leaves the

@@ -1,5 +1,6 @@
 import type { Exercise, LoggedSet, Unit, Equipment } from './types.ts';
 import { rankExercises, sessionCount, MIN_SESSIONS_FOR_PREDICTION } from './predict.ts';
+import { STARTING, MORE, WIDER, type LibraryExercise } from './exercises.ts';
 
 /**
  * The first session. PROMPT.md §6.
@@ -15,15 +16,7 @@ import { rankExercises, sessionCount, MIN_SESSIONS_FOR_PREDICTION } from './pred
  *     the rest
  */
 
-/**
- * The starting twelve. Compound movements people actually walk in and do,
- * ordered by how likely a beginner is to be looking for them.
- *
- * `seed` values are deliberately CONSERVATIVE — an untrained adult should be
- * able to complete the set. Overshooting on set one is worse than undershooting:
- * a number that is too heavy is discouraging and possibly unsafe, while one that
- * is too light gets corrected with two taps of a stepper.
- */
+/** A built-in movement as a lifter with no history meets it: what to seed the dial with. */
 export interface SeedExercise extends Exercise {
   seedLb: number;
   seedKg: number;
@@ -55,121 +48,17 @@ export interface SeedExercise extends Exercise {
   calibrates?: boolean;
 }
 
-export const STARTING_TWELVE: SeedExercise[] = [
-  { id: 'bench',    name: 'Bench Press',      seedLb: 95,  seedKg: 40,  reps: 8, kit: 'barbell', factor: 1.0, calibrates: true },
-  { id: 'squat',    name: 'Squat',            seedLb: 95,  seedKg: 40,  reps: 8, kit: 'barbell', factor: 1.2, calibrates: true },
-  { id: 'deadlift', name: 'Deadlift',         seedLb: 135, seedKg: 60,  reps: 5, kit: 'barbell', factor: 1.45, calibrates: true },
-  { id: 'ohp',      name: 'Overhead Press',   seedLb: 65,  seedKg: 30,  reps: 8, kit: 'barbell', factor: 0.43, calibrates: true },
-  { id: 'row',      name: 'Barbell Row',      seedLb: 85,  seedKg: 35,  reps: 8, kit: 'barbell', factor: 0.65, calibrates: true },
-  { id: 'pulldown', name: 'Lat Pulldown',     seedLb: 80,  seedKg: 35,  reps: 10, kit: 'machine', factor: 0.55 },
-  { id: 'dbpress',  name: 'DB Bench Press',   seedLb: 35,  seedKg: 15,  reps: 10, kit: 'dumbbell', factor: 0.35 },
-  { id: 'dbrow',    name: 'DB Row',           seedLb: 35,  seedKg: 15,  reps: 10, kit: 'dumbbell', factor: 0.28 },
-  { id: 'legpress', name: 'Leg Press',        seedLb: 180, seedKg: 80,  reps: 10, kit: 'machine', factor: 1.8 },
-  { id: 'curl',     name: 'Bicep Curl',       seedLb: 30,  seedKg: 12.5, reps: 10, kit: 'dumbbell', factor: 0.2 },
-  { id: 'triext',   name: 'Tricep Extension', seedLb: 30,  seedKg: 12.5, reps: 12, kit: 'dumbbell', factor: 0.2 },
-  { id: 'lateral',  name: 'Lateral Raise',    seedLb: 15,  seedKg: 7.5, reps: 12, kit: 'dumbbell', factor: 0.08 }
-];
+/** Only what seeds a lifter with no history, so the library's other columns stay out of it. */
+function seedOf({ id, name, seedLb, seedKg, reps, kit, factor, calibrates }: LibraryExercise): SeedExercise {
+  return calibrates
+    ? { id, name, seedLb, seedKg, reps, kit, factor, calibrates }
+    : { id, name, seedLb, seedKg, reps, kit, factor };
+}
 
-/**
- * The rest of the library.
- *
- * `STARTING_TWELVE` stays exactly twelve because §6 promises a **short** list on
- * first launch — a beginner facing thirty movements is the setup maze §5 exists
- * to avoid. These are what everyone else needs once they know what they are
- * doing, and they only reach the first-launch picker once it has history to
- * rank. A day's rail offers them sooner, in this order (see `buildRail`).
- *
- * Chosen for how common they are, not for coverage: every one of these is in
- * an ordinary commercial gym. The bodyweight four (pull-up, chin-up, dip,
- * push-up) are here now that a set's real load counts the lifter's bodyweight
- * (`realLoad`); nothing else is marked bodyweight, because that mark means the
- * whole body is the load.
- */
-export const MORE_MOVEMENTS: SeedExercise[] = [
-  // push
-  { id: 'incline',   name: 'Incline Bench Press', seedLb: 65,  seedKg: 30,   reps: 8, kit: 'barbell', factor: 0.85, calibrates: true },
-  { id: 'dbohp',     name: 'DB Shoulder Press',   seedLb: 25,  seedKg: 10,   reps: 10, kit: 'dumbbell', factor: 0.18 },
-  { id: 'chestpress',name: 'Machine Chest Press', seedLb: 70,  seedKg: 30,   reps: 10, kit: 'machine', factor: 0.95 },
-  { id: 'fly',       name: 'Chest Fly',           seedLb: 25,  seedKg: 10,   reps: 12, kit: 'machine', factor: 0.25 },
-  { id: 'pushdown',  name: 'Tricep Pushdown',     seedLb: 40,  seedKg: 20,   reps: 12, kit: 'machine', factor: 0.25 },
-
-  // pull
-  { id: 'cablerow',  name: 'Seated Cable Row',    seedLb: 80,  seedKg: 35,   reps: 10, kit: 'machine', factor: 0.6 },
-  { id: 'hammer',    name: 'Hammer Curl',         seedLb: 25,  seedKg: 10,   reps: 10, kit: 'dumbbell', factor: 0.2 },
-  { id: 'facepull',  name: 'Face Pull',           seedLb: 30,  seedKg: 12.5, reps: 12, kit: 'machine', factor: 0.2 },
-  { id: 'revfly',    name: 'Reverse Fly',         seedLb: 20,  seedKg: 7.5,  reps: 12, kit: 'machine', factor: 0.1 },
-  /*
-   * Bodyweight, and the four most conspicuous absences from a gym library.
-   * `factor: 0` because there is nothing to scale — `startingWeight` is added
-   * weight, and the honest default for all four is none.
-   */
-  { id: 'pullup',    name: 'Pull-up',             seedLb: 0,   seedKg: 0,    reps: 8,  kit: 'bodyweight', factor: 0 },
-  { id: 'chinup',    name: 'Chin-up',             seedLb: 0,   seedKg: 0,    reps: 8,  kit: 'bodyweight', factor: 0 },
-  { id: 'dip',       name: 'Dip',                 seedLb: 0,   seedKg: 0,    reps: 8,  kit: 'bodyweight', factor: 0 },
-  { id: 'pushup',    name: 'Push-up',             seedLb: 0,   seedKg: 0,    reps: 12, kit: 'bodyweight', factor: 0 },
-  { id: 'shrug',     name: 'Shrug',               seedLb: 95,  seedKg: 40,   reps: 12, kit: 'barbell', factor: 0.8 },
-
-  // legs
-  { id: 'rdl',       name: 'Romanian Deadlift',   seedLb: 95,  seedKg: 40,   reps: 8, kit: 'barbell', factor: 1.1, calibrates: true },
-  { id: 'hipthrust', name: 'Hip Thrust',          seedLb: 135, seedKg: 60,   reps: 10, kit: 'barbell', factor: 1.3 },
-  { id: 'legcurl',   name: 'Leg Curl',            seedLb: 50,  seedKg: 25,   reps: 12, kit: 'machine', factor: 0.4 },
-  { id: 'legext',    name: 'Leg Extension',       seedLb: 50,  seedKg: 25,   reps: 12, kit: 'machine', factor: 0.45 },
-  { id: 'lunge',     name: 'Lunge',               seedLb: 30,  seedKg: 12.5, reps: 10, kit: 'dumbbell', factor: 0.25 },
-  { id: 'calf',      name: 'Calf Raise',          seedLb: 90,  seedKg: 40,   reps: 12, kit: 'machine', factor: 0.6 }
-];
-
-/*
- * The rest of what an ordinary commercial gym has (R678).
- *
- * Strong ships 200+ movements and Hevy 400+ (MARKET.md), and a lifter whose
- * program calls for a front squat or a skull crusher had to invent it: no
- * starting weight, no day, no muscles for the coach to reason with. These
- * come LAST on purpose. `BUILTIN`'s order is the order a lifter with no
- * history meets the day's lifts on the rail, and the rail offers this tier only
- * in the room the core leaves: a push or pull day's twelve stays whole, and leg
- * day, which has fewer core lifts than the rail holds, fills the rest from here.
- * Once a lifter trains one of them it ranks like any lift they do.
- *
- * Ids are hyphenated on purpose. A custom exercise's id is a slug of
- * `[a-z0-9_]`, so none a lifter already made can hold one of these.
- */
-export const WIDER_LIBRARY: SeedExercise[] = [
-  // push
-  { id: 'close-grip-bench', name: 'Close-Grip Bench Press', seedLb: 65,  seedKg: 30,   reps: 8,  kit: 'barbell',  factor: 0.85, calibrates: true },
-  { id: 'incline-db-press', name: 'Incline DB Press',       seedLb: 30,  seedKg: 12.5, reps: 10, kit: 'dumbbell', factor: 0.3 },
-  { id: 'machine-shoulder-press', name: 'Machine Shoulder Press', seedLb: 50,  seedKg: 22.5, reps: 10, kit: 'machine',  factor: 0.45 },
-  { id: 'arnold-press',  name: 'Arnold Press',           seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
-  { id: 'skull-crusher', name: 'Skull Crusher',          seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
-  { id: 'cable-fly',     name: 'Cable Fly',              seedLb: 15,  seedKg: 7.5,  reps: 12, kit: 'machine',  factor: 0.15 },
-  { id: 'db-fly',        name: 'DB Fly',                 seedLb: 15,  seedKg: 7.5,  reps: 12, kit: 'dumbbell', factor: 0.1 },
-  { id: 'front-raise',   name: 'Front Raise',            seedLb: 15,  seedKg: 7.5,  reps: 12, kit: 'dumbbell', factor: 0.08 },
-  { id: 'cable-lateral-raise', name: 'Cable Lateral Raise',    seedLb: 10,  seedKg: 5,    reps: 12, kit: 'machine',  factor: 0.08 },
-
-  // pull
-  { id: 't-bar-row',     name: 'T-Bar Row',              seedLb: 70,  seedKg: 30,   reps: 8,  kit: 'barbell',  factor: 0.6 },
-  { id: 'machine-row',   name: 'Machine Row',            seedLb: 70,  seedKg: 30,   reps: 10, kit: 'machine',  factor: 0.55 },
-  { id: 'sumo-deadlift', name: 'Sumo Deadlift',          seedLb: 135, seedKg: 60,   reps: 5,  kit: 'barbell',  factor: 1.4, calibrates: true },
-  { id: 'rack-pull',     name: 'Rack Pull',              seedLb: 135, seedKg: 60,   reps: 5,  kit: 'barbell',  factor: 1.5 },
-  { id: 'straight-arm-pulldown', name: 'Straight-Arm Pulldown',  seedLb: 30,  seedKg: 12.5, reps: 12, kit: 'machine',  factor: 0.2 },
-  { id: 'barbell-curl',  name: 'Barbell Curl',           seedLb: 45,  seedKg: 20,   reps: 10, kit: 'barbell',  factor: 0.25 },
-  { id: 'cable-curl',    name: 'Cable Curl',             seedLb: 30,  seedKg: 12.5, reps: 12, kit: 'machine',  factor: 0.2 },
-  { id: 'preacher-curl', name: 'Preacher Curl',          seedLb: 30,  seedKg: 12.5, reps: 10, kit: 'machine',  factor: 0.18 },
-
-  // legs
-  { id: 'front-squat',   name: 'Front Squat',            seedLb: 75,  seedKg: 35,   reps: 5,  kit: 'barbell',  factor: 0.85, calibrates: true },
-  { id: 'hack-squat',    name: 'Hack Squat',             seedLb: 90,  seedKg: 40,   reps: 10, kit: 'machine',  factor: 1.0 },
-  { id: 'trap-bar-deadlift', name: 'Trap Bar Deadlift',      seedLb: 135, seedKg: 60,   reps: 5,  kit: 'barbell',  factor: 1.45, calibrates: true },
-  { id: 'goblet-squat',  name: 'Goblet Squat',           seedLb: 35,  seedKg: 15,   reps: 10, kit: 'dumbbell', factor: 0.25 },
-  { id: 'bulgarian-split-squat', name: 'Bulgarian Split Squat',  seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
-  { id: 'good-morning',  name: 'Good Morning',           seedLb: 65,  seedKg: 30,   reps: 10, kit: 'barbell',  factor: 0.5 },
-  { id: 'step-up',       name: 'Step-Up',                seedLb: 20,  seedKg: 7.5,  reps: 10, kit: 'dumbbell', factor: 0.15 },
-  // One bell held in both hands. The nearest kit the app models is a dumbbell,
-  // whose 5 lb / 2.5 kg floor is a real kettlebell too.
-  { id: 'kettlebell-swing', name: 'Kettlebell Swing',       seedLb: 35,  seedKg: 15,   reps: 12, kit: 'dumbbell', factor: 0.25 },
-  { id: 'seated-calf-raise', name: 'Seated Calf Raise',      seedLb: 45,  seedKg: 20,   reps: 12, kit: 'machine',  factor: 0.4 },
-  { id: 'hip-abduction', name: 'Hip Abduction',          seedLb: 70,  seedKg: 30,   reps: 12, kit: 'machine',  factor: 0.5 },
-  { id: 'cable-crunch',  name: 'Cable Crunch',           seedLb: 50,  seedKg: 22.5, reps: 12, kit: 'machine',  factor: 0.3 }
-];
+/** The starting twelve, the rest of the library and the rest of the gym (`exercises.ts` has why). */
+export const STARTING_TWELVE: SeedExercise[] = STARTING.map(seedOf);
+export const MORE_MOVEMENTS: SeedExercise[] = MORE.map(seedOf);
+export const WIDER_LIBRARY: SeedExercise[] = WIDER.map(seedOf);
 
 /** Everything the app ships knowing about. Seeded into the database. */
 export const BUILTIN: SeedExercise[] = [...STARTING_TWELVE, ...MORE_MOVEMENTS, ...WIDER_LIBRARY];

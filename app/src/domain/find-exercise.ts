@@ -1,4 +1,5 @@
 import type { Exercise } from './types.ts';
+import { EXERCISES } from './exercises.ts';
 
 /**
  * Finding a movement by typing part of its name (R683).
@@ -14,24 +15,12 @@ import type { Exercise } from './types.ts';
 export const MATCHES_SHOWN = 5;
 
 /**
- * What a lifter types for a movement the library names another way, keyed by
- * `stem`, so spacing, hyphens and a plural need no entry of their own. Only
- * names that mean ONE movement, because an alias also decides what ADD picks
- * instead of creating: "shoulder press" could be three of them, "flyes" four,
- * and a stiff-leg deadlift is not a Romanian one.
+ * What a lifter types for a movement the library names another way (each
+ * entry's `aliases` in `exercises.ts`), keyed by `stem`, so spacing, hyphens
+ * and a plural need no entry of their own.
  */
-const ALIASES: Record<string, string> = {
-  rdl: 'rdl',
-  skullcrusher: 'skull-crusher',
-  lyingtricepextension: 'skull-crusher',
-  ohp: 'ohp',
-  militarypress: 'ohp',
-  ropepushdown: 'pushdown',
-  bss: 'bulgarian-split-squat',
-  kbswing: 'kettlebell-swing',
-  pecfly: 'fly',
-  bench: 'bench'
-};
+const ALIASES: Record<string, string> = Object.fromEntries(
+  EXERCISES.flatMap(e => (e.aliases ?? []).map(a => [stem(normalizeName(a)), e.id])));
 
 /**
  * One plural off a word: "flies" to "fly", "presses" and "crunches" lose "es",

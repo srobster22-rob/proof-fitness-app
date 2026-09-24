@@ -28,7 +28,7 @@ is the only way to storage. `app/` holds the expo-router routes, one file per sc
 
 | content | lives in |
 |---|---|
-| exercises | `BUILTIN` and its tiers in `coldstart.ts`, plus `MUSCLES` in `muscles.ts` and the day table in `split.ts` (three parallel tables: debt) |
+| exercises | `EXERCISES` in `exercises.ts`, one entry per movement; `BUILTIN` and its tiers (`coldstart.ts`), `MUSCLES` (`muscles.ts`), each lift's day (`split.ts`) and the aliases (`find-exercise.ts`) are views of it |
 | split plans | `SPLIT_PLANS`, `SPLIT_DAYS` in `split.ts` |
 | strings | the `EN` and `ES` tables in `i18n.ts`, read through `t(lang, key)` |
 | coach situations | the `coach*` keys `coach.ts` returns, worded in `i18n.ts` |
@@ -73,6 +73,9 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 - The Bash tool collapses `\\` in heredocs: write escape-heavy code with a file editor.
 - The harness's `close()` must let Chrome exit, or localStorage writes are lost.
 - `orphan-scan` counts `tools/` as a caller: a tool importing an orphan hides it.
+- A source file created while `npm run web` runs is written into the tracked `app/.expo/types/router.d.ts`
+  as a route (`/../src/...`), and the server writes it back until it restarts: restore the file with
+  `git show HEAD:app/.expo/types/router.d.ts > app/.expo/types/router.d.ts`, then restart the server.
 - A hidden browser pane fires no animation frames and no focus events (traps 17, 20).
 
 ## Modules
@@ -135,18 +138,19 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | `src/domain/i18n.ts` | 1,298 | Every visible string (en, es) behind `t()` and `fill()`; number and date locale. |
 | `src/domain/session.ts` | 702 | Session lifecycle (idle end, stale) and the recap payload (`buildRecap`). |
 | `src/domain/coach.ts` | 614 | The coach's call for a lift (raise, hold, deload) from two weeks of history; when a call is made. |
-| `src/domain/coldstart.ts` | 454 | The exercise library (`BUILTIN`, its tiers), first-time starting weights, the prefill, the picker list, unit inference. |
 | `src/domain/goals.ts` | 426 | Lift goals: progress, ranking, the lines they print, validation. |
-| `src/domain/split.ts` | 383 | Split plans (PPL, upper/lower, full body), each lift's day, the day's plan. |
-| `src/domain/muscles.ts` | 333 | What each movement trains (`MUSCLES`), overlap, what to train next. |
-| `src/domain/measure.ts` | 320 | Measurement kinds, units, conversion, readings. |
+| `src/domain/coldstart.ts` | 343 | First-time starting weights, the prefill, the picker list, unit inference; `BUILTIN` and its tiers as views of `exercises.ts`. |
+| `src/domain/measure.ts` | 321 | Measurement kinds, units, conversion, readings. |
+| `src/domain/split.ts` | 300 | Split plans (PPL, upper/lower, full body), each lift's day (from `exercises.ts`), the day's plan. |
 | `src/domain/pr.ts` | 294 | Personal records that never cry wolf: rep bests, e1RM, heaviest. |
+| `src/domain/muscles.ts` | 264 | What each movement trains (`MUSCLES`, a view of `exercises.ts`), overlap, what to train next. |
 | `src/domain/predict.ts` | 257 | Ranks which lift comes next from recency and weekday. |
 | `src/domain/measure-goal.ts` | 244 | Goals about the lifter (bodyweight, height): direction, validation. |
+| `src/domain/exercises.ts` | 237 | The exercise library: one entry per movement with its seed, day, muscles and aliases (`EXERCISES`). |
 | `src/domain/share-url.ts` | 188 | Packs a finished workout into a share link. |
 | `src/domain/weekly.ts` | 169 | The weekly comparison line. |
 | `src/domain/types.ts` | 147 | Core types: `LoggedSet`, `Session`, `Exercise`, `Unit`, `Equipment`. |
-| `src/domain/find-exercise.ts` | 124 | Finds a movement by typed name, alias or plural. |
+| `src/domain/find-exercise.ts` | 113 | Finds a movement by typed name, alias (from `exercises.ts`) or plural. |
 | `src/domain/rest.ts` | 51 | Rest-timer state and formatting. |
 
 ### Storage (`src/data/`)
@@ -169,7 +173,6 @@ harness), `app/test/` (one file per behaviour), `link/` (the share-link page, bu
 ## Organization debt
 
 - **Functions over 150 lines (11):** `NowScreen` 1314, `coachSuggestion` 375, `AddGoal` 369, `Goals` 333, `Recap` 333, `Settings` 250, `ExercisePicker` 247, `Progress` 236, `NowModel.state` 220, `buildRecap` 185, `EquipmentSheet` 157.
-- **Three parallel exercise tables:** `coldstart.ts`, `muscles.ts` and `split.ts` each type the same ids.
 - **Tests that read source text:** about 130 of 210 test files read a source file, directly or through
   `test/helpers/source.ts`; gates should read what modules export (AGENT_LOOP §3a item 8).
 - **Round-history comments:** about 277 comment lines name rounds (R548…); that history lives in LOOP_LOG.

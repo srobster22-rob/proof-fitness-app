@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { functionsIn, measure, FILE_LIMIT, FUNCTION_LIMIT } from '../tools/sizes.mjs';
+import { functionsIn, measure, refreshMap, FILE_LIMIT, FUNCTION_LIMIT } from '../tools/sizes.mjs';
 
 /*
  * tools/sizes.mjs (R695) measures functions with TypeScript's parser. A brace
@@ -35,6 +35,20 @@ describe('the size report measures real functions', () => {
   test('a component in a .tsx file is a function too', () => {
     const src = 'export function Row({ label }: { label: string }) {\n  return <Text>{label}</Text>;\n}\n';
     assert.deepEqual(functionsIn(src, 'Row.tsx').map(f => [f.name, f.lines]), [['Row', 3]]);
+  });
+
+  test('--map rewrites the map\'s sizes and names the rows it lacks or no longer needs (R696)', () => {
+    const m = measure();
+    const now = m.files.find(f => f.path === 'src/ui/now-model.ts')!;
+    const r = refreshMap('# map\r\n| `src/ui/now-model.ts` | 1 | the Now model |\r\n| `src/gone.ts` | 5 | was here |\r\n', m);
+    assert.ok(r.text.includes(`| \`src/ui/now-model.ts\` | ${now.lines.toLocaleString('en-US')} | the Now model |`), r.text);
+    assert.ok(r.text.includes('| `src/gone.ts` | 5 | was here |'), 'a gone row was rewritten instead of reported');
+    assert.ok(!r.text.includes('\r'), 'CRLF left in the refreshed map');
+    assert.deepEqual(r.gone, ['src/gone.ts']);
+    assert.ok(r.missing.includes('src/domain/coach.ts') && !r.missing.includes('src/ui/now-model.ts'));
+    // And each table is largest first again, whatever order the rows were in.
+    const sorted = refreshMap('| `src/ui/type.ts` | 9 | a |\n| `src/ui/now-model.ts` | 9 | b |\n\ntext\n', m).text;
+    assert.ok(sorted.indexOf('now-model.ts') < sorted.indexOf('type.ts'), sorted);
   });
 
   test('the app measures as the source it is, against the §3a limits', () => {

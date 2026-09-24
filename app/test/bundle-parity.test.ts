@@ -22,6 +22,7 @@ import * as m_measure from '../src/domain/measure.ts';
 import * as m_predict from '../src/domain/predict.ts';
 import * as m_pr from '../src/domain/pr.ts';
 import * as m_goals from '../src/domain/goals.ts';
+import * as m_exercises from '../src/domain/exercises.ts';
 import * as m_split from '../src/domain/split.ts';
 import * as m_session from '../src/domain/session.ts';
 import * as m_coldstart from '../src/domain/coldstart.ts';
@@ -100,7 +101,7 @@ describe('browser bundle parity', () => {
    */
   const MODULES: Record<string, Record<string, unknown>> = {
     'types.ts': m_types, 'i18n.ts': m_i18n, 'measure.ts': m_measure,
-    'predict.ts': m_predict, 'pr.ts': m_pr, 'goals.ts': m_goals,
+    'predict.ts': m_predict, 'pr.ts': m_pr, 'goals.ts': m_goals, 'exercises.ts': m_exercises,
     'split.ts': m_split, 'session.ts': m_session, 'coldstart.ts': m_coldstart
   };
 

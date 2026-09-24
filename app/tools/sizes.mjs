@@ -8,6 +8,7 @@
  *
  *   node tools/sizes.mjs           the largest files and functions
  *   node tools/sizes.mjs --json    everything, as JSON on stdout
+ *   node tools/sizes.mjs --map     refresh ../ARCHITECTURE.md's sizes; name rows it lacks or no longer needs
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -88,6 +89,33 @@ export function measure(root = APP) {
   };
 }
 
+/**
+ * ARCHITECTURE.md's module rows with their sizes rewritten from the source,
+ * plus the modules it lacks and the ones it lists that are gone. A commit
+ * that adds, moves or splits a module runs `--map`, writes the new module's
+ * row by hand (what it owns is a sentence, not a number), and runs it again.
+ */
+export function refreshMap(text, m = measure()) {
+  const sizes = new Map(m.files.map(f => [f.path, f.lines]));
+  const seen = new Set();
+  const ROW = /^\| `((?:src|app)\/[^`]+)` \| ([\d,]+) \|/;
+  const resized = text.replace(/\r\n/g, '\n').split('\n').map(line => line.replace(ROW, (row, p) => {
+    seen.add(p);
+    return sizes.has(p) ? `| \`${p}\` | ${sizes.get(p).toLocaleString('en-US')} |` : row;
+  }));
+  // Each table stays largest first, so the monoliths are the first thing a reader sees.
+  const lines = [];
+  for (let i = 0; i < resized.length;) {
+    let j = i;
+    while (j < resized.length && ROW.test(resized[j])) j++;
+    if (j === i) { lines.push(resized[i++]); continue; }
+    const size = l => Number(ROW.exec(l)[2].replace(/,/g, ''));
+    lines.push(...resized.slice(i, j).sort((a, b) => size(b) - size(a) || a.localeCompare(b)));
+    i = j;
+  }
+  return { text: lines.join('\n'), missing: [...sizes.keys()].filter(p => !seen.has(p)).sort(), gone: [...seen].filter(p => !sizes.has(p)).sort() };
+}
+
 /** One line for the check's summary. */
 export function headline(m) {
   const f = m.files[0], fn = m.functions[0];
@@ -98,6 +126,15 @@ export function headline(m) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const m = measure();
+  if (process.argv.includes('--map')) {
+    const file = path.join(APP, '..', 'ARCHITECTURE.md');
+    const r = refreshMap(fs.readFileSync(file, 'utf8'), m);
+    fs.writeFileSync(file, r.text);
+    for (const p of r.missing) console.log(`missing from ARCHITECTURE.md (write its row): ${p}`);
+    for (const p of r.gone) console.log(`listed in ARCHITECTURE.md but gone (remove its row): ${p}`);
+    console.log(r.missing.length || r.gone.length ? 'sizes refreshed; the rows above need a hand' : 'ARCHITECTURE.md sizes refreshed');
+    process.exit(r.missing.length || r.gone.length ? 1 : 0);
+  }
   if (process.argv.includes('--json')) {
     process.stdout.write(JSON.stringify(m, null, 1) + '\n');
   } else {

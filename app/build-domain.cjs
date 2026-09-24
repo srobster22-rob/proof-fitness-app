@@ -35,7 +35,7 @@ const OUT = process.env.PROOF_BUNDLE_OUT || path.join(__dirname, 'dist', 'proof-
 // Order matters: a module's imports are destructured out of the shared
 // registry when its IIFE runs, so every module must appear after the ones it
 // imports from. `split.ts` sits before `session.ts` for exactly that reason.
-const MODULES = ['types.ts', 'i18n.ts', 'measure.ts', 'predict.ts', 'pr.ts', 'goals.ts', 'split.ts', 'session.ts', 'coldstart.ts'];
+const MODULES = ['types.ts', 'exercises.ts', 'i18n.ts', 'measure.ts', 'predict.ts', 'pr.ts', 'goals.ts', 'split.ts', 'session.ts', 'coldstart.ts'];
 
 /*
  * Each module gets its OWN IIFE rather than being flattened into one scope.
