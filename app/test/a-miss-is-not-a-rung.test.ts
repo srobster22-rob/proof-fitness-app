@@ -93,10 +93,10 @@ describe('what the lifter sees (R691)', () => {
     return { repo, clock };
   }
 
-  test('the recap does not promise a raise after a missed set', () => {
+  test('the recap does not promise a raise after a missed set: it names the miss (R694)', () => {
     const { repo } = missedToday();
     const next = recapFor(repo, 'today', T0 + 3_600_000)!.next;
-    assert.deepEqual(next, [], `the recap said: ${JSON.stringify(next)}`);
+    assert.deepEqual(next.map(c => c.line), ['205 again — make 5'], `the recap said: ${JSON.stringify(next)}`);
   });
 
   test('the next workout opens on "205 again — make 5"', () => {

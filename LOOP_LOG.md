@@ -4527,3 +4527,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R694 FIX (PT3 found bugs): the coach reads every set at the top weight, not the top set: no raise after a later miss, "made it" ends at a miss, and with no call the dial opens on last time's top set.
+
+## R694 · FIX · No raise on top of a miss: every set at the top weight counts
+Pick: PT3 Broken 1 and 2 (all three personas), backlog 1 — PT ref PT3 · impact planned 2/1/0
+Player notices: Miss a set at a weight you just made (160×8, then 160×6) and "made it" goes back to the call, the recap says "160 again — make 8", and next time the lift opens on 160×8, where it used to say "try 165".
+Impact: planned 2/1/0 → shipped 2/1/0 (biggest file coach.ts 564→614)
+Built: coach.ts `missedAfterMaking` (a set at a weight made the reps, then a later set there fell short) is the one definition for the coach and `callMade`. Every raise (PLATEAU, PROGRESS, CLIMBING) goes through `unlessMissed(call, bar)`, with the bar the call going in asked (the target, R691's `asked`, the session before's reps), and becomes "W again — make bar" over such a miss; lighter back-offs never count. `callMade` ends at one. recap `nextCalls` names a `coachMissed` hold as well as increases; R691's "the recap names nothing after a miss" test now expects the miss named.
+Quality: reviewer REJECT (cycle 1): the bar was the session's own best set, so 200×5 then 200×6 read as a miss and a set the Now screen called "made it" became a recap miss; and the branch ran before R691, lowering its bar. Redesigned: one `missedAfterMaking` for the coach and `callMade`, each raise wrapped with the bar the call going in asked. Cycle 2 APPROVE; its three comments that claimed the two "never disagree" were reworded. Backlog: after a hold that asked other reps ("add a rep", "repeat it", an R691 miss below the target) the line and the next call can still disagree (4 probes); the fix is the coach recomputing its own call from before the session.
+Verified: suite 2370/2370, tsc, dist and MARKET.md current. 8 plants (a miss after making it never seen, any short set counts, a lighter set counts, the bar is the session's own best set, a same-weight raise rests on the set before, a plateau raises over a miss, made-it never ends, the recap drops the miss) each fail a named test and restore sha256-identical. Phone size on the sample: squat 200×5 "made it", 200×3 turns it back to the grey call, the recap reads "Squat · 200 again — make 5", and 3 days later the dial opens on 200×5 under it (shots/R694/; before: shots/PT3/critic-sample-01-s14-end.png, "try 205").
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (the first-timer never misses a set)
+Market: unchanged at 42. Row 5 held at 2 (no up-score in the round that built it); its stale "never set on the dial" corrected (R692).
+Content: unchanged (coach situations 9; order only)
+Coach: none
+Decisions: none
+Next: R695 ORGANIZE (AGENT_LOOP v3.4 §3a, owner order 2026-09-24; it outranks the derived RETRO, which waits for the phase to end). Backlog: the dial opens on last time's LAST set when there is no call (PT3 Broken 3), the SIZE contradiction, the day laid out (slice 3).

@@ -746,6 +746,21 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**No raise on top of a miss (R694).** The coach still ranks sessions by their top set, but every raise
+(PLATEAU, PROGRESS, CLIMBING) passes through `unlessMissed(call, bar)`. If the latest session made `bar` at
+its top weight and then a later set there fell short (`missedAfterMaking`), the call becomes `coachMissed`,
+"160 again — make 8", in place of "try 165" (PT3, all three personas). The bar is what the call going in asked:
+the target for a same-weight raise, R691's `asked` for a climb, and the session before's reps for a plateau.
+So after a climbing, progress, plateau or all-sets call taken as given, a set the Now screen called "made it"
+is not a miss on the recap. After a hold that asked other reps the two can disagree (the reviewer's four
+probes: "add a rep" then 200×8, ×7 is "made it" and then "make 8"; an R691 miss asking 5 then 200×8, ×5; "add a
+rep" into a plateau; "repeat 185×10" then ×9). The real fix is the coach recomputing its own call from before
+that session, a design change, not a patch. `callMade` uses the same
+`missedAfterMaking` on the made set's own weight, so "made it" ends at such a miss; lighter back-offs and
+heavier tries never count. `recapFor().next` names a `coachMissed` hold as well as increases. Accepted:
+rest-pause mini-sets read as misses, and a lifter stuck at 8, 7, 6 hears "make 8", not "stuck at". Not done:
+with no call, the dial still opens on last time's LAST set (PT3 Broken 3).
+
 **The Call Sheet, slice 2: the call is on the dial (R692, D8).** `NowModel.coachCall()` is the one call for
 the line under the lift and for the dial; `loadPrefill` sets weight and reps from it while the lift has no
 set in this workout (a deload keeps the reps). `startWeight` is still last time's weight, and is what the

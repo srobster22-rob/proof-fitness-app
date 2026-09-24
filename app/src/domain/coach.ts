@@ -100,7 +100,8 @@ interface TopSet { sessionId: string; at: number; weight: number; reps: number; 
  * The TOP set rather than the average, because that is the one a lifter is
  * asking about when they ask what to lift today — warm-ups and back-offs are
  * not the thing being progressed, and including them would drag every
- * suggestion down toward the warm-up.
+ * suggestion down toward the warm-up. The sets after it at the same weight
+ * still count against a raise: see `missedAfterMaking`.
  */
 function topSets(history: LoggedSet[], exerciseId: string, now: number, live?: string): TopSet[] {
   const cutoff = now - WINDOW_DAYS * 86_400_000;
@@ -114,6 +115,22 @@ function topSets(history: LoggedSet[], exerciseId: string, now: number, live?: s
     }
   }
   return [...best.values()].sort((a, b) => b.at - a.at);
+}
+
+/**
+ * Whether a set at `weight` fell short of `reps` AFTER the first set there that
+ * reached them (R694): made it, then missed. Sets in the order logged. One
+ * definition for the coach, which withholds a raise over it, and for
+ * `callMade`, which stops saying "made it" over it. For a climbing, progress,
+ * plateau or all-sets call taken as given, the line and the next call agree;
+ * a hold that asked other reps ("add a rep", "repeat it", a miss below the
+ * target) can still disagree (R694 review, backlog). A lighter set after it is
+ * a back-off and never counts.
+ */
+function missedAfterMaking(sets: readonly LoggedSet[], weight: number, reps: number): boolean {
+  const same = (w: number) => Math.abs(w - weight) < 1e-9;
+  const i = sets.findIndex(s => same(s.weight) && s.reps >= reps);
+  return i >= 0 && sets.slice(i + 1).some(s => same(s.weight) && s.reps < reps);
 }
 
 /**
@@ -356,6 +373,30 @@ export function coachSuggestion(
   }
 
   /*
+   * NO RAISE ON TOP OF A MISS (R694). The branches below that add weight read
+   * each session's best set, so a made first set hid the misses after it: row
+   * 160×8, ×6, ×5 said "try 165", and squat 200×5, 200×3 said "try 205" (PT3,
+   * all three personas). So every raise passes through here with the reps it
+   * rests on, `bar`, and a latest session that made the bar at its top weight
+   * and then fell short there gets that weight again for the bar instead:
+   * "160 again — make 8", R691's line. The bar is what a climbing, progress,
+   * plateau or all-sets call going in asked, so for one of those taken as
+   * given, a set the Now screen called "made it" is not a miss here. After a
+   * hold that asked other reps the two can disagree (R694 review, backlog).
+   */
+  const workout = history
+    .filter(s => s.sessionId === latest.sessionId && s.exerciseId === exerciseId)
+    .sort((a, b) => a.at - b.at);
+  const unlessMissed = (call: Suggestion, bar: number): Suggestion =>
+    missedAfterMaking(workout, latest.weight, bar)
+      ? {
+        kind: 'hold', weight: latest.weight, recentWeight: latest.weight,
+        sessions: atSameWeight, key: 'coachMissed', reps: bar,
+        params: { weight: latest.weight, reps: bar }
+      }
+      : call;
+
+  /*
    * PLATEAU. Same weight for three sessions with reps not improving is a
    * signal that the next session at that weight will look like the last three.
    * Nudging the load is the standard answer and the one a lifter can act on
@@ -363,11 +404,12 @@ export function coachSuggestion(
    */
   if (atSameWeight >= PLATEAU_SESSIONS && sets[0].reps <= sets[atSameWeight - 1].reps) {
     const up = nearer(latest.weight, latest.weight + step, raise(latest.weight, latest.weight + step), true);
-    return {
+    // The bar: what the session before did, as a call from it asked.
+    return unlessMissed({
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachPlateau', reps: Math.min(latest.reps, target),
       params: { weight: latest.weight, suggest: up, n: atSameWeight }
-    };
+    }, Math.min(sets[1].reps, target));
   }
 
   /*
@@ -376,11 +418,12 @@ export function coachSuggestion(
    */
   if (atSameWeight >= MIN_SESSIONS && latest.reps >= target) {
     const up = nearer(latest.weight, latest.weight + step, raise(latest.weight, latest.weight + step), true);
-    return {
+    // The bar: the target this raise says was reached.
+    return unlessMissed({
       kind: 'increase', weight: up, recentWeight: latest.weight,
       sessions: atSameWeight, key: 'coachIncrease', reps: Math.min(latest.reps, target),
       params: { weight: latest.weight, suggest: up, n: atSameWeight }
-    };
+    }, target);
   }
 
   /*
@@ -485,11 +528,12 @@ export function coachSuggestion(
       const jumps = opts.jump ? theirStep / opts.jump : 0;
       const theirPlates = jumps >= 1 && Math.abs(jumps - Math.round(jumps)) < 1e-9;
       const up = theirPlates ? latest.weight + theirStep : raise(latest.weight, latest.weight + theirStep);
-      return {
+      // The bar: the reps asked, as the miss above reads them.
+      return unlessMissed({
         kind: 'increase', weight: up, recentWeight: latest.weight,
         sessions: sets.length, key: 'coachClimbing', reps: Math.min(latest.reps, target),
         params: { weight: latest.weight, suggest: up, n: sets.length }
-      };
+      }, asked);
     }
   }
 
@@ -522,7 +566,12 @@ export function coachSuggestion(
  * its weight or above, for its reps: 205 for 8 is not "try 210" made, and
  * neither is 210 for 4. A hold ("repeat it before adding", "stay here and add
  * a rep") is made only AT its weight, since a heavier set is the thing it
- * said not to do yet. `sets` must be in the call's unit.
+ * said not to do yet. `sets` must be in the call's unit, oldest first.
+ *
+ * Made until a later set at the made set's own weight falls short
+ * (`missedAfterMaking`, R694): "160×8 — made it" stayed green above 160×6 and
+ * 160×5 (PT3), and the coach reads that session as a miss. A lighter set after
+ * it is a back-off and a heavier one a try beyond it; neither changes it.
  */
 export function callMade(call: Suggestion | null, sets: readonly LoggedSet[]): LoggedSet | null {
   if (!call || call.reps === undefined) return null;
@@ -530,7 +579,8 @@ export function callMade(call: Suggestion | null, sets: readonly LoggedSet[]): L
   const atWeight = (w: number) => call.kind === 'hold'
     ? Math.abs(w - call.weight) < 1e-9
     : w >= call.weight - 1e-9;
-  return sets.find(s => atWeight(s.weight) && s.reps >= reps) ?? null;
+  const made = sets.find(s => atWeight(s.weight) && s.reps >= reps);
+  return made && !missedAfterMaking(sets, made.weight, reps) ? made : null;
 }
 
 /** How many sessions, newest first, share the latest session's top weight. */

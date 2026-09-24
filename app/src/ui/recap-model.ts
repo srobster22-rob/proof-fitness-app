@@ -188,6 +188,11 @@ export function recapFor(repo: Repo, sessionId: string, now: number, title?: str
  * break (PT1), so the recap leaves
  * them to the Now screen.
  *
+ * One hold is named: a MISS, "160 again — make 8" (R694). It is about the
+ * workout just finished, so no break can falsify it, and it answers what the
+ * struggling lifter asked of the recap after a miss: what now? Before it the
+ * lift was either raised or went unmentioned (PT3).
+ *
  * The finished workout is evidence now, so even the first recap of a lifter's
  * life can name a number to beat: the only coach line a first week sees when
  * no lift comes round twice in it. Judged as of the workout's end, so
@@ -209,7 +214,7 @@ export function nextCalls(repo: Repo, sets: readonly LoggedSet[], at: number, un
     const call = coachSuggestion(history, id, at, {
       unit, goal, grid: WEIGHT_STEP[unit], base: EQUIPMENT_BASE[kit][unit]
     });
-    if (call?.kind === 'increase') {
+    if (call?.kind === 'increase' || call?.key === 'coachMissed') {
       calls.push({ id, lift: exercises.get(id)?.name ?? id, line: fill(t(lang, call.key as never), call.params) });
       if (calls.length === NEXT_CALLS) break;
     }
