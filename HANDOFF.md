@@ -746,6 +746,15 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**The check command, the snapshot and the map (R695, ORGANIZE).** `npm run check` in app/ is the SHIP
+gate: 8 gates, then a summary naming each failure's first assertion and file:line, exit 1 on any failure,
+full outputs in app/out/. `node tools/snapshot.ts` fingerprints every decision the pure `.ts` modules make
+on a fixed world (UTC, `Date.now` frozen), including everything each scripted action stored; an ORGANIZE
+round shows the same hash before and after. test/the-snapshot-runs-every-function fails when any function
+in scope, a callback included, never runs there (script the case, or list a named one with the reason it
+cannot run). The `.tsx` screens are not in it. ARCHITECTURE.md is the module map;
+its test fails when a module is missing or its size drifts past 15% (or 40 lines).
+
 **No raise on top of a miss (R694).** The coach still ranks sessions by their top set, but every raise
 (PLATEAU, PROGRESS, CLIMBING) passes through `unlessMissed(call, bar)`. If the latest session made `bar` at
 its top weight and then a later set there fell short (`missedAfterMaking`), the call becomes `coachMissed`,

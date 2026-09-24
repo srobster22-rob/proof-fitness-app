@@ -4541,3 +4541,17 @@ Content: unchanged (coach situations 9; order only)
 Coach: none
 Decisions: none
 Next: R695 ORGANIZE (AGENT_LOOP v3.4 §3a, owner order 2026-09-24; it outranks the derived RETRO, which waits for the phase to end). Backlog: the dial opens on last time's LAST set when there is no call (PT3 Broken 3), the SIZE contradiction, the day laid out (slice 3).
+
+## R695 · ORGANIZE · One check command, a snapshot that sees every decision in its scope, and the map
+Pick: ORGANIZE 1 of ≤ 6 (AGENT_LOOP v3.4 §3a, owner order 2026-09-24; it outranks the derived RETRO): the check command and the equivalence proof first, since every later ORGANIZE round is proven with them · impact planned 0/0/+1
+Player notices: nothing (ORGANIZE: behaviour-preserving; no product source touched)
+Impact: planned 0/0/+1 → shipped 0/0/+1 (product source unchanged: 65 files, 21,011 lines; largest file NowScreen.tsx 2,674 → 2,674; largest function NowScreen 1,314 → 1,314)
+Built: `npm run check` (tools/check.mjs, check-summary.mjs): 8 SHIP gates in 22 s, a summary naming each failure's first assertion and file:line (the child's error for a file that dies loading; "timed out" for a hang), exit 1 on failure, zero tests fails. tools/snapshot.ts: a fixed world (UTC, Date.now frozen) through every public action, hashing what each stored; a V8-coverage test fails when any function in scope, callbacks included, never runs. tools/sizes.mjs (TypeScript's parser: 11 functions > 150 lines). inventory.ts --check. ARCHITECTURE.md (180 lines, sizes tested). R694's repro as tools/playtests/miss-after-made.mjs (PLAYBOOK TRY).
+Quality: 2 reviewer REJECTs (the §4 cap), both right. Cycle 1: the snapshot ran a third of the Now model (5 planted breaks unseen), inventory --check failed on CRLF, a file dying at load got an empty summary. Cycle 2: effects were not hashed (a restore dropping every note, or bending readings, stayed green) and callbacks were not counted. Fixed and shipped on proof: all 10 of the reviewer's mutations now move the hash, each in its own section. Found while organizing, for a FIX round: setPlan's reset of a dropped day never fires.
+Verified: check ALL GREEN, suite 2398/2398 (was 2370), snapshot 4b84093657106be8. 27 plants (a crashing gate, a hung gate, zero tests, a load error, CRLF, the TZ pin, the frozen clock, an unscripted action or callback, react-native leaking into a pure module, …) each fail a named test and restore sha256-identical. The repro script fails 3 of 4 on R693's coach and passes on HEAD.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (no product change)
+Market: unchanged at 42
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R696 ORGANIZE: one exercises registry (coldstart, muscles, split and find-exercise's aliases as views; COACH code-quality note), patch ready in scratch. Backlog FIX: ppl legs → upper-lower → ppl brings legs back (setPlan reads chosenDay after the plan changed).

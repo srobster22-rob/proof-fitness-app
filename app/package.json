@@ -10,6 +10,7 @@
     "bundle": "expo export --platform ios --no-bytecode --output-dir ./.export",
     "build": "node build-domain.cjs",
     "test": "node check-deps.cjs && node build-domain.cjs && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=./tools/failure-log.mjs --test-reporter-destination=stdout \"test/**/*.test.ts\" && tsc --noEmit",
+    "check": "node tools/check.mjs",
     "e2e": "node tools/render-recap.ts",
     "typecheck": "tsc --noEmit",
     "check-deps": "node check-deps.cjs",

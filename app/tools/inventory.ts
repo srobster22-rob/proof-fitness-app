@@ -3,6 +3,7 @@
  *
  *   node tools/inventory.ts                 regenerate ../CONTENT.md
  *   node tools/inventory.ts --history R680  ...and append a history row (RETRO rounds)
+ *   node tools/inventory.ts --check         report whether ../CONTENT.md is current, and write nothing
  *
  * Every count below comes from a definition the app itself runs on: an exported constant
  * where one exists, otherwise the declaration parsed out of the source file. Targets come
@@ -91,8 +92,11 @@ const pct = (r: { count: number; target: number }) => Math.round((r.count / r.ta
 const furthest = [...rows].sort((a, b) => a.count / a.target - b.count / b.target)[0];
 
 // ---- CONTENT.md, keeping its history section
-const OUT = path.join(ROOT, 'CONTENT.md');
-const previous = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : '';
+// Overridable only so a test can run `--check` against a copy.
+const OUT = process.env.PROOF_CONTENT_OUT ?? path.join(ROOT, 'CONTENT.md');
+// Read as LF: git may check the file out with CRLF (core.autocrlf), and the
+// history section below is carried over from it into what gets written.
+const previous = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8').replace(/\r\n/g, '\n') : '';
 const historyAt = previous.indexOf('## History');
 let history = historyAt >= 0
   ? previous.slice(historyAt).trimEnd()
@@ -126,6 +130,16 @@ const content = [
   ''
 ].join('\n');
 
+// `npm run check` asks whether CONTENT.md is current without curing it: a
+// round that changed the counts and never regenerated the file fails here.
+if (process.argv.includes('--check')) {
+  if (previous !== content) {
+    console.error('CONTENT.md is stale: run `node tools/inventory.ts` in app/ and commit the result.');
+    process.exit(1);
+  }
+  console.log('CONTENT.md is current');
+  process.exit(0);
+}
 fs.writeFileSync(OUT, content);
 console.log(rows.map(r => `${r.id} ${r.count}/${r.target}`).join('  '));
 console.log(`furthest below target: ${furthest.id} (${pct(furthest)}%)`);
