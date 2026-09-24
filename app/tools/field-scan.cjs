@@ -36,8 +36,8 @@ const HERE = path.join(__dirname, '..');
 const INTERFACES = [
   { file: 'src/ui/progress-model.ts', name: 'ProgressRow' },
   { file: 'src/domain/goals.ts', name: 'GoalProgress' },
-  { file: 'src/ui/now-model.ts', name: 'NowState' },
-  { file: 'src/ui/now-model.ts', name: 'RailLift' },
+  { file: 'src/ui/now-state.ts', name: 'NowState' },
+  { file: 'src/ui/now-state.ts', name: 'RailLift' },
   { file: 'src/ui/measure-model.ts', name: 'KindRow' },
   { file: 'src/domain/measure-goal.ts', name: 'MeasureGoalProgress' },
   { file: 'src/data/portable.ts', name: 'RestoreReport' },

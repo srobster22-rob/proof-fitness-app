@@ -12,9 +12,9 @@ const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
  * tools/snapshot.ts is how an ORGANIZE round proves a move changed nothing.
  * The first version ran a third of the Now model: R695's reviewer broke
  * removeSet, editSet, setPlan, skipDay and layoutFor and the hash never moved.
- * So the snapshot runs under V8 coverage here, and every named function in the
- * modules it imports must run, except the ones listed below with the reason
- * they cannot or must not.
+ * So the snapshot runs under V8 coverage here, and every function in the
+ * modules it imports must run, callbacks included, except the named ones
+ * listed below with the reason they cannot or must not.
  */
 const ORPHAN = 'kept orphaned on purpose (tools/orphan-scan.cjs ACKNOWLEDGED); a tool calling it would count as its caller';
 const NEVER_RUN_ON_PURPOSE: Record<string, string> = {
@@ -23,7 +23,7 @@ const NEVER_RUN_ON_PURPOSE: Record<string, string> = {
   'src/domain/goals.ts goalE1rmGap': ORPHAN,
   'src/domain/i18n.ts missingKeys': ORPHAN,
   'src/domain/measure.ts kindOf': ORPHAN,
-  'src/ui/now-model.ts columnHeight': ORPHAN,
+  'src/ui/now-layout.ts columnHeight': ORPHAN,
   'src/ui/recap-model.ts headline': ORPHAN,
   'src/ui/drag-scroll.ts useDragScroll': 'a React hook: it runs only inside a rendered component',
   'src/ui/guarded-push.ts useGuardedPush': 'a React hook: it runs only inside a rendered component',

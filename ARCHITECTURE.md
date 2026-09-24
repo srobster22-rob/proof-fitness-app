@@ -19,7 +19,7 @@ is the only way to storage. `app/` holds the expo-router routes, one file per sc
 2. `NowModel.log()` (`now-model.ts`) builds the `LoggedSet` from the dial and calls `repo.logSet()`.
 3. `Repo.logSet()` (`repo.ts`) writes through the `Db` interface: `expo-db.ts` natively, `web-db.ts` on web.
 4. `NowModel.state()` recomputes the screen: its `coachCall()` asks `coachSuggestion` (`coach.ts`) for the line,
-   `callMade` for "made it", `prefillFor` (`coldstart.ts`) and the call for the dial, `rail-order.ts`
+   `lastTimeParts` (`now-line.ts`) words it and `callMade` says "made it", `prefillFor` (`coldstart.ts`) and the call set the dial, `rail-order.ts`
    and `split.ts` for the rail, `rest.ts` for the timer, `goals.ts` for the goal tail.
 5. FINISH: `NowModel.finish()` ends the session; `app/recap.tsx` renders `recapFor()` (`recap-model.ts`),
    which runs `buildRecap` (`session.ts`), `findPRs` (`pr.ts`) and `nextCalls` (the coach again).
@@ -98,18 +98,22 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | module | lines | owns |
 |---|---:|---|
 | `src/ui/NowScreen.tsx` | 2,674 | Renders `NowModel`: dial, rail, THIS WORKOUT, day chooser, picker and every sheet. |
-| `src/ui/now-model.ts` | 2,286 | The Now screen as a state machine: dial, LOG SET, undo, day and lift rail, the line under the lift, layout arithmetic. |
+| `src/ui/now-model.ts` | 1,452 | The Now screen as a state machine (`NowModel`): the dial, LOG SET, undo, the day and the lift rail, the plan. |
 | `src/ui/progress-model.ts` | 947 | Progress rows and sparklines, recent workouts, the weekly line, erase counts. |
 | `src/ui/recap-model.ts` | 478 | A stored session as the recap: totals, records, NEXT TIME calls, share text. |
+| `src/ui/now-layout.ts` | 441 | The Now screen's layout arithmetic: the hero's size for a phone, the column's height, the rail's geometry, scroll-to-reveal. |
 | `src/ui/goals-model.ts` | 336 | The Goals screen: drafts, horizons, create, edit, remove. |
 | `src/ui/measure-model.ts` | 303 | The Measurements screen: rows, trends, saving a reading. |
 | `src/ui/press-style.ts` | 248 | Press feedback styles, pure. |
 | `src/ui/ScreenModal.tsx` | 195 | A modal that leaves with its screen. |
 | `src/ui/RepoGate.tsx` | 188 | Waits for the database to open, and says why it failed. |
+| `src/ui/now-state.ts` | 166 | The types of what the Now screen renders: `NowState`, `RailLift`, `SessionLift`. |
 | `src/ui/ConfirmSheet.tsx` | 161 | A confirmation the user has to mean. |
+| `src/ui/now-line.ts` | 159 | The line under the lift: last time, the coach's call, "made it", the goal's tail. |
 | `src/ui/lift-history.ts` | 147 | One lift's history sheet: rep bests, the last 12 sessions. |
 | `src/ui/backup.ts` | 124 | The native half of export and restore: files and the share sheet. |
 | `src/ui/goal-filters.ts` | 120 | Filtering and sorting goals. |
+| `src/ui/now-steppers.ts` | 113 | The Now screen's steppers: weight and rep steps, the plates and custom jumps, a typed weight. |
 | `src/ui/LiftSheet.tsx` | 109 | Draws one lift's history sheet. |
 | `src/ui/drag-scroll.ts` | 89 | Mouse drag for horizontal rows on web. |
 | `src/ui/Spark.tsx` | 83 | Draws a sparkline. |

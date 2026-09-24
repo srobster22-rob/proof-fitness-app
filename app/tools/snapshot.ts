@@ -565,6 +565,9 @@ async function exportsSection(): Promise<unknown> {
     imported.push(rel);
     for (const [name, v] of Object.entries(mod)) {
       if (typeof v === 'function') continue;
+      // A re-export is the same value under the same name: counted once, so a
+      // module split that re-exports what it moved leaves the hash alone.
+      if (name in values && values[name] === v) continue;
       values[name in values ? `${name}@${rel}` : name] = v;
     }
   }

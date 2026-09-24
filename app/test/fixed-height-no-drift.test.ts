@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SCREEN = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
-const MODEL = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-model.ts'), 'utf8');
+const MODEL = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-layout.ts'), 'utf8');
 
 /*
  * R512. `fixedHeight` decides whether the Now screen fits, and it does that

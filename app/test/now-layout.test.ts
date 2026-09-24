@@ -158,7 +158,7 @@ describe('Now screen — layout invariants', () => {
      */
     const size = Number(/fontSize:\s*(\d+)/.exec(style('exercise'))?.[1]);
     const heroFloor = Number(/hero: Math\.max\((\d+),/.exec(
-      fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-model.ts'), 'utf8'))?.[1]);
+      fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-layout.ts'), 'utf8'))?.[1]);
     assert.ok(heroFloor > 0, 'layoutFor no longer floors the hero; this guard has no bound');
     assert.ok(size < heroFloor,
       `the exercise name is ${size}px and the hero floors at ${heroFloor}px, so on ` +
