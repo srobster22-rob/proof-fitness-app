@@ -119,6 +119,18 @@ function freeSlug(taken: Set<string>, name: string): string {
   return `${base}_${Date.now().toString(36)}`;
 }
 
+/** What the dial opens on for one lift (`NowModel.dialFor`). */
+interface OpeningDial {
+  weight: number;
+  reps: number;
+  source: Prefill['source'];
+  /** Last time's weight, which the grid and jump rules key off (see `startWeight`). */
+  startWeight: number;
+  startConverted: boolean;
+  equipment: Equipment | null;
+  machine: string | null;
+}
+
 export class NowModel {
   repo: Repo;
   now: () => number;
@@ -336,12 +348,24 @@ export class NowModel {
 
   /**
    * The coach's call for the lift on screen, one computation for the line
-   * under its name and for the dial it opens on (R691). See the comment on
-   * `lastTime` in `state()` for why each option is what it is.
+   * under its name and for the dial it opens on (R691). See `coachLine` for
+   * why each option is what it is.
    */
   private coachCall(): Suggestion | null {
+    return this.callFor(this.exerciseId, this.equipment, this.startWeight, this.startConverted);
+  }
+
+  /**
+   * The coach's call for any lift, from what its dial opens on: the equipment
+   * it is done on, last time's weight, and whether that weight was converted.
+   * The lift on screen passes its own (`coachCall`); `dialFor` passes each
+   * lift's, so every lift's call is the one its dial would show.
+   */
+  private callFor(
+    exerciseId: string, equipment: Equipment | null, startWeight: number, startConverted: boolean
+  ): Suggestion | null {
     return coachSuggestion(
-      this.historyInSessionUnit(), this.exerciseId, this.now(),
+      this.historyInSessionUnit(), exerciseId, this.now(),
       {
         unit: this.session.unit, goal: trainingGoal(this.repo),
         live: { id: this.session.id, startedAt: this.session.startedAt },
@@ -353,8 +377,8 @@ export class NowModel {
          * rack does not have (R541). The engine defaults this to 0, so
          * it is this line that makes the floor real.
          *
-         * `this.equipment`, not `exercises.get(id)?.equipment` — that
-         * read a field `Exercise` has never had (equipment lives on
+         * The lift's own `equipment`, not `exercises.get(id)?.equipment` —
+         * that read a field `Exercise` has never had (equipment lives on
          * `LoggedSet`, per-set, not per-exercise) and `tsc --noEmit` was
          * never run to catch it. It type-checked as `any` and silently
          * fell through to the `?? 'barbell'` default on every call, so
@@ -362,26 +386,39 @@ export class NowModel {
          * actually logged on — right for a barbell lift by coincidence,
          * wrong and unnoticed for a dumbbell or bodyweight one.
          */
-        base: EQUIPMENT_BASE[this.equipment ?? 'barbell'][this.session.unit],
+        base: EQUIPMENT_BASE[equipment ?? 'barbell'][this.session.unit],
         // Their jump, only where the plate button moves by exactly that from
         // this weight: not a conversion (R669), not off their own grid (R671).
-        jump: this.startConverted || !this.onPlateGrid(this.startWeight) ? undefined : this.plateJump()
+        jump: startConverted || !this.onPlateGrid(startWeight) ? undefined : this.plateJump()
       }
     );
   }
 
   private loadPrefill(): void {
+    const dial = this.dialFor(this.exerciseId);
+    this.weight = dial.weight;
+    this.reps = dial.reps;
+    this.source = dial.source;
+    this.startWeight = dial.startWeight;
+    this.startConverted = dial.startConverted;
+    this.equipment = dial.equipment;
+    this.machine = dial.machine;
+  }
+
+  /**
+   * What the dial opens on for a lift, without opening it: last time's numbers
+   * (`prefillFor`), the equipment it is done on, and the coach's call over both.
+   * `loadPrefill` puts the lift on screen's onto the dial, and the day's plan
+   * reads every lift's from here, so a block shows what its dial opens on.
+   */
+  private dialFor(exerciseId: string): OpeningDial {
     const all = this.historyInSessionUnit();
-    const p = prefillFor(this.exerciseId, all, this.session.unit);
-    this.weight = p.weight;
-    this.reps = p.reps;
-    this.source = p.source;
-    this.startWeight = p.weight;
+    const p = prefillFor(exerciseId, all, this.session.unit);
     // `prefillFor` takes this lift's latest set by `at`; its session still knows
     // the unit it was logged in, which the converted number no longer shows.
     let newest: LoggedSet | null = null;
-    for (const s of this.setsFor(this.exerciseId)) if (!newest || s.at > newest.at) newest = s;
-    this.startConverted = newest !== null &&
+    for (const s of this.setsFor(exerciseId)) if (!newest || s.at > newest.at) newest = s;
+    const startConverted = newest !== null &&
       (this.repo.sessionUnits().get(newest.sessionId) ?? this.session.unit) !== this.session.unit;
 
     // Equipment carries over the same way the numbers do — the last set of
@@ -390,7 +427,7 @@ export class NowModel {
     // never been answered for this lift, which is not the same as "barbell".
     let last: LoggedSet | null = null;
     for (const set of all) {
-      if (set.exerciseId !== this.exerciseId) continue;
+      if (set.exerciseId !== exerciseId) continue;
       if (!set.equipment) continue;
       if (!last || set.at > last.at) last = set;
     }
@@ -409,14 +446,16 @@ export class NowModel {
     // Collapsing the two made CLEAR fail to stick — it wrote the empty string
     // and the next read treated it as no answer at all and went back to the
     // barbell on last week's set.
-    const chosen = this.repo.getPref(`kit.${this.exerciseId}`);
+    const chosen = this.repo.getPref(`kit.${exerciseId}`);
+    let equipment: Equipment | null;
+    let machine: string | null;
     if (chosen !== null) {
       const [kit, ...rest] = chosen.split(':');
-      this.equipment = (kit || null) as Equipment | null;
-      this.machine = kit === 'machine' ? (rest.join(':') || null) : null;
+      equipment = (kit || null) as Equipment | null;
+      machine = kit === 'machine' ? (rest.join(':') || null) : null;
     } else {
-      this.equipment = last?.equipment ?? null;
-      this.machine = last?.equipment === 'machine' ? (last.machine ?? null) : null;
+      equipment = last?.equipment ?? null;
+      machine = last?.equipment === 'machine' ? (last.machine ?? null) : null;
     }
 
     /*
@@ -431,18 +470,20 @@ export class NowModel {
      * 185×12 on the dial, harder than the 205×6 being backed off from (R692
      * review).
      */
-    const call = this.coachCall();
-    if (call && !this.repo.setsInSession(this.session.id).some(s => s.exerciseId === this.exerciseId)) {
-      this.weight = call.weight;
-      if (call.reps !== undefined) this.reps = call.reps;
+    let { weight, reps } = p;
+    const call = this.callFor(exerciseId, equipment, p.weight, startConverted);
+    if (call && !this.repo.setsInSession(this.session.id).some(s => s.exerciseId === exerciseId)) {
+      weight = call.weight;
+      if (call.reps !== undefined) reps = call.reps;
       else {
         let top: LoggedSet | null = null;
         for (const s of all) {
-          if (s.exerciseId === this.exerciseId && s.weight === call.recentWeight && (!top || s.at > top.at)) top = s;
+          if (s.exerciseId === exerciseId && s.weight === call.recentWeight && (!top || s.at > top.at)) top = s;
         }
-        if (top) this.reps = top.reps;
+        if (top) reps = top.reps;
       }
     }
+    return { weight, reps, source: p.source, startWeight: p.weight, startConverted, equipment, machine };
   }
 
   // ---- reads ---------------------------------------------------------------
@@ -571,51 +612,7 @@ export class NowModel {
       plateJump: this.plateJump(),
       repJump: this.repJump(),
       lang: this.lang(),
-      /*
-       * The coach line (OWNER.md #2) takes over this slot rather than getting
-       * one of its own.
-       *
-       * Not a compromise — the right place. The slot's head says "Last time
-       * 185 x 5" for any lift with history, and the coach line is that same
-       * fact plus what to do about it: "185 for 2 sessions - try 190". It is a
-       * strict improvement on what was there, in the position a lifter already
-       * looks for it, directly under the exercise name.
-       *
-       * And it is the only place it could go. R512 measured the shortest
-       * shipping phone at 624px of unshrinkable content against 568px of
-       * screen, and R511 put LOG SET below the fold by adding EIGHT pixels of
-       * padding. A new row costs about twenty. Reusing a row that is already
-       * budgeted in `fixedHeight`'s HEADER_TEXT costs nothing at all.
-       *
-       * `historyInSessionUnit`, not `allSets`: a LoggedSet carries no unit
-       * (HANDOFF trap 9), so raw history would compare kilos against pounds
-       * and suggest a jump in the wrong currency.
-       *
-       * `grid` below is WEIGHT_STEP, the stepper's own increment, and the
-       * lifter's plate jump goes in separately as `jump` (R671). R592 passed
-       * the FINER of the two as the grid, because WEIGHT_STEP alone is
-       * "reachable by the fine +/-5 stepper and loadable on a standard bar" —
-       * right until somebody tells the app they load something finer, which
-       * `jump.<unit>`'s own docstring in settings.tsx names directly ("someone
-       * running microplates"). Measured then: a plateau at 60 kg with a 1.25 kg
-       * jump got "try 62.5", the exact 2x jump that preference exists to avoid.
-       *
-       * But a grid of the jump counts from zero, and the lifter does not stand
-       * at zero: a plateau at 85 with a 1.5 kg jump said "try 87", which the
-       * plate button (86.5, 88) and the stepper (87.5, 90) both step over. So
-       * the coach now takes whichever is nearer the goal's target -- the
-       * stepper's grid, or a whole number of jumps from where they stand --
-       * and 60 kg on 1.25 still says 61.25. Not `plateGrid()` either, which
-       * R668 put here and R669 took back ("try 178" at 175 on dumbbells by 7);
-       * R668's climb by whole jumps (175 -> 182, "try 189") also needs `jump`.
-       */
-      lastTime: lastTimeParts({
-        previous: this.lastTime(),
-        thisSession: sessionSets.filter(s => s.exerciseId === this.exerciseId),
-        goal: this.goalHint(),
-        start: this.source === 'history' ? null : this.startWeight,
-        coach: this.coachCall()
-      }, this.lang()),
+      lastTime: this.coachLine(sessionSets),
       /*
        * Which sets logged in THIS workout are personal records (OWNER.md #5).
        *
@@ -666,6 +663,54 @@ export class NowModel {
       totalVolume: liveStats.volume,
       totalVolumeKnown: liveStats.volumeKnown
     };
+  }
+
+  /**
+   * The line under the lift's name. The coach line (OWNER.md #2) takes over
+   * this slot rather than getting one of its own.
+   *
+   * Not a compromise — the right place. The slot's head says "Last time
+   * 185 x 5" for any lift with history, and the coach line is that same
+   * fact plus what to do about it: "185 for 2 sessions - try 190". It is a
+   * strict improvement on what was there, in the position a lifter already
+   * looks for it, directly under the exercise name.
+   *
+   * And it is the only place it could go. R512 measured the shortest
+   * shipping phone at 624px of unshrinkable content against 568px of
+   * screen, and R511 put LOG SET below the fold by adding EIGHT pixels of
+   * padding. A new row costs about twenty. Reusing a row that is already
+   * budgeted in `fixedHeight`'s HEADER_TEXT costs nothing at all.
+   *
+   * `historyInSessionUnit`, not `allSets`: a LoggedSet carries no unit
+   * (HANDOFF trap 9), so raw history would compare kilos against pounds
+   * and suggest a jump in the wrong currency.
+   *
+   * `grid` in `callFor` is WEIGHT_STEP, the stepper's own increment, and the
+   * lifter's plate jump goes in separately as `jump` (R671). R592 passed
+   * the FINER of the two as the grid, because WEIGHT_STEP alone is
+   * "reachable by the fine +/-5 stepper and loadable on a standard bar" —
+   * right until somebody tells the app they load something finer, which
+   * `jump.<unit>`'s own docstring in settings.tsx names directly ("someone
+   * running microplates"). Measured then: a plateau at 60 kg with a 1.25 kg
+   * jump got "try 62.5", the exact 2x jump that preference exists to avoid.
+   *
+   * But a grid of the jump counts from zero, and the lifter does not stand
+   * at zero: a plateau at 85 with a 1.5 kg jump said "try 87", which the
+   * plate button (86.5, 88) and the stepper (87.5, 90) both step over. So
+   * the coach now takes whichever is nearer the goal's target -- the
+   * stepper's grid, or a whole number of jumps from where they stand --
+   * and 60 kg on 1.25 still says 61.25. Not `plateGrid()` either, which
+   * R668 put here and R669 took back ("try 178" at 175 on dumbbells by 7);
+   * R668's climb by whole jumps (175 -> 182, "try 189") also needs `jump`.
+   */
+  private coachLine(sessionSets: LoggedSet[]): NowState['lastTime'] {
+    return lastTimeParts({
+      previous: this.lastTime(),
+      thisSession: sessionSets.filter(s => s.exerciseId === this.exerciseId),
+      goal: this.goalHint(),
+      start: this.source === 'history' ? null : this.startWeight,
+      coach: this.coachCall()
+    }, this.lang());
   }
 
   /**

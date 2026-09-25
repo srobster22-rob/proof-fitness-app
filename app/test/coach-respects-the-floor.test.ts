@@ -174,8 +174,12 @@ describe('the deload floor uses the actual equipment, not a type error (R573)', 
   test('the lookup reads the CURRENT equipment, not a field Exercise never had', () => {
     const src = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-model.ts'), 'utf8');
     const call = around(src, 'base: EQUIPMENT_BASE[', 0, 120);
-    assert.match(call, /this\.equipment/,
-      'the deload floor no longer reads this.equipment');
+    // The lift's own equipment, handed in: the lift on screen passes its
+    // current `this.equipment`, and `dialFor` each lift's from its sets.
+    assert.match(call, /EQUIPMENT_BASE\[equipment \?\?/,
+      'the deload floor no longer reads the lift\'s own equipment');
+    assert.match(src, /this\.callFor\(this\.exerciseId, this\.equipment,/,
+      'the lift on screen no longer hands the coach its current equipment');
     assert.doesNotMatch(call, /exercises\.get\(this\.exerciseId\)\?\.equipment/,
       'the floor is reading equipment off Exercise again, which has never had that field');
   });

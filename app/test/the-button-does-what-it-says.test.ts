@@ -7,7 +7,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { fill, t } from '../src/domain/i18n.ts';
-import { around } from './helpers/source.ts';
+import { region } from './helpers/source.ts';
 import type { Unit } from '../src/domain/types.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -85,8 +85,10 @@ describe('the plate button moves what its label promises (R563)', () => {
     // which pushed `base:` past the old window and made this test stop
     // seeing it at all -- silently checking three keys instead of four and
     // still reporting green. Widened to the real distance plus headroom.
-    // Since R692 the call lives in `coachCall()`, shared by the line and the dial.
-    const call = around(MODEL_SRC, 'private coachCall(): Suggestion | null {', 0, 1400);
+    // The call lives in `callFor()`, shared by the line and every dial. Read
+    // to the method's own closing brace rather than a character window, which
+    // is what let the window above go blind once already.
+    const call = region(MODEL_SRC.replace(/\r\n/g, '\n'), 'private callFor(', '\n  }\n');
     for (const key of ['unit:', 'goal:', 'grid:', 'base:']) {
       const times = call.split(key).length - 1;
       assert.equal(times, 1, `the coach call passes ${key} ${times} times`);

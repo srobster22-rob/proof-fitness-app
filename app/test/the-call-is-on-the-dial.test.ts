@@ -90,6 +90,9 @@ describe('the call is on the dial (R692)', () => {
     const HERE = path.dirname(fileURLToPath(import.meta.url));
     const model = readFileSync(path.join(HERE, '..', 'src', 'ui', 'now-model.ts'), 'utf8');
     assert.match(model, /coach: this\.coachCall\(\)/);
-    assert.match(model, /const call = this\.coachCall\(\);\s*if \(call && !this\.repo\.setsInSession\(this\.session\.id\)\.some\(s => s\.exerciseId === this\.exerciseId\)\)/);
+    // The line's call is the dial's: both go through `callFor` with the same
+    // lift, equipment and last-time weight.
+    assert.match(model, /return this\.callFor\(this\.exerciseId, this\.equipment, this\.startWeight, this\.startConverted\);/);
+    assert.match(model, /const call = this\.callFor\(exerciseId, equipment, p\.weight, startConverted\);\s*if \(call && !this\.repo\.setsInSession\(this\.session\.id\)\.some\(s => s\.exerciseId === exerciseId\)\)/);
   });
 });
