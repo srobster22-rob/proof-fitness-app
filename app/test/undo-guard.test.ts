@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -20,7 +21,7 @@ const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')),
  * not two.
  */
 describe('UNDO does not remove two sets from one same-tick double-fired tap', () => {
-  const src = read('src/ui/NowScreen.tsx');
+  const src = nowScreenSource();
 
   test('a synchronous ref guard sits before model.undo() is ever called', () => {
     assert.match(src, /const undoingRef = useRef\(false\);/,

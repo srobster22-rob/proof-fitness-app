@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SCREEN = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+const SCREEN = nowScreenSource();
 
 /*
  * R686. At 375x812 THIS WORKOUT is a one-line window, and R684 made it show a

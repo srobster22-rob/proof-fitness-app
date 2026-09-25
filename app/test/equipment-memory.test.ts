@@ -8,9 +8,10 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { region } from './helpers/source.ts';
 import { t } from '../src/domain/i18n.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SOURCE = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+const SOURCE = nowScreenSource();
 const T0 = Date.UTC(2026, 6, 29, 18);
 
 function model() {
@@ -167,7 +168,7 @@ describe('the equipment choice is remembered (§4, §11)', () => {
  */
 describe('turning the machine question off says so, and says how to undo it', () => {
   test('the sheet states the state rather than just being quiet', () => {
-    const sheet = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const sheet = nowScreenSource();
     assert.match(sheet, /T\('notAskingMachine'\)/,
       'the suppressed state is silent — nothing tells the user it is on');
   });

@@ -4583,3 +4583,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R698 ORGANIZE: NowScreen.tsx (2,673 lines, one 1,314-line function) into components, proven by a trace of the running screens. The dev server was stopped while the new files were created, so router.d.ts stayed clean.
+
+## R698 · ORGANIZE · NowScreen.tsx in files: its sheets, controls, shared kit and stylesheet, proven on the running screens
+Pick: ORGANIZE 4 of ≤ 6 (§3a checklist 3; the coordinator's second item): the largest file, 2,673 lines, eight things in one · impact planned 0/0/+1
+Player notices: nothing (ORGANIZE: behaviour-preserving)
+Impact: planned 0/0/+1 → shipped 0/0/+1 (product source 70 files, 21,007 lines → 77, 21,100; NowScreen.tsx 2,673 → 1,351; now-styles.ts 496, ExercisePicker.tsx 263, EquipmentSheet.tsx 195, DayChooser.tsx 143, EditSetSheet.tsx 141, NowControls.tsx 102, now-kit.ts 75; largest file now now-model.ts 1,439; largest function NowScreen 1,314 unchanged: debt)
+Built: a PURE MOVE by script: NowScreen.tsx's top-level blocks cut at statement boundaries into seven files, `export` added only where another module uses a name, and each file keeping only the imports it uses (the unused default `React` went). NEW tools/playtests/ui-trace.mjs, the proof for `.tsx`: every rendered element's tag, label, text, box and computed style through a fixed 15-step flow of the Now screen and its sheets, reduced motion, the rest timer masked. 36 tests that read the screen as text read it whole through test/helpers/now-screen.ts.
+Quality: self-reviewed; no independent reviewer (a scripted move proven identical on the live screens). The check caught the mover's bug: `{...onState(x)}` read as a property access, so the import was missed (tsc, 8 errors); fixed and re-run from HEAD's file, the first output staged before it was overwritten. The trace tapped Set 1 first and was refused: PT3's clipped earlier sets are real.
+Verified: check ALL GREEN, suite 2426/2426 (the per-file sweeps grew with the files). UI trace 10471c6722697b60 before, and after on two runs; a planted one-point font change on LOG SET moves it (9317b6bb6bfa3fa6), restoring brings it back. Domain snapshot: every value and behaviour section identical; the two new .ts files are platform modules (react-native), listed.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (no product change; the trace is the screen-level proof)
+Market: unchanged at 42
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R699 ORGANIZE: an error boundary per screen, errors logged with the screen name (§3a checklist 6, the coordinator's fifth item).

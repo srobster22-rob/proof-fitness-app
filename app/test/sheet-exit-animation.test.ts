@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
 import { region } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
@@ -110,7 +111,7 @@ describe('ConfirmSheet fades and rises out instead of teleporting away', () => {
  * whether to render gets left alone until the timer lands.
  */
 describe('DayChooser fades and rises out too, without a visible flag to defer', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
   const chooser = region(src, 'function DayChooser', 'function ExercisePicker');
 
   test('both ways out — skip and picking a day — go through the same deferred leave', () => {
@@ -139,7 +140,7 @@ describe('DayChooser fades and rises out too, without a visible flag to defer', 
  * ExercisePicker's `onAdd` does, so each one wraps cleanly.
  */
 describe('EditSetSheet fades and rises out on all three of its exits', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
   const sheet = region(src, 'function EditSetSheet', 'function EquipmentSheet');
 
   test('close, save and remove all go through the same deferred leave', () => {
@@ -165,7 +166,7 @@ describe('EditSetSheet fades and rises out on all three of its exits', () => {
  * needed wrapping.
  */
 describe('EquipmentSheet fades and rises out on every one of its six closing chips', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
   const sheet = region(src, 'function EquipmentSheet', 'function Jump');
 
   test('every call that closes goes through pick(), not onPick() directly', () => {
@@ -196,7 +197,7 @@ describe('EquipmentSheet fades and rises out on every one of its six closing chi
  * unconditional. Nothing here reads `onAdd`'s answer back at all any more.
  */
 describe('ExercisePicker fades and rises out, including the add-a-movement path', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
   const sheet = region(src, 'function ExercisePicker', 'function EquipmentSheet');
 
   test('picking a lift and submitting a new one both go through the deferred leave', () => {

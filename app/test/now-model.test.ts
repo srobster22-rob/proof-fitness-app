@@ -22,6 +22,7 @@ import { STARTING_TWELVE } from '../src/domain/coldstart.ts';
 import { dayOf, inPlanDay, sessionPlanDay } from '../src/domain/split.ts';
 import { nextCandidates } from '../src/domain/predict.ts';
 import type { LoggedSet } from '../src/domain/types.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const readSrc = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -636,7 +637,7 @@ describe('Now screen — typed weight (§4)', () => {
   });
 
   test('the edit-set sheet reuses the same ceiling, not a second copy of it', () => {
-    const src = readSrc('src/ui/NowScreen.tsx');
+    const src = nowScreenSource();
     assert.match(src, /w <= MAX_TYPED_WEIGHT/,
       'EditSetSheet must reuse the shared ceiling rather than trusting the 6-character text cap alone');
   });

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
@@ -89,8 +90,11 @@ describe('no sheet outlives its screen', () => {
     // jump-amounts sheet from when §9 still banned a settings SCREEN, and it
     // survived the owner's overrule as a second control labelled SETTINGS
     // showing different things from the first.
-    for (const f of ['NowScreen.tsx', 'ConfirmSheet.tsx']) {
-      const src = fs.readFileSync(path.join(ROOT, 'src', 'ui', f), 'utf8');
+    // The Now screen's sheets have their own files since R698: the screen is read whole.
+    for (const [f, src] of [
+      ['NowScreen.tsx and its sheets', nowScreenSource()],
+      ['ConfirmSheet.tsx', fs.readFileSync(path.join(ROOT, 'src', 'ui', 'ConfirmSheet.tsx'), 'utf8')],
+    ]) {
       assert.match(src, /<ScreenModal/, `${f} lost its ScreenModal`);
     }
     assert.match(fs.readFileSync(path.join(ROOT, 'app', 'goals.tsx'), 'utf8'), /<ScreenModal/);

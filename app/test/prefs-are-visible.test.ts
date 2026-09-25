@@ -8,6 +8,7 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { displayUnit } from '../src/ui/display-unit.ts';
 import { progressRows, recentSessions } from '../src/ui/progress-model.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
@@ -185,7 +186,7 @@ describe('every stored preference visibly changes the app (R520)', () => {
     }
     for (const [key] of EXEMPT) {
       assert.ok(keys.has(key), `${key} is exempted but no longer exists; drop the exemption`);
-      assert.match(fs.readFileSync(path.join(APP, 'src', 'ui', 'NowScreen.tsx'), 'utf8'),
+      assert.match(nowScreenSource(),
         /skipMachine=\{repo\.getPref\(PREF_SKIP_MACHINE\) === '1'\}/,
         'the exemption claims NowScreen reads this directly, and it no longer does');
     }

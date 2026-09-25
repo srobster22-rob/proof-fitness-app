@@ -17,9 +17,10 @@ import {
 } from '../src/ui/now-layout.ts';
 import { DAY_HEADING } from '../src/domain/split.ts';
 import { region } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SOURCE = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+const SOURCE = nowScreenSource();
 const MIN = 60_000;
 const T0 = Date.UTC(2026, 6, 29, 18);
 

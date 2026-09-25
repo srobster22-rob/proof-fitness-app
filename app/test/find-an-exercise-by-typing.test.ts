@@ -8,6 +8,7 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { BUILTIN } from '../src/domain/coldstart.ts';
 import { findExercises, exactExercise, MATCHES_SHOWN } from '../src/domain/find-exercise.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const T0 = Date.UTC(2026, 8, 23, 18);
 const LIBRARY = BUILTIN.map(e => ({ id: e.id, name: e.name }));
@@ -121,7 +122,7 @@ describe('the Now screen uses it', () => {
 
   test('the picker shows the matches under what is typed, and a tap picks one', () => {
     const HERE = path.dirname(fileURLToPath(import.meta.url));
-    const screen = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const screen = nowScreenSource();
     assert.match(screen, /matches\.map\(ex =>/, 'the picker no longer lists matches');
     assert.match(screen, /const matches = adding \? search\(name\) : \[\]/, 'the matches are not what was typed');
     assert.match(screen, /matches\.map\(ex =>[\s\S]{0,400}onPress=\{\(\) => pick\(ex\.id\)\}/, 'a match does not pick its movement');

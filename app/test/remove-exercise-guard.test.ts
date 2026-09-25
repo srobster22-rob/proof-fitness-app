@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -22,7 +23,7 @@ const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')),
  * genuinely gone.
  */
 describe('the exercise-removal × does not show a false error on a same-tick double tap', () => {
-  const src = read('src/ui/NowScreen.tsx');
+  const src = nowScreenSource();
 
   test('a synchronous per-id guard sits before onRemove is ever called', () => {
     assert.match(src, /const removedIds = useRef\(new Set<string>\(\)\);/,

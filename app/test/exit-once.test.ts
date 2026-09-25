@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -52,7 +53,7 @@ describe('useExitOnce', () => {
   });
 
   test('every sheet in NowScreen that used to copy-paste this now shares it', () => {
-    const now = read('src/ui/NowScreen.tsx');
+    const now = nowScreenSource();
     assert.match(now, /import \{ ScreenModal, useExitOnce \} from '\.\/ScreenModal\.tsx'/,
       'NowScreen stopped importing the shared hook');
     const uses = now.match(/useExitOnce\(/g) ?? [];

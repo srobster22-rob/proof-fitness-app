@@ -8,6 +8,7 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { t, fill, languageOf, missingKeys, LANGUAGES, PREF_LANG } from '../src/domain/i18n.ts';
 import { lastTimeParts } from '../src/ui/now-line.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -280,7 +281,7 @@ describe('nothing renders a bare English sentence', () => {
  * has no opinion about language and its ids are English by construction.
  */
 describe('names taken from domain ids go through the table', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
 
   test('equipment is not uppercased straight onto the screen', () => {
     assert.doesNotMatch(src, /\{e\.toUpperCase\(\)\}/,
@@ -352,7 +353,7 @@ describe('names taken from domain ids go through the table', () => {
  * one file (R154's YOU-screen pass, R156's picker-sheet pass, this one).
  */
 describe('every accessibility label on the logging screen is translated', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
 
   test('no accessibilityLabel is left as a bare English literal', () => {
     const bad = [...src.matchAll(/accessibilityLabel="([A-Z][^"]*)"/g)]
@@ -506,7 +507,7 @@ test('no TextInput placeholder is a bare English literal, anywhere in the app', 
  * `editSet`, `logIt`, `saveSet`) already existed in both tables, unused.
  */
 test('the edit-set sheet title, weight label and save button are translated', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
   assert.doesNotMatch(src, /'ADD A SET' : 'EDIT SET'/);
   assert.doesNotMatch(src, /WEIGHT \(\{unit/);
   assert.doesNotMatch(src, /'LOG IT' : 'SAVE SET'/);
@@ -632,7 +633,7 @@ test('the settings tab has no hardcoded English left in its jump fields or plan 
  * equipment names, five screens ago.
  */
 test('the plan blurb on the first-run screen is translated, not read from the domain record', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
   assert.doesNotMatch(src, /PLAN_BLURB\[p\]/);
   assert.doesNotMatch(src, /PLAN_LABEL\[p\]/);
   assert.match(src, /T\(PLAN_BLURB_KEY\[p\]\)/);
@@ -647,7 +648,7 @@ test('the plan blurb on the first-run screen is translated, not read from the do
  * shape pre-composed ('PUSH DAY' / 'DÍA DE EMPUJE') and was simply unused here.
  */
 test('the picker sheet day heading is translated, not built from SPLIT_LABEL', () => {
-  const src = code(read('src/ui/NowScreen.tsx'));
+  const src = code(nowScreenSource());
   assert.doesNotMatch(src, /SPLIT_LABEL\[state\.day\]/);
   assert.doesNotMatch(src, /import \{ SPLIT_LABEL \}/);
   assert.match(src, /T\(DAY_TITLE_KEY\[state\.day\]\)/);

@@ -5,9 +5,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TAB_BAR_HEIGHT, goTab, type Tab } from '../src/ui/tab-bar.ts';
 import { region } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SCREEN = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+const SCREEN = nowScreenSource();
 const BAR = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'TabBar.tsx'), 'utf8');
 const screen = (f: string) => fs.readFileSync(path.join(HERE, '..', 'app', f), 'utf8');
 

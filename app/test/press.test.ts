@@ -4,6 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pressStyle, dangerPressStyle } from '../src/ui/press-style.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -219,7 +220,7 @@ for (const [file, backdrops, passthroughs] of [
 }
 
 test('src/ui/NowScreen.tsx: as many press treatments as Pressables, minus named exceptions', () => {
-  const src = read('src/ui/NowScreen.tsx');
+  const src = nowScreenSource();
   const pressables = (src.match(/<Pressable\b/g) ?? []).length;
   const backdrops = (src.match(/<Pressable style=\{s\.backdrop\}/g) ?? []).length;
   const passthroughs = (src.match(/onPress=\{e => e\.stopPropagation\(\)\}/g) ?? []).length;

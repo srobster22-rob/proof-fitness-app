@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
 import { around } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
@@ -110,7 +111,7 @@ describe('every control announces itself (§4)', () => {
    * counting swipes to work out which pair is the weight.
    */
   test('the steppers say what they step', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     // Translated behind T('increaseWord')/T('decreaseWord') now — see
     // i18n.ts — so the structural rule (two shared names across four
     // steppers) is checked at the key rather than at the English string.
@@ -123,7 +124,7 @@ describe('every control announces itself (§4)', () => {
   });
 
   test('the primary action is a button, by name', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     // Translated behind T('logSet') now; same anchor rule as elsewhere.
     const log = around(src, "accessibilityLabel={T('logSet')}", 400, 40);
     assert.match(log, /accessibilityRole="button"/,
@@ -131,7 +132,7 @@ describe('every control announces itself (§4)', () => {
   });
 
   test('the exercise name is announced without being drawn as a button', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     assert.match(src, /accessibilityLabel=\{fill\(T\('changeExerciseA11y'\), \{ name: state\.exercise\.name \}\)\}/);
     // §7: it must still not LOOK like a button.
     assert.doesNotMatch(src, /style=\{s\.exerciseTap[^}]*button/i);

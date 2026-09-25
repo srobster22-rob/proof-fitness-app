@@ -8,6 +8,7 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { IDLE_END_MS } from '../src/domain/session.ts';
 import { around } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const T0 = Date.UTC(2026, 7, 27, 12);
@@ -79,7 +80,7 @@ describe('a workout abandoned while the app slept is ended (§8)', () => {
   test('and the screen calls it when it comes back into focus', () => {
     // The whole point: the constructor path was already right, and unreachable
     // in the case that matters.
-    const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     const focus = around(src, 'model.startNextIfFinished();', 700, 100);
     assert.match(focus, /model\.closeIfStale\(\);/,
       'focus no longer re-checks whether the session went stale while away');
@@ -106,7 +107,7 @@ describe('a workout abandoned while the app slept is ended (§8)', () => {
    * app is listening for it at all.
    */
   describe('the app waking is also a way back (§8)', () => {
-    const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
 
     test('a wake is listened for', () => {
       assert.match(src, /AppState\.addEventListener\('change'/,

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { slop, TARGET } from '../src/ui/target.ts';
 import { HIT } from '../src/ui/now-layout.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -95,7 +96,7 @@ describe('everything you tap is big enough to tap', () => {
 
   for (const [name, re] of SITES) {
     test(`${name} carries it`, () => {
-      assert.match(read('src/ui/NowScreen.tsx'), re);
+      assert.match(nowScreenSource(), re);
     });
   }
   /*
@@ -114,7 +115,7 @@ describe('everything you tap is big enough to tap', () => {
 
 
   test('FINISH carries it, which is the one that would hurt', () => {
-    const src = read('src/ui/NowScreen.tsx');
+    const src = nowScreenSource();
     const at = src.indexOf('model.finish(); sync(); onFinish?.();');
     assert.notEqual(at, -1, 'the finish handler moved');
     assert.match(src.slice(at - 1600, at), /hitSlop=\{slop\(40, 12\)\}/);
@@ -132,7 +133,7 @@ describe('everything you tap is big enough to tap', () => {
  * `useRef` living in the component — nothing a domain-model test can reach.
  */
 describe('FINISH cannot push the recap route twice from one tap that lands twice', () => {
-  const src = read('src/ui/NowScreen.tsx');
+  const src = nowScreenSource();
 
   test('a synchronous guard sits between the tap and the push', () => {
     const at = src.indexOf('model.finish(); sync(); onFinish?.();');

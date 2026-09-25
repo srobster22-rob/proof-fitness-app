@@ -8,6 +8,7 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { PLATE, REP_JUMP, WEIGHT_STEP } from '../src/ui/now-steppers.ts';
 import { region } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const T0 = Date.UTC(2026, 7, 27, 12);
@@ -110,7 +111,7 @@ describe('the logging path stays inside §4 (tap budgets)', () => {
     // §4: "Loading spinners on the logging path — zero. All local, sync is
     // background." A local SQLite write has nothing to wait for, and an
     // `await` here would be how one appears.
-    const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     const at = src.indexOf('model.log()');
     assert.notEqual(at, -1, 'the log handler moved');
     const around = src.slice(Math.max(0, at - 200), at + 200);
@@ -172,7 +173,7 @@ describe('finishing a workout is one tap, and stays one (R521)', () => {
      * back — so an 'are you sure' would be a tap spent on a question the app
      * can already answer by undoing.
      */
-    const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     // `region`, not slice(indexOf(...)): a moved anchor makes the raw form
     // return the tail of the file rather than throw, and this test would then
     // pass by reading something else entirely. The repo's own gate caught me
@@ -194,7 +195,7 @@ describe('finishing a workout is one tap, and stays one (R521)', () => {
      * session rolled over underneath. The ref is the fix and it has to be a
      * ref, checked and set synchronously outside any render.
      */
-    const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     assert.match(src, /if \(finishedRef\.current\) return;\s*finishedRef\.current = true;/,
       'the double-press guard is gone, so one press can push two recaps');
     // THIS ref, not any ref: the file has three `useRef(false)` and matching

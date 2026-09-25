@@ -8,9 +8,10 @@ import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { region } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SOURCE = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+const SOURCE = nowScreenSource();
 
 /**
  * The first screen of the app has to be answerable by somebody who has never

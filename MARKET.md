@@ -266,3 +266,4 @@ ever names a weight your own plates and buttons can make.
 | R695 | 42 | Hevy 88 | ORGANIZE 1: one check command, a domain snapshot that runs every function in its scope, ARCHITECTURE.md; no product change |
 | R696 | 42 | Hevy 88 | ORGANIZE 2: one exercise registry; coldstart, muscles, split, the aliases and the bodyweight list are views of it; no product change |
 | R697 | 42 | Hevy 88 | ORGANIZE 3: now-model.ts 2,286 → 1,439 lines, split into steppers, layout, the line and the state types; no product change |
+| R698 | 42 | Hevy 88 | ORGANIZE 4: NowScreen.tsx 2,673 → 1,351 lines; its sheets, controls, kit and stylesheet in their own files; the UI trace identical |

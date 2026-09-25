@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
@@ -95,7 +96,7 @@ describe('a font size fitted to the screen never gets fitted twice (R569)', () =
      * position changed, so this now checks for what R573 left rather than
      * the exact string R569 originally wrote.
      */
-    const src = fs.readFileSync(path.join(APP, 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+    const src = nowScreenSource();
     assert.match(src, /R569 found this ALREADY HAD the exemption/,
       'the note explaining the typed-weight field\'s exemption is gone');
   });

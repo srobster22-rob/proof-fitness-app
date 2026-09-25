@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');
@@ -34,7 +35,7 @@ const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')),
  * made — this one had briefly drifted from that convention.
  */
 describe('LOG SET does not log twice from one same-tick double-fired tap', () => {
-  const src = read('src/ui/NowScreen.tsx');
+  const src = nowScreenSource();
 
   test('a synchronous ref guard sits before model.log() is ever called', () => {
     assert.match(src, /const loggingRef = useRef\(false\);/,

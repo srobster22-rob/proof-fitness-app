@@ -8,6 +8,7 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { coachSuggestion, callMade, type Suggestion, type TrainingGoal } from '../src/domain/coach.ts';
 import type { LoggedSet } from '../src/domain/types.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const DAY = 86_400_000;
 const T0 = Date.UTC(2026, 6, 29, 18);
@@ -157,7 +158,7 @@ describe('what each call asks for', () => {
 
 describe('the screen shows it', () => {
   const HERE = path.dirname(fileURLToPath(import.meta.url));
-  const screen = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+  const screen = nowScreenSource();
 
   test('a made call is in volt', () => {
     assert.match(screen, /<Text style=\{\[s\.lastTimeText, state\.lastTime\.made && s\.lastTimeHit\]\} numberOfLines=\{1\}>\s*\{state\.lastTime\.head\}/,

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
 import { region } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 /**
  * Layout invariants for the Now screen.
@@ -23,7 +24,7 @@ import { region } from './helpers/source.ts';
  */
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SOURCE = fs.readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+const SOURCE = nowScreenSource();
 
 /** The body of one entry in the `StyleSheet.create({ ... })` object. */
 function style(name: string): string {

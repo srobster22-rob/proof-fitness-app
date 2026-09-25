@@ -35,7 +35,9 @@ const BROWSER_ONLY: Record<string, string> = {
   'src/data/web-db.ts': 'needs localStorage and sql.js\'s wasm',
 };
 /** Modules node cannot import: they reach react-native or native expo modules. Everything else is in scope. */
-const PLATFORM: string[] = ['src/data/db.ts', 'src/ui/backup.ts', 'src/ui/haptics.ts', 'src/ui/locale.ts', 'src/ui/press.ts'];
+const PLATFORM: string[] = [
+  'src/data/db.ts', 'src/ui/backup.ts', 'src/ui/haptics.ts', 'src/ui/locale.ts', 'src/ui/now-kit.ts', 'src/ui/now-styles.ts', 'src/ui/press.ts'
+];
 
 describe('the snapshot runs every function in its scope', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'proof-cov-'));

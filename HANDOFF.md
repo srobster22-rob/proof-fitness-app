@@ -746,6 +746,13 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**The Now screen in files (R697, R698, ORGANIZE).** now-model.ts keeps `NowModel`; its steppers, layout arithmetic,
+the line under the lift and the state types are now-steppers.ts, now-layout.ts, now-line.ts and now-state.ts.
+NowScreen.tsx keeps the `NowScreen` component; its sheets (DayChooser, EditSetSheet, ExercisePicker,
+EquipmentSheet), small controls (NowControls.tsx), shared strings and colours (now-kit.ts) and stylesheet
+(now-styles.ts) have their own files. Tests that read the screen as text read it whole through
+test/helpers/now-screen.ts. The `NowScreen` function itself is still 1,314 lines (ARCHITECTURE.md debt).
+
 **One exercise registry (R696, ORGANIZE).** A movement is one entry in `src/domain/exercises.ts`
 (`EXERCISES`: seeds, kit, factor, calibrates, day, muscles, aliases), in three tiers. `BUILTIN` and its tiers
 (coldstart.ts), `MUSCLES` (muscles.ts), each lift's day (split.ts), the typed aliases (find-exercise.ts) and which

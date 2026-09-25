@@ -54,7 +54,8 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 - **A behaviour change you did not mean:** `node tools/snapshot.ts --out a.json` before and after,
   then diff; the per-section hashes say which part moved. It covers every `.ts` module node can
   import (a test fails if any of their functions, callbacks included, never runs), NOT the `.tsx` screens: a round
-  that moves `.tsx` code needs a trace of the running screens as its proof.
+  that moves `.tsx` code proves itself with `node tools/playtests/ui-trace.mjs`: every rendered
+  element, box and style through a fixed flow of the Now screen and its sheets (needs `npm run web`).
 - **In the running app:** `npm run web` serves port 8099 and writes the sample to `public/seed.b64`.
   `tools/playtest.mjs` drives it at phone size (real taps, `offsetDays`, screenshots); the scripts in
   `tools/playtests/` reproduce past bugs and exit 1 if one is back.
@@ -97,28 +98,35 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 
 | module | lines | owns |
 |---|---:|---|
-| `src/ui/NowScreen.tsx` | 2,673 | Renders `NowModel`: dial, rail, THIS WORKOUT, day chooser, picker and every sheet. |
 | `src/ui/now-model.ts` | 1,439 | The Now screen as a state machine (`NowModel`): the dial, LOG SET, undo, the day and the lift rail, the plan. |
+| `src/ui/NowScreen.tsx` | 1,351 | The Now screen: renders `NowModel` (the dial, the rail, THIS WORKOUT) and opens its sheets. |
 | `src/ui/progress-model.ts` | 947 | Progress rows and sparklines, recent workouts, the weekly line, erase counts. |
+| `src/ui/now-styles.ts` | 496 | The Now screen's stylesheet, shared by the screen and its sheets. |
 | `src/ui/recap-model.ts` | 478 | A stored session as the recap: totals, records, NEXT TIME calls, share text. |
 | `src/ui/now-layout.ts` | 441 | The Now screen's layout arithmetic: the hero's size for a phone, the column's height, the rail's geometry, scroll-to-reveal. |
 | `src/ui/goals-model.ts` | 336 | The Goals screen: drafts, horizons, create, edit, remove. |
 | `src/ui/measure-model.ts` | 303 | The Measurements screen: rows, trends, saving a reading. |
+| `src/ui/ExercisePicker.tsx` | 263 | The exercise picker sheet: today's lifts, the rest by day, search. |
 | `src/ui/press-style.ts` | 248 | Press feedback styles, pure. |
+| `src/ui/EquipmentSheet.tsx` | 195 | The equipment sheet: barbell, dumbbell, machine (and which one), bodyweight. |
 | `src/ui/ScreenModal.tsx` | 195 | A modal that leaves with its screen. |
 | `src/ui/RepoGate.tsx` | 188 | Waits for the database to open, and says why it failed. |
 | `src/ui/now-state.ts` | 166 | The types of what the Now screen renders: `NowState`, `RailLift`, `SessionLift`. |
 | `src/ui/ConfirmSheet.tsx` | 161 | A confirmation the user has to mean. |
 | `src/ui/now-line.ts` | 159 | The line under the lift: last time, the coach's call, "made it", the goal's tail. |
 | `src/ui/lift-history.ts` | 147 | One lift's history sheet: rep bests, the last 12 sessions. |
+| `src/ui/DayChooser.tsx` | 143 | The day chooser: the split, and today's day. |
+| `src/ui/EditSetSheet.tsx` | 141 | The sheet that edits a logged set, or adds one. |
 | `src/ui/backup.ts` | 124 | The native half of export and restore: files and the share sheet. |
 | `src/ui/goal-filters.ts` | 120 | Filtering and sorting goals. |
 | `src/ui/now-steppers.ts` | 113 | The Now screen's steppers: weight and rep steps, the plates and custom jumps, a typed weight. |
 | `src/ui/LiftSheet.tsx` | 109 | Draws one lift's history sheet. |
+| `src/ui/NowControls.tsx` | 102 | The Now screen's small controls: a jump button, a column wrapper, a stepper. |
 | `src/ui/drag-scroll.ts` | 89 | Mouse drag for horizontal rows on web. |
 | `src/ui/Spark.tsx` | 83 | Draws a sparkline. |
 | `src/ui/backup-model.ts` | 82 | Export and restore, as the screen sees them. |
 | `src/ui/guarded-push.ts` | 75 | Navigation a double tap cannot fire twice. |
+| `src/ui/now-kit.ts` | 75 | What the Now screen's components share: strings, colours, measures, the haptic on a logged set. |
 | `src/ui/rail-order.ts` | 73 | The order of the Now screen's day rail. |
 | `src/ui/TabBar.tsx` | 71 | The bottom tab bar. |
 | `src/ui/type.ts` | 66 | The type scale and spacing. |

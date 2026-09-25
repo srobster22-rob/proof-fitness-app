@@ -7,10 +7,11 @@ import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { around } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
-const SCREEN = fs.readFileSync(path.join(APP, 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+const SCREEN = nowScreenSource();
 const T0 = Date.UTC(2026, 8, 9, 12);
 
 /*

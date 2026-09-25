@@ -8,6 +8,7 @@ import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { IDLE_END_MS } from '../src/domain/session.ts';
 import { region } from './helpers/source.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const T = Date.UTC(2026, 7, 24, 9);
@@ -102,7 +103,7 @@ describe('the day question follows the workout, not the app launch', () => {
  * deriving it — a second copy in `useState` is what caused this.
  */
 describe('the screen derives the question rather than remembering it', () => {
-  const src = readFileSync(path.join(HERE, '..', 'src', 'ui', 'NowScreen.tsx'), 'utf8');
+  const src = nowScreenSource();
   // The comment explaining the fix quotes the thing the fix removed, so it has
   // to come out before matching — the same trap `contrast.test.ts` hit when its
   // guard failed on the note explaining why a colour was deleted.
