@@ -27,6 +27,10 @@ import {
 import { TYPE, SPACING } from '../src/ui/type.ts';
 import { buzz } from '../src/ui/haptics.ts';
 import { pressStyle, useReducedMotion, onState, SELECTED, SELECTED_TEXT } from '../src/ui/press.ts';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+
+/** A render error here is recorded as "settings" and shown in place of the screen. */
+export const ErrorBoundary = errorBoundaryFor('settings');
 
 /**
  * Screen 4 — Settings.

@@ -45,6 +45,8 @@ try {
   if ((await s.controls()).some(c => /^LEGS$/.test(c.label))) await s.tap(/^LEGS$/);
   const t = await text(s);
   expect('three days later the lift opens on the same weight again', /\d+ again — make \d+/.test(t), t);
+  const errs = await s.errors();
+  expect('the app recorded no errors', Array.isArray(errs) && errs.length === 0, JSON.stringify(errs));
 } finally {
   await s.close();
   try { fs.rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold a lock */ }

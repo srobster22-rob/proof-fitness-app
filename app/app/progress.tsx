@@ -36,6 +36,10 @@ import { pressStyle, useReducedMotion } from '../src/ui/press.ts';
 import { Spark } from '../src/ui/Spark.tsx';
 import { LiftSheet } from '../src/ui/LiftSheet.tsx';
 import { shortDate } from '../src/ui/dates.ts';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+
+/** A render error here is recorded as "progress" and shown in place of the screen. */
+export const ErrorBoundary = errorBoundaryFor('progress');
 
 /**
  * Screen 2 — Progress. PROMPT.md §5: "one screen, not a dashboard".

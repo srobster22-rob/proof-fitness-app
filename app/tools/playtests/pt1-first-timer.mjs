@@ -162,6 +162,10 @@ try {
   console.log(`HEADLINE H3 coach lines seen in two weeks: ${coachSeen.size}${coachSeen.size ? ` (${[...coachSeen].join(' | ')})` : ''}`);
   console.log(`HEADLINE H4 detour taps: ${detours}`);
   console.log(`HEADLINE H5 heaviest first-time weight / best bench: ${heaviestStart}/${bestBench} = ${(heaviestStart / bestBench).toFixed(2)}`);
+  // Anything the app caught and swallowed while the screens looked fine (src/ui/error-log.ts).
+  const errs = await s.errors();
+  console.log(`ERRORS recorded by the app: ${errs === null ? 'unreadable (not a development build)' : errs.length}`);
+  if (errs === null || errs.length) { for (const e of errs ?? []) console.log(`  ${e.screen}: ${e.message}`); process.exitCode = 1; }
 } finally {
   await s.close();
 }

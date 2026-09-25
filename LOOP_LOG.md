@@ -4597,3 +4597,17 @@ Content: unchanged
 Coach: none
 Decisions: none
 Next: R699 ORGANIZE: an error boundary per screen, errors logged with the screen name (§3a checklist 6, the coordinator's fifth item).
+
+## R699 · ORGANIZE · Errors carry their screen: a boundary per route, an error log, and a smoke run that fails on it
+Pick: ORGANIZE 5 of ≤ 6 (§3a checklist 6, errors surface with context; the coordinator's fifth item): one root boundary, no screen named, nothing recorded · impact planned 0/0/+1
+Player notices: nothing in normal use; a screen that crashes now says which one, shows the message and offers TRY AGAIN, where the router's default crash screen was
+Impact: planned 0/0/+1 → shipped 0/0/+1 (product source 77 files, 21,100 lines → 80, 21,266: error-log.ts 65, ScreenErrorBoundary.tsx 48, failure-look.ts 28, RepoGate.tsx 188 → 176; largest file now-model.ts 1,439 and function NowScreen 1,314 unchanged)
+Built: src/ui/error-log.ts records each error with its screen (a ring of 50, the console, a dev-only read hook) and watches what no boundary sees. Each of the 8 routes exports `ErrorBoundary = errorBoundaryFor(<screen>)` in RepoGate's face, now shared (failure-look.ts, no copied styles); the root layout records "app". The harness reads the log (`errors()`); ui-trace, pt1 and the R694 repro fail on any entry; `npm run check` smokes the live app when `npm run web` is up and says "skipped" otherwise. Two new i18n keys each in en and es.
+Quality: self-reviewed; no independent reviewer (tooling and a failure-only screen, proven live). The suite caught my retry button without an accessible name, fixed; one old test pinned the router's own boundary, now pins ours. Three new files were written while the dev server ran and polluted router.d.ts: restored, the server restarted (the R696 trap).
+Verified: check ALL GREEN, suite 2434/2434, smoke: the live app recorded no errors, UI trace unchanged (10471c6722697b60). Live: a throw planted in Progress's render showed its boundary and recorded ["progress", …]; restored byte-identical, Progress renders and the log is empty (shots/R699/). 8 plants each fail a named test and restore sha256-identical.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (no change outside a crash)
+Market: unchanged at 42
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R700 ORGANIZE, the last of the phase: the 1,314-line NowScreen function and the routes' long components, as far as one round goes; then ARCHITECTURE.md's debt list and "ORGANIZE phase complete".

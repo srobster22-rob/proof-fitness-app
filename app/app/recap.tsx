@@ -21,6 +21,10 @@ import { latestRecap, recapFor, shareText, streakWorthShowing } from '../src/ui/
 import { COLUMN } from '../src/ui/column.ts';
 import { loadLabel } from '../src/domain/types.ts';
 import { pressStyle, useReducedMotion } from '../src/ui/press.ts';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+
+/** A render error here is recorded as "recap" and shown in place of the screen. */
+export const ErrorBoundary = errorBoundaryFor('recap');
 
 /**
  * Screen 4 — Recap. PROMPT.md §5.

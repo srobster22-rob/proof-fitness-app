@@ -63,6 +63,10 @@ try {
   await step('a rail lift', () => s.tap(/^Leg Extension/));
   await step('undo', () => s.tap(/^Undo last /));
   await step('the clear question', () => s.tap(/^Clear this workout$/));
+  // Anything the app caught and swallowed while the screens looked fine (src/ui/error-log.ts).
+  const errs = await s.errors();
+  console.log(`ERRORS recorded by the app: ${errs === null ? 'unreadable (not a development build)' : errs.length}`);
+  if (errs === null || errs.length) { for (const e of errs ?? []) console.log(`  ${e.screen}: ${e.message}`); process.exitCode = 1; }
 } finally {
   await s.close();
   try { fs.rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold a lock */ }

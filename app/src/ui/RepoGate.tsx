@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { initRepo, repoStatus, resetRepo, dbDiagnostic, DB_NAME } from '../data/db.ts';
 import { t, fill, languageFor } from '../domain/i18n.ts';
 import { deviceLocale } from './locale.ts';
+import { failure } from './failure-look.ts';
 
 /*
  * The device locale, not `repo.getPref(PREF_LANG)` — this screen renders
@@ -158,31 +159,18 @@ function StorageError({
   );
 }
 
-const VOLT = '#CCFF00';
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#08090A' },
-  loading: { flex: 1, backgroundColor: '#08090A', alignItems: 'center', justifyContent: 'center' },
-  body: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 28, paddingVertical: 40 },
-  mark: { width: 44, height: 44, backgroundColor: VOLT, borderRadius: 8, marginBottom: 26 },
-  title: { color: '#fff', fontSize: 22, fontWeight: '800', letterSpacing: -0.3, marginBottom: 14 },
-  body1: { color: '#C3CBD2', fontSize: 15, lineHeight: 23, marginBottom: 12 },
-  body2: { color: '#7C8792', fontSize: 14, lineHeight: 22, marginBottom: 24 },
-  detail: {
-    backgroundColor: '#0E1114', borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: '#1A1F25', marginBottom: 26
-  },
-  detailLabel: { color: '#9AA5AF', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 6 },
-  detailText: { color: '#8B959E', fontSize: 12, lineHeight: 19, fontFamily: 'Courier' },
-  detailNote: {
-    marginTop: 10, paddingTop: 10,
-    borderTopWidth: 1, borderTopColor: '#1A1F25'
-  },
-  retry: {
-    backgroundColor: VOLT, borderRadius: 14, height: 56,
-    alignItems: 'center', justifyContent: 'center'
-  },
-  retryText: { color: '#000', fontSize: 15, fontWeight: '900', letterSpacing: 2 },
-  send: { alignSelf: 'center', paddingVertical: 14, paddingHorizontal: 18 },
-  sendText: { color: '#9AA5AF', fontSize: 12, fontWeight: '800', letterSpacing: 1.4 },
-  attempts: { color: '#9AA5AF', fontSize: 12, textAlign: 'center', marginTop: 14 }
-});
+// The face RepoGate shares with every screen's error boundary (failure-look.ts), and its own extras.
+const s = {
+  ...failure,
+  ...StyleSheet.create({
+    loading: { flex: 1, backgroundColor: '#08090A', alignItems: 'center', justifyContent: 'center' },
+    body2: { color: '#7C8792', fontSize: 14, lineHeight: 22, marginBottom: 24 },
+    detailNote: {
+      marginTop: 10, paddingTop: 10,
+      borderTopWidth: 1, borderTopColor: '#1A1F25'
+    },
+    send: { alignSelf: 'center', paddingVertical: 14, paddingHorizontal: 18 },
+    sendText: { color: '#9AA5AF', fontSize: 12, fontWeight: '800', letterSpacing: 1.4 },
+    attempts: { color: '#9AA5AF', fontSize: 12, textAlign: 'center', marginTop: 14 }
+  })
+};

@@ -162,7 +162,31 @@ async function reports() {
   } catch (e) {
     lines.push(`sizes: unavailable (${e?.message ?? e})`);
   }
+  const smoke = await smokeRun();
+  lines.push(smoke.line);
+  if (smoke.failed) extra.push({ name: 'smoke (live app)', ok: false, ms: smoke.ms, first: smoke.first });
   return { reports: lines, extra };
+}
+
+/**
+ * The smoke run (AGENT_LOOP §3a item 6): with the dev server up, the UI trace
+ * drives the Now screen and its sheets, and the check fails if the app
+ * recorded any error on the way (src/ui/error-log.ts). Without the server it
+ * says it was skipped; it never reads as a pass.
+ */
+async function smokeRun() {
+  const { devPort } = await import('./dev-port.ts');
+  const url = `http://localhost:${devPort()}/`;
+  const up = await fetch(url, { signal: AbortSignal.timeout(3000) }).then(r => r.ok, () => false);
+  if (!up) return { line: `smoke: skipped (no dev server at ${url}; \`npm run web\` runs one)`, failed: false };
+  const r = run('smoke', ['tools/playtests/ui-trace.mjs'], { timeout: 10 * MINUTE });
+  const count = (r.output.match(/^ERRORS recorded by the app: (.*)$/m) ?? [])[1] ?? 'not reported';
+  const clean = r.ok && count === '0';
+  return {
+    line: `smoke: ${clean ? 'the live app recorded no errors through the UI trace' : `FAILED, errors recorded: ${count}`}`,
+    failed: !clean, ms: r.ms,
+    first: clean ? null : [firstErrorLine(r.output.replace(/^ui-trace .*$/m, '')), 'full output: app/out/check-smoke.txt']
+  };
 }
 
 async function main() {

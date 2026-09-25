@@ -29,6 +29,10 @@ import {
 import {
   KINDS, formatMeasure, convertMeasure,
   type MeasurementKind, type MeasureUnit } from '../src/domain/measure.ts';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+
+/** A render error here is recorded as "measure" and shown in place of the screen. */
+export const ErrorBoundary = errorBoundaryFor('measure');
 
 /**
  * Measurements — of the lifter, rather than of a lift.

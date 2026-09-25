@@ -59,6 +59,7 @@ import { onState, pressStyle, dangerPressStyle } from '../src/ui/press-style.ts'
 import { sparkFloor } from '../src/ui/spark-geom.ts';
 import { slop } from '../src/ui/target.ts';
 import { goTab, type Tab } from '../src/ui/tab-bar.ts';
+import { recordError, recentErrors, clearErrors, watchGlobalErrors, ERROR_RING } from '../src/ui/error-log.ts';
 import { exportAll, serialize, parse, restore, count, summarise } from '../src/data/portable.ts';
 import { adaptExpoDb } from '../src/data/expo-db.ts';
 import { toFsPath, joinPath, resolveDbLocation, planDbMigration, planDbOpen, describeDbLocation } from '../src/data/db-location.ts';
@@ -518,6 +519,34 @@ function domainSection(repo: Repo): unknown {
   };
 }
 
+/**
+ * The error log: what a boundary records, what the global watcher catches and
+ * stops catching, and the ring's cap. Stacks carry file paths, so they stay out
+ * of the hash; the console is quiet while it runs.
+ */
+function errorLog(): unknown {
+  const log = console.error;
+  console.error = () => {};
+  try {
+    clearErrors();
+    const target = new EventTarget();
+    const stop = watchGlobalErrors(target as never);
+    target.dispatchEvent(Object.assign(new Event('error'), { error: new Error('a handler threw') }));
+    target.dispatchEvent(Object.assign(new Event('unhandledrejection'), { reason: 'a promise was rejected' }));
+    stop();
+    target.dispatchEvent(Object.assign(new Event('error'), { error: new Error('after the undo: not recorded') }));
+    watchGlobalErrors({} as never)();
+    recordError('progress', new Error('the render threw'));
+    const seen = recentErrors().map(({ screen, message, at }) => ({ screen, message, at }));
+    for (let i = 0; i < ERROR_RING + 5; i++) recordError('burst', `#${i}`);
+    const kept = recentErrors();
+    clearErrors();
+    return { seen, kept: [kept.length, kept[0].message, kept[kept.length - 1].message], cleared: recentErrors().length };
+  } finally {
+    console.error = log;
+  }
+}
+
 /** The screen helpers that are not a screen: preferences, press styles, geometry and navigation. */
 function uiSection(repo: Repo): unknown {
   const calls: unknown[] = [];
@@ -534,6 +563,7 @@ function uiSection(repo: Repo): unknown {
     press: [press({ pressed: true } as never), press({ pressed: false } as never), danger({ pressed: true } as never),
       pressStyle({}, 'quiet', true)({ pressed: true } as never)],
     spark: Array.from({ length: 13 }, (_, n) => sparkFloor(n)), slop: [slop(30), slop(44, 8)], router: calls,
+    errors: errorLog(),
   };
 }
 

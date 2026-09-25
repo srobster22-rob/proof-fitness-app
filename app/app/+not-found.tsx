@@ -4,6 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import { getRepo } from '../src/data/db.ts';
 import { t, languageOf } from '../src/domain/i18n.ts';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+
+/** A render error here is recorded as "not-found" and shown in place of the screen. */
+export const ErrorBoundary = errorBoundaryFor('not-found');
 
 const T = (k: Parameters<typeof t>[1]) => t(languageOf(getRepo()), k);
 

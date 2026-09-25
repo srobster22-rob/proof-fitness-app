@@ -6,6 +6,10 @@ import { NowScreen } from '../src/ui/NowScreen.tsx';
 import { getRepo } from '../src/data/db.ts';
 import { deviceLocale } from '../src/ui/locale.ts';
 import { useGuardedPush } from '../src/ui/guarded-push.ts';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+
+/** A render error here is recorded as "now" and shown in place of the screen. */
+export const ErrorBoundary = errorBoundaryFor('now');
 
 /**
  * The app's entry point IS the logging screen. §4: cold launch goes to the

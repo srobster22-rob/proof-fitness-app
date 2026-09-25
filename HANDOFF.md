@@ -746,6 +746,13 @@ hiding the button.
 **Progress knows about goals.** Each row carries its target ("5 TO 50"), a lift with a goal is
 never ranked off the screen, and the cap says how many lifts it is holding back.
 
+**Errors carry their screen (R699, ORGANIZE).** Every route exports `ErrorBoundary = errorBoundaryFor('<screen>')`
+(ScreenErrorBoundary.tsx): a render that throws shows that screen's name, the message and TRY AGAIN, in
+RepoGate's face (failure-look.ts), and is recorded in src/ui/error-log.ts; the root layout records what no
+boundary sees as "app". Playtests fail on any recorded error (`s.errors()` in the harness, a dev-only hook),
+and `npm run check` runs the UI trace as a smoke run when `npm run web` is up. Proven by a planted throw in
+Progress (shots/R699/).
+
 **The Now screen in files (R697, R698, ORGANIZE).** now-model.ts keeps `NowModel`; its steppers, layout arithmetic,
 the line under the lift and the state types are now-steppers.ts, now-layout.ts, now-line.ts and now-state.ts.
 NowScreen.tsx keeps the `NowScreen` component; its sheets (DayChooser, EditSetSheet, ExercisePicker,

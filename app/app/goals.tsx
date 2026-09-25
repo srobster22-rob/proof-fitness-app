@@ -39,6 +39,10 @@ import {
   lastView, rememberView, type GoalFilter, type GoalSort } from '../src/ui/goal-filters.ts';
 import { TYPE, SPACING } from '../src/ui/type.ts';
 import { pressStyle, useReducedMotion, onState, SELECTED, SELECTED_TEXT } from '../src/ui/press.ts';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+
+/** A render error here is recorded as "goals" and shown in place of the screen. */
+export const ErrorBoundary = errorBoundaryFor('goals');
 
 /**
  * Screen 3 — Goals. PROMPT.md §5.

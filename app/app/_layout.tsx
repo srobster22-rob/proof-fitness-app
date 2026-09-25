@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { RepoGate } from '../src/ui/RepoGate.tsx';
+import { errorBoundaryFor } from '../src/ui/ScreenErrorBoundary.tsx';
+import { watchGlobalErrors } from '../src/ui/error-log.ts';
 
 /**
- * expo-router renders this instead of a white screen when a route throws during
- * render. Re-exported rather than written: the default surfaces the stack, which
- * is what you actually want the first time the app runs on a device.
+ * What breaks the layout itself (RepoGate, the stack) is recorded as "app"; each
+ * route has its own boundary for its own screen (ScreenErrorBoundary.tsx).
  */
-export { ErrorBoundary } from 'expo-router';
+export const ErrorBoundary = errorBoundaryFor('app');
 
 /**
  * Root layout.
@@ -20,6 +21,8 @@ export { ErrorBoundary } from 'expo-router';
  * from to log a set.
  */
 export default function RootLayout() {
+  // What no screen's boundary sees: a throw in a handler, a rejected promise.
+  useEffect(() => watchGlobalErrors(), []);
   return (
     <>
       <StatusBar style="light" />

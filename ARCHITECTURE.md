@@ -60,8 +60,11 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
   `tools/playtest.mjs` drives it at phone size (real taps, `offsetDays`, screenshots); the scripts in
   `tools/playtests/` reproduce past bugs and exit 1 if one is back.
 - **The database failed to open:** `RepoGate.tsx` shows why, from `dbDiagnostic()` in `db.ts`.
-- **A crash while rendering:** expo-router's error boundary in `app/_layout.tsx`. In the dev
-  preview Metro's overlay shows first (HANDOFF trap 18).
+- **A crash while rendering:** each route exports its own boundary (`ScreenErrorBoundary.tsx`), which shows
+  the screen's name and the message and records it in `error-log.ts`; what no boundary sees (a handler, a
+  promise) is recorded as "app". Playtests read the log through the harness's `errors()` and fail on any
+  entry; with `npm run web` up, the check's smoke line does too. In the dev preview Metro's overlay shows
+  first (HANDOFF trap 18).
 - **A seed:** the sample loads from `public/seed.b64` into localStorage `proof.db.v1`; the
   snapshot builds the same shape in memory on a fixed clock (`T0`, 23 Sep 2026).
 
@@ -85,14 +88,14 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 
 | module | lines | owns |
 |---|---:|---|
-| `app/goals.tsx` | 1,130 | Goals: the list, filters, the add and edit sheets. |
-| `app/progress.tsx` | 782 | Progress, and the export, restore and erase controls. |
-| `app/measure.tsx` | 670 | Measurements: kinds, readings, goals. |
-| `app/recap.tsx` | 515 | The recap card, SHARE, NEXT TIME. |
-| `app/settings.tsx` | 369 | Units, training goal, split, language. |
-| `app/index.tsx` | 49 | The entry point, which is the Now screen. |
-| `app/+not-found.tsx` | 48 | A share link to a route this build lacks. |
-| `app/_layout.tsx` | 42 | The root stack, and expo-router's error boundary. |
+| `app/goals.tsx` | 1,134 | Goals: the list, filters, the add and edit sheets. |
+| `app/progress.tsx` | 786 | Progress, and the export, restore and erase controls. |
+| `app/measure.tsx` | 674 | Measurements: kinds, readings, goals. |
+| `app/recap.tsx` | 519 | The recap card, SHARE, NEXT TIME. |
+| `app/settings.tsx` | 373 | Units, training goal, split, language. |
+| `app/index.tsx` | 53 | The entry point, which is the Now screen. |
+| `app/+not-found.tsx` | 52 | A share link to a route this build lacks. |
+| `app/_layout.tsx` | 45 | The root stack, and expo-router's error boundary. |
 
 ### Screens, models and UI helpers (`src/ui/`)
 
@@ -110,7 +113,7 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | `src/ui/press-style.ts` | 248 | Press feedback styles, pure. |
 | `src/ui/EquipmentSheet.tsx` | 195 | The equipment sheet: barbell, dumbbell, machine (and which one), bodyweight. |
 | `src/ui/ScreenModal.tsx` | 195 | A modal that leaves with its screen. |
-| `src/ui/RepoGate.tsx` | 188 | Waits for the database to open, and says why it failed. |
+| `src/ui/RepoGate.tsx` | 176 | Waits for the database to open, and says why it failed. |
 | `src/ui/now-state.ts` | 166 | The types of what the Now screen renders: `NowState`, `RailLift`, `SessionLift`. |
 | `src/ui/ConfirmSheet.tsx` | 161 | A confirmation the user has to mean. |
 | `src/ui/now-line.ts` | 159 | The line under the lift: last time, the coach's call, "made it", the goal's tail. |
@@ -130,7 +133,9 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | `src/ui/rail-order.ts` | 73 | The order of the Now screen's day rail. |
 | `src/ui/TabBar.tsx` | 71 | The bottom tab bar. |
 | `src/ui/type.ts` | 66 | The type scale and spacing. |
+| `src/ui/error-log.ts` | 65 | Every error caught, with its screen: a ring of the last 50, the console, and a dev-only read hook for playtests. |
 | `src/ui/Arrive.tsx` | 62 | The arrival animation of a new set chip. |
+| `src/ui/ScreenErrorBoundary.tsx` | 48 | Each route's error boundary: the screen that broke says so, and the error is recorded with its name. |
 | `src/ui/target.ts` | 47 | The minimum tap-target size. |
 | `src/ui/haptics.ts` | 43 | Haptics, named by event. |
 | `src/ui/tab-bar.ts` | 42 | Tab routes. |
@@ -140,6 +145,7 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | `src/ui/training-goal.ts` | 39 | The TRAINING GOAL preference. |
 | `src/ui/spark-geom.ts` | 35 | Sparkline geometry. |
 | `src/ui/display-unit.ts` | 32 | The UNITS preference. |
+| `src/ui/failure-look.ts` | 28 | The one face of a failure, shared by RepoGate and every error boundary. |
 | `src/ui/locale.ts` | 28 | The device locale. |
 | `src/ui/dates.ts` | 21 | Short dates ("Sep 14"). |
 
@@ -147,7 +153,7 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 
 | module | lines | owns |
 |---|---:|---|
-| `src/domain/i18n.ts` | 1,298 | Every visible string (en, es) behind `t()` and `fill()`; number and date locale. |
+| `src/domain/i18n.ts` | 1,304 | Every visible string (en, es) behind `t()` and `fill()`; number and date locale. |
 | `src/domain/session.ts` | 702 | Session lifecycle (idle end, stale) and the recap payload (`buildRecap`). |
 | `src/domain/coach.ts` | 614 | The coach's call for a lift (raise, hold, deload) from two weeks of history; when a call is made. |
 | `src/domain/goals.ts` | 426 | Lift goals: progress, ranking, the lines they print, validation. |
@@ -189,6 +195,5 @@ harness), `app/test/` (one file per behaviour), `link/` (the share-link page, bu
   `test/helpers/source.ts`; gates should read what modules export (AGENT_LOOP §3a item 8).
 - **Round-history comments:** about 277 comment lines name rounds (R548…); that history lives in LOOP_LOG.
 - **Counted by regex:** `tools/inventory.ts` counts coach situations and insights by reading source text.
-- **Errors surface without a screen name:** one root boundary, none per screen, no error ring.
 - **Dead or unadopted code:** `open-once.ts` (never adopted), `Repo.lastSetOf` and its index,
   `goalE1rmGap` (the orphan-scan list), and one-off seed tools (`tools/seed-*565/540/549/541/556/548/539/r573.ts`).

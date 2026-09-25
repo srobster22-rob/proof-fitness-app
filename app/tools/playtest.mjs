@@ -177,6 +177,14 @@ export class Session {
     return this.eval(`document.body.innerText`);
   }
 
+  /**
+   * What the app's error log recorded since this page loaded (src/ui/error-log.ts),
+   * or null when it cannot be read: only a development build exposes it.
+   */
+  async errors() {
+    return this.eval(`(globalThis.__PROOF_ERRORS__ ? globalThis.__PROOF_ERRORS__() : null)`);
+  }
+
   async shot(dir, name) {
     fs.mkdirSync(dir, { recursive: true });
     const { data } = await this.send('Page.captureScreenshot', { format: 'png' });

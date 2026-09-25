@@ -28,10 +28,12 @@ const APP = path.join(HERE, '..');
  * uncaught render error to Metro's overlay instead, the same shape as trap 17.
  */
 describe('both crash-recovery paths stay wired (R576)', () => {
-  test('the root layout still opts into the router error boundary', () => {
+  test('the root layout still has an error boundary', () => {
+    // Its own since R699 (errorBoundaryFor, which also records the error as
+    // "app"); every route has one too: errors-surface-with-the-screen.test.ts.
     const src = fs.readFileSync(path.join(APP, 'app', '_layout.tsx'), 'utf8');
-    assert.match(src, /export \{ ErrorBoundary \} from 'expo-router';/,
-      'app/_layout.tsx no longer re-exports the router\'s crash screen -- a route ' +
+    assert.match(src, /export const ErrorBoundary = errorBoundaryFor\('app'\);/,
+      'app/_layout.tsx no longer exports an error boundary -- a layout ' +
       'that throws during render now shows a blank screen instead of a fallback');
   });
 
