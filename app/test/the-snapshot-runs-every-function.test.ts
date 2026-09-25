@@ -37,7 +37,7 @@ const BROWSER_ONLY: Record<string, string> = {
 /** Modules node cannot import: they reach react-native or native expo modules. Everything else is in scope. */
 const PLATFORM: string[] = [
   'src/data/db.ts', 'src/ui/backup.ts', 'src/ui/failure-look.ts', 'src/ui/haptics.ts', 'src/ui/locale.ts',
-  'src/ui/now-kit.ts', 'src/ui/now-styles.ts', 'src/ui/press.ts'
+  'src/ui/now-hooks.ts', 'src/ui/now-kit.ts', 'src/ui/now-styles.ts', 'src/ui/press.ts'
 ];
 
 describe('the snapshot runs every function in its scope', () => {

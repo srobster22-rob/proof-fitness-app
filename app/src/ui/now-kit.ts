@@ -6,6 +6,9 @@
  */
 import { t, languageOf } from '../domain/i18n.ts';
 import { getRepo } from '../data/db.ts';
+import type { NowModel } from './now-model.ts';
+import type { NowLayout } from './now-layout.ts';
+import type { NowState } from './now-state.ts';
 
 /**
  * Every visible string on this screen, in the chosen language.
@@ -72,4 +75,18 @@ export function feedback(fn: () => Promise<unknown>): void {
   } catch {
     /* a phone that cannot buzz is not a reason to lose a set */
   }
+}
+
+/**
+ * What every section of the Now screen is drawn from, handed down whole by
+ * `NowScreen`: the fitted layout, the model's state, whether motion is
+ * reduced, the model, and `sync`, the one commit point that re-reads the
+ * model after a change.
+ */
+export interface NowSection {
+  L: NowLayout;
+  state: NowState;
+  still: boolean;
+  model: NowModel;
+  sync: () => void;
 }

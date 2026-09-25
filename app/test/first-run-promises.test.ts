@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
+import { nowScreenSource } from './helpers/now-screen.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
@@ -59,8 +60,7 @@ describe('the first screen keeps the promises it makes (R555)', () => {
   });
 
   test('the raw seed/history field stays off the screen; the label carries it', () => {
-    const screens = ['NowScreen.tsx'].map(f =>
-      fs.readFileSync(path.join(APP, 'src', 'ui', f), 'utf8')).join('\n');
+    const screens = nowScreenSource();
     assert.doesNotMatch(screens, /prefillSource/,
       'prefillSource now reaches a screen -- update field-scan.cjs, whose ' +
       'ACKNOWLEDGED entry says only tests read it');

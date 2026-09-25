@@ -1,9 +1,8 @@
 # PROOF — architecture
 
 The map of the code: find the module before you open a file, and never read a whole monolith.
-Sizes are line counts from `node tools/sizes.mjs` (in app/), which prints the current ones; a
-test fails when a module is missing here or its size has drifted by more than 15% (or 40 lines,
-whichever is larger).
+Sizes are line counts; `node tools/sizes.mjs --map` (in app/) rewrites them. A test fails when a
+module is missing here or its size drifts by more than 15% (or 40 lines, whichever is larger).
 Any commit that adds, moves or splits a module updates this file.
 
 ## Shape
@@ -15,7 +14,7 @@ is the only way to storage. `app/` holds the expo-router routes, one file per sc
 
 ## One request: LOG SET
 
-1. `NowScreen.tsx`: the LOG SET press calls `model.log()`, then re-renders from `model.state()`.
+1. `NowScreen.tsx`: LOG SET calls `log` (`useSetEntry`, `now-hooks.ts`): `model.log()`, then a re-render from `model.state()`.
 2. `NowModel.log()` (`now-model.ts`) builds the `LoggedSet` from the dial and calls `repo.logSet()`.
 3. `Repo.logSet()` (`repo.ts`) writes through the `Db` interface: `expo-db.ts` natively, `web-db.ts` on web.
 4. `NowModel.state()` recomputes the screen: its `coachCall()` asks `coachSuggestion` (`coach.ts`) for the line,
@@ -43,30 +42,28 @@ is the only way to storage. `app/` holds the expo-router routes, one file per sc
 tests, types, bundle matches source, MARKET.md current, CONTENT.md current, link page current. It ends
 with a summary naming each failing gate, its first failing assertion and file:line, and exits
 1 on any failure; a run of zero tests, a hung gate (each has a timeout) or a test file that dies while
-loading all fail, the last with the error its child printed. It also prints two reports: the domain
-snapshot hash and the size headline.
+loading all fail, the last with the error its child printed. It reports the domain snapshot hash and
+the size headline, and with `npm run web` up it runs the UI trace as a smoke test that fails on any recorded error.
 Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.txt`.
 
 ## Finding an error
 
 - **A failing test:** `app/test-failures.log` (written by `tools/failure-log.mjs`) keeps every
   failure with its stack, whatever happened to stdout. The check prints the first one.
-- **A behaviour change you did not mean:** `node tools/snapshot.ts --out a.json` before and after,
-  then diff; the per-section hashes say which part moved. It covers every `.ts` module node can
-  import (a test fails if any of their functions, callbacks included, never runs), NOT the `.tsx` screens: a round
-  that moves `.tsx` code proves itself with `node tools/playtests/ui-trace.mjs`: every rendered
-  element, box and style through a fixed flow of the Now screen and its sheets (needs `npm run web`).
-- **In the running app:** `npm run web` serves port 8099 and writes the sample to `public/seed.b64`.
-  `tools/playtest.mjs` drives it at phone size (real taps, `offsetDays`, screenshots); the scripts in
-  `tools/playtests/` reproduce past bugs and exit 1 if one is back.
+- **A behaviour change you did not mean:** `node tools/snapshot.ts --out a.json` before and after, then diff;
+  the per-section hashes say which part moved. It covers every `.ts` module node can import (a test fails if
+  any of their functions, callbacks included, never runs), NOT the `.tsx` screens: for those, compare two runs of
+  `node tools/playtests/ui-trace.mjs`, every element, box and style through the Now screen and its sheets.
+- **In the running app:** `npm run web` serves port 8099 and writes the sample to `public/seed.b64`, which
+  loads into localStorage `proof.db.v1` (the snapshot builds the same shape in memory on a fixed clock,
+  `T0`, 23 Sep 2026). `tools/playtest.mjs` drives it at phone size (real taps, `offsetDays`, screenshots);
+  the scripts in `tools/playtests/` reproduce past bugs and exit 1 if one is back.
 - **The database failed to open:** `RepoGate.tsx` shows why, from `dbDiagnostic()` in `db.ts`.
 - **A crash while rendering:** each route exports its own boundary (`ScreenErrorBoundary.tsx`), which shows
   the screen's name and the message and records it in `error-log.ts`; what no boundary sees (a handler, a
   promise) is recorded as "app". Playtests read the log through the harness's `errors()` and fail on any
   entry; with `npm run web` up, the check's smoke line does too. In the dev preview Metro's overlay shows
   first (HANDOFF trap 18).
-- **A seed:** the sample loads from `public/seed.b64` into localStorage `proof.db.v1`; the
-  snapshot builds the same shape in memory on a fixed clock (`T0`, 23 Sep 2026).
 
 ## Known traps (HANDOFF.md "Traps" has all twenty, with the history)
 
@@ -74,12 +71,10 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 - `node --test` runs files concurrently: a test that writes a shared file must use its own path (trap 19).
 - A spawned `node --test` inside a test inherits `NODE_TEST_CONTEXT` and its reporters never run: delete it.
 - `package.json` must not say `"type": "module"`: Metro and the Expo config are CommonJS.
-- The Bash tool collapses `\\` in heredocs: write escape-heavy code with a file editor.
 - The harness's `close()` must let Chrome exit, or localStorage writes are lost.
 - `orphan-scan` counts `tools/` as a caller: a tool importing an orphan hides it.
-- A source file created while `npm run web` runs is written into the tracked `app/.expo/types/router.d.ts`
-  as a route (`/../src/...`), and the server writes it back until it restarts: restore the file with
-  `git show HEAD:app/.expo/types/router.d.ts > app/.expo/types/router.d.ts`, then restart the server.
+- Stop `npm run web` before creating a source file: the server writes it into the tracked `app/.expo/types/router.d.ts`
+  as a route (`/../src/...`) until it restarts. Undo: `git show HEAD:app/.expo/types/router.d.ts > app/.expo/types/router.d.ts`.
 - A hidden browser pane fires no animation frames and no focus events (traps 17, 20).
 
 ## Modules
@@ -102,38 +97,44 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | module | lines | owns |
 |---|---:|---|
 | `src/ui/now-model.ts` | 1,439 | The Now screen as a state machine (`NowModel`): the dial, LOG SET, undo, the day and the lift rail, the plan. |
-| `src/ui/NowScreen.tsx` | 1,351 | The Now screen: renders `NowModel` (the dial, the rail, THIS WORKOUT) and opens its sheets. |
 | `src/ui/progress-model.ts` | 947 | Progress rows and sparklines, recent workouts, the weekly line, erase counts. |
 | `src/ui/now-styles.ts` | 496 | The Now screen's stylesheet, shared by the screen and its sheets. |
+| `src/ui/NowScreen.tsx` | 479 | The Now screen: holds its state, calls its hooks, lays out its sections and opens its sheets. |
 | `src/ui/recap-model.ts` | 478 | A stored session as the recap: totals, records, NEXT TIME calls, share text. |
 | `src/ui/now-layout.ts` | 441 | The Now screen's layout arithmetic: the hero's size for a phone, the column's height, the rail's geometry, scroll-to-reveal. |
+| `src/ui/now-hooks.ts` | 372 | The Now screen's behaviour that is not drawing: awake while working, the swipe, TODAY's reveal, LOG SET and the steppers, the rest tick, resuming. |
 | `src/ui/goals-model.ts` | 336 | The Goals screen: drafts, horizons, create, edit, remove. |
 | `src/ui/measure-model.ts` | 303 | The Measurements screen: rows, trends, saving a reading. |
 | `src/ui/ExercisePicker.tsx` | 263 | The exercise picker sheet: today's lifts, the rest by day, search. |
 | `src/ui/press-style.ts` | 248 | Press feedback styles, pure. |
 | `src/ui/EquipmentSheet.tsx` | 195 | The equipment sheet: barbell, dumbbell, machine (and which one), bodyweight. |
 | `src/ui/ScreenModal.tsx` | 195 | A modal that leaves with its screen. |
+| `src/ui/LogRows.tsx` | 178 | The log panel's rows: the weight (steppers, the typed field, plate jumps) and the reps. |
 | `src/ui/RepoGate.tsx` | 176 | Waits for the database to open, and says why it failed. |
 | `src/ui/now-state.ts` | 166 | The types of what the Now screen renders: `NowState`, `RailLift`, `SessionLift`. |
 | `src/ui/ConfirmSheet.tsx` | 161 | A confirmation the user has to mean. |
 | `src/ui/now-line.ts` | 159 | The line under the lift: last time, the coach's call, "made it", the goal's tail. |
+| `src/ui/TodaySets.tsx` | 159 | THIS WORKOUT: each lift's set chips (tap one to edit it), with UNDO and + by the latest. |
+| `src/ui/DayRail.tsx` | 147 | The day rail: the day's lifts as chips; tap one to train it. |
 | `src/ui/lift-history.ts` | 147 | One lift's history sheet: rep bests, the last 12 sessions. |
 | `src/ui/DayChooser.tsx` | 143 | The day chooser: the split, and today's day. |
 | `src/ui/EditSetSheet.tsx` | 141 | The sheet that edits a logged set, or adds one. |
+| `src/ui/NowHeader.tsx` | 130 | The Now screen's header: the lift (opens the picker), the streak, last time's line, the equipment tag. |
 | `src/ui/backup.ts` | 124 | The native half of export and restore: files and the share sheet. |
 | `src/ui/goal-filters.ts` | 120 | Filtering and sorting goals. |
 | `src/ui/now-steppers.ts` | 113 | The Now screen's steppers: weight and rep steps, the plates and custom jumps, a typed weight. |
 | `src/ui/LiftSheet.tsx` | 109 | Draws one lift's history sheet. |
 | `src/ui/NowControls.tsx` | 102 | The Now screen's small controls: a jump button, a column wrapper, a stepper. |
+| `src/ui/now-kit.ts` | 92 | What the Now screen's parts share: strings, colours, measures, the haptic on a logged set, and `NowSection`, what each section is drawn from. |
 | `src/ui/drag-scroll.ts` | 89 | Mouse drag for horizontal rows on web. |
 | `src/ui/Spark.tsx` | 83 | Draws a sparkline. |
 | `src/ui/backup-model.ts` | 82 | Export and restore, as the screen sees them. |
 | `src/ui/guarded-push.ts` | 75 | Navigation a double tap cannot fire twice. |
-| `src/ui/now-kit.ts` | 75 | What the Now screen's components share: strings, colours, measures, the haptic on a logged set. |
 | `src/ui/rail-order.ts` | 73 | The order of the Now screen's day rail. |
 | `src/ui/TabBar.tsx` | 71 | The bottom tab bar. |
 | `src/ui/type.ts` | 66 | The type scale and spacing. |
 | `src/ui/error-log.ts` | 65 | Every error caught, with its screen: a ring of the last 50, the console, and a dev-only read hook for playtests. |
+| `src/ui/NowFooter.tsx` | 63 | CLEAR and FINISH. |
 | `src/ui/Arrive.tsx` | 62 | The arrival animation of a new set chip. |
 | `src/ui/ScreenErrorBoundary.tsx` | 48 | Each route's error boundary: the screen that broke says so, and the error is recorded with its name. |
 | `src/ui/target.ts` | 47 | The minimum tap-target size. |
@@ -184,13 +185,12 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | `src/data/expo-db.ts` | 85 | Adapts expo-sqlite to the `Db` interface. |
 | `src/data/open-once.ts` | 55 | A synchronous open-once helper `db.ts` never adopted (debt). |
 
-Outside `app/src` and `app/app`: `app/tools/` (check, snapshot, sizes, inventory, market, seeds,
-harness), `app/test/` (one file per behaviour), `link/` (the share-link page, built to `link/dist`),
-`harness/` (the clip renderer's proof), `spike/` (the on-device video spike).
+Outside `app/src` and `app/app`: `app/tools/` (check, snapshot, sizes, inventory, market, seeds, harness),
+`app/test/` (one file per behaviour), `link/` (the share-link page), `harness/` (clip proof), `spike/` (video spike).
 
 ## Organization debt
 
-- **Functions over 150 lines (11):** `NowScreen` 1314, `coachSuggestion` 375, `AddGoal` 369, `Goals` 333, `Recap` 333, `Settings` 250, `ExercisePicker` 247, `Progress` 236, `NowModel.state` 220, `buildRecap` 185, `EquipmentSheet` 157.
+- **Functions over 150 lines (11):** `NowScreen` 445, `coachSuggestion` 375, `AddGoal` 369, `Goals` 333, `Recap` 333, `Settings` 250, `ExercisePicker` 247, `Progress` 236, `NowModel.state` 220, `buildRecap` 185, `EquipmentSheet` 157.
 - **Tests that read source text:** about 130 of 210 test files read a source file, directly or through
   `test/helpers/source.ts`; gates should read what modules export (AGENT_LOOP §3a item 8).
 - **Round-history comments:** about 277 comment lines name rounds (R548…); that history lives in LOOP_LOG.

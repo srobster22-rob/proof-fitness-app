@@ -64,7 +64,18 @@ describe('a screen that opens another one re-reads when it comes back', () => {
        * fail, which is the only reason it was ever noticed.
        */
       const calls = (s: string) => /useFocusEffect\s*\(/.test(s);
-      const covered = [src, ...imported].some(calls);
+      /*
+       * Or a call to a hook of its own that makes that call: `NowScreen`'s
+       * effect lives in `now-hooks.ts` (`useResumeOnReturn`). Only a hook the
+       * component CALLS counts, for the reason above.
+       */
+      const callsAHookThatDoes = (component: string) =>
+        [...component.matchAll(/from '\.\/([\w-]+)\.ts'/g)]
+          .map(m => readFileSync(path.join(APP, 'src', 'ui', m[1] + '.ts'), 'utf8').replace(/\r\n/g, '\n'))
+          // To the function's own closing line, which is a bare `}`.
+          .flatMap(hooks => [...hooks.matchAll(/^export function (use\w+)\([\s\S]*?^\}$/gm)])
+          .some(([body, name]) => calls(body) && new RegExp(`\\b${name}\\s*\\(`).test(component));
+      const covered = [src, ...imported].some(calls) || imported.some(callsAHookThatDoes);
       if (!covered) offenders.push(name);
     }
     assert.ok(pushers >= 1, `no pushing screens found — the scan went stale`);

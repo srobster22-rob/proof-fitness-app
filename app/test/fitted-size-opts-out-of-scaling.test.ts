@@ -13,7 +13,7 @@ const APP = path.join(HERE, '..');
  * Extend this when a new screen adopts the same "already fitted to the
  * screen" pattern -- the population is small and explicit on purpose.
  */
-const FILES = ['src/ui/NowScreen.tsx'];
+const FILES = ['src/ui/NowScreen.tsx', 'src/ui/LogRows.tsx'];
 
 /*
  * R569. layoutFor's whole job is fitting a number to the screen it renders on
