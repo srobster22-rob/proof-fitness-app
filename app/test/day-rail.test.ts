@@ -5,7 +5,16 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
 import { Repo } from '../src/data/repo.ts';
-import { NowModel, layoutFor, columnHeight, RAIL_MAX, RAIL_PAD, RAIL_CHIP, RAIL_LABEL, RAIL_WHY } from '../src/ui/now-model.ts';
+import { NowModel } from '../src/ui/now-model.ts';
+import {
+  layoutFor,
+  columnHeight,
+  RAIL_MAX,
+  RAIL_PAD,
+  RAIL_CHIP,
+  RAIL_LABEL,
+  RAIL_WHY
+} from '../src/ui/now-layout.ts';
 import { DAY_HEADING } from '../src/domain/split.ts';
 import { region } from './helpers/source.ts';
 

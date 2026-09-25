@@ -26,7 +26,7 @@ import {
   REP_CHOICES, customReps, horizonDays, HORIZON_UNITS, DAYS_PER, goalLifts,
   type HorizonUnit } from '../src/ui/goals-model.ts';
 import { MAX_GOALS, goalCardLine, goalBarA11y } from '../src/domain/goals.ts';
-import { PLATE } from '../src/ui/now-model.ts';
+import { PLATE } from '../src/ui/now-steppers.ts';
 import { narrativeLine, type Goal, type GoalProgress } from '../src/domain/goals.ts';
 import { pickerFor } from '../src/domain/coldstart.ts';
 import { COLUMN } from '../src/ui/column.ts';

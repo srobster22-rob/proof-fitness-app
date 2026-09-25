@@ -6,10 +6,18 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Repo } from '../src/data/repo.ts';
+import { NowModel, splitPickerGroups } from '../src/ui/now-model.ts';
 import {
-  NowModel, WEIGHT_STEP, PLATE, REP_JUMP, typedWeight, MAX_TYPED_WEIGHT, layoutFor, columnHeight, heroWidth, HIT, lastTimeLine, goalTail, revealOffset, splitPickerGroups
-, customJump, customRepJump, lastTimeParts
-} from '../src/ui/now-model.ts';
+  WEIGHT_STEP,
+  PLATE,
+  REP_JUMP,
+  typedWeight,
+  MAX_TYPED_WEIGHT,
+  customJump,
+  customRepJump
+} from '../src/ui/now-steppers.ts';
+import { layoutFor, columnHeight, heroWidth, HIT, revealOffset } from '../src/ui/now-layout.ts';
+import { lastTimeLine, goalTail, lastTimeParts } from '../src/ui/now-line.ts';
 import { STARTING_TWELVE } from '../src/domain/coldstart.ts';
 import { dayOf, inPlanDay, sessionPlanDay } from '../src/domain/split.ts';
 import { nextCandidates } from '../src/domain/predict.ts';

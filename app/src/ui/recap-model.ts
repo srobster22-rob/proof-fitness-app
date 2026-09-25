@@ -10,7 +10,7 @@ import { loadLabel, convertWeight } from '../domain/types.ts';
 import { coachSuggestion } from '../domain/coach.ts';
 import { EQUIPMENT_BASE } from '../domain/coldstart.ts';
 import { trainingGoal } from './training-goal.ts';
-import { WEIGHT_STEP } from './now-model.ts';
+import { WEIGHT_STEP } from './now-steppers.ts';
 import { t, fill, languageOf, number, type Language } from '../domain/i18n.ts';
 import {
   CARRIES_BODYWEIGHT, bodyweightMultiple, realLoad,

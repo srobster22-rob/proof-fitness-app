@@ -85,7 +85,7 @@ describe('the bug this round fixed', () => {
   });
 
   test('steppers follow the session unit', async () => {
-    const { WEIGHT_STEP } = await import('../src/ui/now-model.ts');
+    const { WEIGHT_STEP } = await import('../src/ui/now-steppers.ts');
     const kg = new NowModel(fresh(), () => T0, 'de-DE');
     assert.equal(WEIGHT_STEP[kg.state().session.unit], 2.5, 'kg plates step 2.5, not 5');
 

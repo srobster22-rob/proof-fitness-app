@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { slop, TARGET } from '../src/ui/target.ts';
-import { HIT } from '../src/ui/now-model.ts';
+import { HIT } from '../src/ui/now-layout.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');

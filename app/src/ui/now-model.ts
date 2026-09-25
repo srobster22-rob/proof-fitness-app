@@ -25,13 +25,7 @@ import { t, fill, languageOf, type Language } from '../domain/i18n.ts';
 import { PLATE, REP_JUMP, WEIGHT_STEP, customJump, customRepJump } from './now-steppers.ts';
 import { RAIL_MAX } from './now-layout.ts';
 import { type GoalHint, lastTimeParts } from './now-line.ts';
-import { type NowState, type RailLift, type SessionLift } from './now-state.ts';
-export { MAX_JUMP, MAX_REP_JUMP, MAX_TYPED_WEIGHT, PLATE, REP_JUMP, WEIGHT_STEP, customJump, customRepJump, typedWeight } from './now-steppers.ts';
-export { HIT, RAIL_CHIP, RAIL_LABEL, RAIL_MAX, RAIL_PAD, RAIL_WHY, columnHeight, heroWidth, layoutFor, revealOffset } from './now-layout.ts';
-export type { NowLayout } from './now-layout.ts';
-export { goalTail, lastTimeLine, lastTimeParts } from './now-line.ts';
-export type { GoalHint, LastTimeInput } from './now-line.ts';
-export type { NowState, RailLift, SessionLift } from './now-state.ts';
+import type { NowState, RailLift, SessionLift } from './now-state.ts';
 
 
 /**
@@ -65,13 +59,6 @@ export type { NowState, RailLift, SessionLift } from './now-state.ts';
  * it cannot.
  */
 export const PREF_SKIP_MACHINE = 'pref.skipMachineName';
-/**
- * The unit they picked in Settings, which outranks the unit they last trained
- * in. Lives here rather than in `app/settings.tsx` because this file is what
- * ACTS on it — a preference key owned by the screen that writes it, and read by
- * nothing, is how it came to have no effect at all.
- */
-export { PREF_UNIT } from './display-unit.ts';
 
 /**
  * Split the picker into the day you are training and everything else.

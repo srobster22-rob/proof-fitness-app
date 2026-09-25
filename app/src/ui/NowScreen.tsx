@@ -6,11 +6,10 @@ import {
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect } from 'expo-router';
 import * as KeepAwake from 'expo-keep-awake';
-import {
-  NowModel, WEIGHT_STEP, PLATE, REP_JUMP, typedWeight, MAX_TYPED_WEIGHT, layoutFor, revealOffset, splitPickerGroups, HIT,
-  type NowState
-, RAIL_CHIP, PREF_SKIP_MACHINE
-} from './now-model.ts';
+import { NowModel, splitPickerGroups, PREF_SKIP_MACHINE } from './now-model.ts';
+import { WEIGHT_STEP, PLATE, REP_JUMP, typedWeight, MAX_TYPED_WEIGHT } from './now-steppers.ts';
+import { layoutFor, revealOffset, HIT, RAIL_CHIP } from './now-layout.ts';
+import type { NowState } from './now-state.ts';
 import { restSince } from '../domain/rest.ts';
 import { EQUIPMENT, loadLabel, type Equipment, type Exercise, type LoggedSet, type Unit } from '../domain/types.ts';
 import {

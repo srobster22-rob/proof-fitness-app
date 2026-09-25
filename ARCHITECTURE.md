@@ -88,7 +88,7 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 | `app/progress.tsx` | 782 | Progress, and the export, restore and erase controls. |
 | `app/measure.tsx` | 670 | Measurements: kinds, readings, goals. |
 | `app/recap.tsx` | 515 | The recap card, SHARE, NEXT TIME. |
-| `app/settings.tsx` | 368 | Units, training goal, split, language. |
+| `app/settings.tsx` | 369 | Units, training goal, split, language. |
 | `app/index.tsx` | 49 | The entry point, which is the Now screen. |
 | `app/+not-found.tsx` | 48 | A share link to a route this build lacks. |
 | `app/_layout.tsx` | 42 | The root stack, and expo-router's error boundary. |
@@ -97,8 +97,8 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 
 | module | lines | owns |
 |---|---:|---|
-| `src/ui/NowScreen.tsx` | 2,674 | Renders `NowModel`: dial, rail, THIS WORKOUT, day chooser, picker and every sheet. |
-| `src/ui/now-model.ts` | 1,452 | The Now screen as a state machine (`NowModel`): the dial, LOG SET, undo, the day and the lift rail, the plan. |
+| `src/ui/NowScreen.tsx` | 2,673 | Renders `NowModel`: dial, rail, THIS WORKOUT, day chooser, picker and every sheet. |
+| `src/ui/now-model.ts` | 1,439 | The Now screen as a state machine (`NowModel`): the dial, LOG SET, undo, the day and the lift rail, the plan. |
 | `src/ui/progress-model.ts` | 947 | Progress rows and sparklines, recent workouts, the weekly line, erase counts. |
 | `src/ui/recap-model.ts` | 478 | A stored session as the recap: totals, records, NEXT TIME calls, share text. |
 | `src/ui/now-layout.ts` | 441 | The Now screen's layout arithmetic: the hero's size for a phone, the column's height, the rail's geometry, scroll-to-reveal. |

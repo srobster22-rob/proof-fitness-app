@@ -7,7 +7,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
 import { t, fill, languageOf, missingKeys, LANGUAGES, PREF_LANG } from '../src/domain/i18n.ts';
-import { lastTimeParts } from '../src/ui/now-model.ts';
+import { lastTimeParts } from '../src/ui/now-line.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')), 'utf8');

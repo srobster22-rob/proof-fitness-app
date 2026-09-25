@@ -2,7 +2,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
-import { NowModel, WEIGHT_STEP } from '../src/ui/now-model.ts';
+import { NowModel } from '../src/ui/now-model.ts';
+import { WEIGHT_STEP } from '../src/ui/now-steppers.ts';
 import type { Unit } from '../src/domain/types.ts';
 
 const T0 = Date.UTC(2026, 8, 9, 12);

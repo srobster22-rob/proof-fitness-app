@@ -4569,3 +4569,17 @@ Content: unchanged (exercises 60)
 Coach: code-quality "three parallel tables" → R696: taken
 Decisions: D2 and D4's revert steps now point at exercises.ts
 Next: R697 ORGANIZE: now-model.ts split by concern (steppers, layout, the line, the state types), a pure move with re-exports, then importers updated. Trap found: a source file created while `npm run web` runs is written into the tracked router.d.ts until the server restarts (in ARCHITECTURE.md).
+
+## R697 · ORGANIZE · now-model.ts split by concern: steppers, layout, the line under the lift, the state types
+Pick: ORGANIZE 3 of ≤ 6 (§3a checklist 3, module boundaries; the coordinator's third item): the largest model, 2,286 lines of five concerns · impact planned 0/0/+1
+Player notices: nothing (ORGANIZE: behaviour-preserving)
+Impact: planned 0/0/+1 → shipped 0/0/+1 (product source 66 files, 20,975 lines → 70, 21,007; now-model.ts 2,286 → 1,439; now-layout.ts 441, now-state.ts 166, now-line.ts 159, now-steppers.ts 113; largest file NowScreen.tsx 2,674 → 2,673, largest function NowScreen 1,314 unchanged)
+Built: two commits (§3a). 5af5ad8, a PURE MOVE by script: the top-level blocks cut at statement boundaries, comments and all, into four modules; the model re-exports every moved name, so no importer changed; four tests that read the moved code as text read its new file. Then this one: 19 importers (NowScreen, recap-model, the goals and settings routes, the snapshot, 14 tests) read each name from its new module, and now-model.ts's re-exports are gone, PREF_UNIT's with them (display-unit.ts owns it). The snapshot counts a re-export once.
+Quality: self-reviewed; no independent reviewer (a mechanical move proven by an identical snapshot, and §4 names EXPAND, BIG SWING and POLISH). The check caught the one importer the rewrite missed, a dynamic `await import()` in units.test.ts. A load-induced timing flake (progress-model's frame budget, 25.8 vs 24 ms) passed 3 of 3 alone.
+Verified: check ALL GREEN, suite 2406/2406. Snapshot b5b92ae66c5f6fe1 → 31449436fc963126 after both commits: every exported value and all 14 behaviour sections identical, the module list +4. The headline run on the live app identical after each commit (3, 1.60, 3, 0, 1.50, same coach lines). 4 plants: kilos stepping by 5 and a made call going silent fail tests in the new files, the hero ignoring height fails 5 layout tests, a moved name reached through now-model fails tsc.
+Headline: H1 3→3 · H2 1.60→1.60 · H3 3→3 · H4 0→0 · H5 1.50→1.50 (the live app, twice)
+Market: unchanged at 42
+Content: unchanged
+Coach: none
+Decisions: none
+Next: R698 ORGANIZE: NowScreen.tsx (2,673 lines, one 1,314-line function) into components, proven by a trace of the running screens. The dev server was stopped while the new files were created, so router.d.ts stayed clean.

@@ -2,7 +2,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { Repo } from '../src/data/repo.ts';
-import { NowModel, PREF_UNIT } from '../src/ui/now-model.ts';
+import { NowModel } from '../src/ui/now-model.ts';
+import { PREF_UNIT } from '../src/ui/display-unit.ts';
 import { unitForNewSession } from '../src/domain/coldstart.ts';
 
 const T = Date.UTC(2026, 7, 24, 9);

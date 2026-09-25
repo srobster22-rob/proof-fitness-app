@@ -15,8 +15,9 @@ import type { TrainingGoal } from '../src/domain/coach.ts';
 const GOAL_KEY: Record<TrainingGoal, 'goalStrength' | 'goalSize' | 'goalConsistency'> = {
   strength: 'goalStrength', size: 'goalSize', consistency: 'goalConsistency'
 };
-import {
-  customJump, customRepJump, PLATE, REP_JUMP, PREF_SKIP_MACHINE, PREF_UNIT } from '../src/ui/now-model.ts';
+import { PREF_SKIP_MACHINE } from '../src/ui/now-model.ts';
+import { customJump, customRepJump, PLATE, REP_JUMP } from '../src/ui/now-steppers.ts';
+import { PREF_UNIT } from '../src/ui/display-unit.ts';
 import { SPLIT_PLANS } from '../src/domain/split.ts';
 import type { SplitPlan } from '../src/domain/split.ts';
 import { convertWeight, type Unit } from '../src/domain/types.ts';

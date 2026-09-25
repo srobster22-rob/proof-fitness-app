@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Repo } from '../src/data/repo.ts';
 import { NowModel } from '../src/ui/now-model.ts';
-import { PLATE, REP_JUMP, WEIGHT_STEP } from '../src/ui/now-model.ts';
+import { PLATE, REP_JUMP, WEIGHT_STEP } from '../src/ui/now-steppers.ts';
 import { region } from './helpers/source.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));

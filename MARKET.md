@@ -265,3 +265,4 @@ ever names a weight your own plates and buttons can make.
 | R694 | 42 | Hevy 88 | FIX: no raise on top of a miss (every set at the top weight counts); row 5 held at 2 in the round that built it |
 | R695 | 42 | Hevy 88 | ORGANIZE 1: one check command, a domain snapshot that runs every function in its scope, ARCHITECTURE.md; no product change |
 | R696 | 42 | Hevy 88 | ORGANIZE 2: one exercise registry; coldstart, muscles, split, the aliases and the bodyweight list are views of it; no product change |
+| R697 | 42 | Hevy 88 | ORGANIZE 3: now-model.ts 2,286 → 1,439 lines, split into steppers, layout, the line and the state types; no product change |
