@@ -10,6 +10,8 @@ const read = (p: string) => readFileSync(path.join(HERE, '..', ...p.split('/')),
 /** Every file that draws chrome, so a new screen cannot quietly opt out. */
 const SCREENS = [
   'src/ui/NowScreen.tsx',
+  // Where the Now screen's styles live, since they left NowScreen.tsx.
+  'src/ui/now-styles.ts',
   'app/goals.tsx',
   'app/progress.tsx',
   'app/recap.tsx',

@@ -142,7 +142,6 @@ export const s = StyleSheet.create({
   unitFloat: { position: 'absolute', left: '100%', bottom: 0 },
   // A word, not a unit: smaller, and left to wrap in the space the unit had.
   unitWord: { fontSize: 11, letterSpacing: 1, width: 62, marginLeft: 8 },
-  stepHint: { color: '#7C8792', fontSize: 12, textAlign: 'center', marginTop: -4, letterSpacing: 1 },
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14 },
   /** Fixed-width slot, so each row stays symmetrical about its number. */
   jumpSlot: { width: 40, alignItems: 'center' },
@@ -226,14 +225,6 @@ export const s = StyleSheet.create({
   },
   kitClearText: { color: MUTED, fontSize: 12, fontWeight: '800', letterSpacing: 1.4 },
 
-  jumpEditRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14 },
-  jumpInput: {
-    width: 96, height: 48, paddingHorizontal: 14,
-    backgroundColor: '#111417', borderRadius: 12,
-    borderWidth: 1, borderColor: '#2A323A',
-    color: '#fff', fontSize: 18, fontWeight: '800'
-  },
-  jumpEditUnit: { color: MUTED, fontSize: 14, fontWeight: '600' },
   save: {
     height: 54, borderRadius: 14, backgroundColor: VOLT,
     alignItems: 'center', justifyContent: 'center', marginTop: 22
@@ -309,11 +300,6 @@ export const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: '#0F1113', borderRadius: 9, paddingVertical: 8, paddingHorizontal: 12, marginRight: 8
   },
-  // Armed, not deleted: one tap lights the set, the second removes it. A chip
-  // is small and sits beside four others, so a control that destroyed a real
-  // set on a single stray tap would trade one mistake for another.
-  chipArmed: { borderColor: '#FF6B6B', backgroundColor: '#2A1416' },
-  chipArmedText: { color: '#FF6B6B' },
   /*
    * A set that broke a record. Volt on the border and the number, which is the
    * accent §15 allows one use of — and this is what it is for: not the loudest

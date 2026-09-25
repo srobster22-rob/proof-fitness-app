@@ -98,10 +98,10 @@ Full outputs: `app/out/check-<gate>.txt`; the summary: `app/out/check-summary.tx
 |---|---:|---|
 | `src/ui/now-model.ts` | 1,439 | The Now screen as a state machine (`NowModel`): the dial, LOG SET, undo, the day and the lift rail, the plan. |
 | `src/ui/progress-model.ts` | 947 | Progress rows and sparklines, recent workouts, the weekly line, erase counts. |
-| `src/ui/now-styles.ts` | 496 | The Now screen's stylesheet, shared by the screen and its sheets. |
-| `src/ui/NowScreen.tsx` | 479 | The Now screen: holds its state, calls its hooks, lays out its sections and opens its sheets. |
+| `src/ui/now-styles.ts` | 482 | The Now screen's stylesheet, shared by the screen and its sheets. |
 | `src/ui/recap-model.ts` | 478 | A stored session as the recap: totals, records, NEXT TIME calls, share text. |
 | `src/ui/now-layout.ts` | 441 | The Now screen's layout arithmetic: the hero's size for a phone, the column's height, the rail's geometry, scroll-to-reveal. |
+| `src/ui/NowScreen.tsx` | 423 | The Now screen: holds its state, calls its hooks, lays out its sections and opens its sheets. |
 | `src/ui/now-hooks.ts` | 372 | The Now screen's behaviour that is not drawing: awake while working, the swipe, TODAY's reveal, LOG SET and the steppers, the rest tick, resuming. |
 | `src/ui/goals-model.ts` | 336 | The Goals screen: drafts, horizons, create, edit, remove. |
 | `src/ui/measure-model.ts` | 303 | The Measurements screen: rows, trends, saving a reading. |
@@ -190,10 +190,10 @@ Outside `app/src` and `app/app`: `app/tools/` (check, snapshot, sizes, inventory
 
 ## Organization debt
 
-- **Functions over 150 lines (11):** `NowScreen` 445, `coachSuggestion` 375, `AddGoal` 369, `Goals` 333, `Recap` 333, `Settings` 250, `ExercisePicker` 247, `Progress` 236, `NowModel.state` 220, `buildRecap` 185, `EquipmentSheet` 157.
-- **Tests that read source text:** about 130 of 210 test files read a source file, directly or through
-  `test/helpers/source.ts`; gates should read what modules export (AGENT_LOOP §3a item 8).
-- **Round-history comments:** about 277 comment lines name rounds (R548…); that history lives in LOOP_LOG.
+- **Functions over 150 lines (11):** `NowScreen` 389, `coachSuggestion` 375, `AddGoal` 369, `Goals` 333, `Recap` 333, `Settings` 250, `ExercisePicker` 247, `Progress` 236, `NowModel.state` 220, `buildRecap` 185, `EquipmentSheet` 157. What is left of `NowScreen` is its state, the wiring of its six sheets (about 115 lines) and comments.
+- **Tests that read source text:** about 140 of 214 test files read a source file, directly or through
+  `test/helpers/source.ts` or `now-screen.ts`; gates should read what modules export (AGENT_LOOP §3a item 8).
+- **Round-history comments:** 284 lines in `src/` and `app/` name a round (R548…); that history lives in LOOP_LOG.
 - **Counted by regex:** `tools/inventory.ts` counts coach situations and insights by reading source text.
 - **Dead or unadopted code:** `open-once.ts` (never adopted), `Repo.lastSetOf` and its index,
   `goalE1rmGap` (the orphan-scan list), and one-off seed tools (`tools/seed-*565/540/549/541/556/548/539/r573.ts`).

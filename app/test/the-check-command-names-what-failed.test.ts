@@ -136,6 +136,15 @@ describe('the check command names what failed, and where', () => {
     assert.match(hung.output, /timed out after/);
   });
 
+  test('a command that dies without a word still says how it ended', () => {
+    const silent = run('selftest-silent', ['-e', 'process.exit(3)'], { save: false });
+    assert.equal(silent.ok, false);
+    assert.equal(firstErrorLine(silent.output), 'exited with code 3 and printed nothing');
+    // Anything the child did print stays the report.
+    const loud = run('selftest-loud', ['-e', 'console.log("Error: the real reason"); process.exit(3)'], { save: false });
+    assert.equal(firstErrorLine(loud.output), 'Error: the real reason');
+  });
+
   test('one failing or crashing gate makes the exit code 1; all passing makes it 0', () => {
     const pass = { name: 'a', run: () => ({ ok: true, ms: 1 }) };
     const fail = { name: 'b', run: () => ({ ok: false, ms: 1, first: ['b broke'] }) };

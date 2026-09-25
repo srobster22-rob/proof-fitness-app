@@ -34,7 +34,12 @@ export function run(slug, args, { env = {}, timeout = 5 * MINUTE, save = true } 
     cwd: APP, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, env: childEnv, timeout
   });
   const timedOut = r.error?.code === 'ETIMEDOUT';
-  const output = `${r.stdout ?? ''}${r.stderr ?? ''}` +
+  const said = `${r.stdout ?? ''}${r.stderr ?? ''}`;
+  // A child that fails without a word still says how it ended: a code or a
+  // signal tells a deliberate exit from a crash, where "(no output)" cannot.
+  const how = !said.trim() && !r.error && r.status !== 0
+    ? `exited with ${r.signal ? `signal ${r.signal}` : `code ${r.status}`} and printed nothing\n` : '';
+  const output = said + how +
     (timedOut ? `\nError: timed out after ${Math.round(timeout / 1000)}s\n` : r.error ? `\n${String(r.error)}\n` : '');
   if (save) {
     fs.mkdirSync(OUT, { recursive: true });

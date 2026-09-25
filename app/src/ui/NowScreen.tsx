@@ -101,14 +101,6 @@ export function NowScreen({
   const railDrag = useDragScroll<any>();
   // The one destructive control on this screen, so it asks first.
   const [confirmClear, setConfirmClear] = useState(false);
-  /*
-   * Editing the jump amounts. Opened from the hint line that describes them,
-   * which is the only honest home for it: §9 bans a settings SCREEN, and a
-   * preference set from the control it changes never needs one.
-   */
-  // Type the weight and reps straight in, without walking there on the
-  // steppers. The hero already opens a weight field on tap (R29); this is the
-  // same idea for both numbers at once, and the only way to type reps at all.
   // Typing the reps, mirroring the weight's own typed field. The numbers are
   // the control: tap either to set it exactly instead of walking there.
   const [typingReps, setTypingReps] = useState<string | null>(null);
@@ -150,44 +142,6 @@ export function NowScreen({
 
   return (
     <View style={[s.root, { maxWidth: L.column }]} {...swipe.panHandlers}>
-      {/* §15 bans nav chrome competing with content, but Progress and Goals have
-          to be reachable mid-week or they may as well not exist. Compromise:
-          two muted words at the very top, far from the hero number, styled so
-          they read as a footer that happens to sit above rather than as a tab
-          bar. If this ever grows a third item, it has become a tab bar and the
-          rule has been broken.
-
-          This row is IN FLOW, deliberately. It used to be absolutely positioned
-          at `top: 6` while the header below started at the container's
-          `paddingTop: 8` — the same band — so the two were only ever separated
-          by the exercise name being short enough. "TRICEP EXTENSION" printed
-          straight through "PROGRESS". Laying it out normally means the header
-          cannot reach it no matter how long the lift's name is. */}
-      {/*
-        Even gaps, not even columns.
-
-        Reported as "a lot of empty space next to them", and measured on a 375px
-        screen it was exactly that: PROGRESS and GOALS clustered from x20 to
-        x157, the gear alone at x342, and **185px of nothing** between them —
-        more empty space than content, in the first row of the app.
-
-        Equal thirds were tried first and are the wrong fix, which the ruler
-        says plainly: with each item aligned inside its own cell the gaps came
-        out **75px and 132px**, because a 13px glyph hugging the right edge of
-        its cell sits much further from its neighbour than a centred word does.
-        Even columns do not produce even spacing when the things inside them are
-        different sizes.
-
-        The eye reads the GAPS, so space those. Three items under
-        `space-between` divide the leftover width equally between them —
-        measured at **103.5px on both sides**, with PROGRESS still on the left
-        margin and the gear still on the right. The column is capped at
-        PHONE_MAX so this cannot stretch into a spread-out desktop tab bar.
-
-        The pair still reads as a pair: that distinction is carried by two WORDS
-        against one glyph, not by how tightly they were bunched.
-      */}
-
       {/*
         A fixed column on a phone, a scrolling one on a window too short to hold
         it.
@@ -324,16 +278,6 @@ export function NowScreen({
             undoingRef={undoingRef} setEditingSet={setEditingSet} setAddingTo={setAddingTo} />
         </TodayList>
       </View>
-
-      {/*
-        NEXT LIFT is back, but earning its place this time.
-        It was removed as pointless when it sat there from launch, guessing at a
-        lift before anything had happened — a second, vaguer way to do what the
-        picker does precisely. It now appears only once the FIRST set is logged,
-        which is the moment the question "what now" actually exists, and stays
-        until the workout is finished. Before that the slot is empty and the
-        screen is about the set in front of you.
-      */}
 
       {/*
         Centred as a pair, not shoved against the right edge.

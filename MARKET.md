@@ -268,3 +268,4 @@ ever names a weight your own plates and buttons can make.
 | R697 | 42 | Hevy 88 | ORGANIZE 3: now-model.ts 2,286 → 1,439 lines, split into steppers, layout, the line and the state types; no product change |
 | R698 | 42 | Hevy 88 | ORGANIZE 4: NowScreen.tsx 2,673 → 1,351 lines; its sheets, controls, kit and stylesheet in their own files; the UI trace identical |
 | R699 | 42 | Hevy 88 | ORGANIZE 5: an error boundary per route, an error log with the screen name, a smoke run on the live app; no change outside a crash |
+| R700 | 42 | Hevy 88 | ORGANIZE 6: the NowScreen function 1,314 → 389 lines, its hooks and five sections in their own files, dead comments and styles gone; ORGANIZE phase complete; the UI trace identical |
